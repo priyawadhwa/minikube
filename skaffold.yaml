@@ -1,0 +1,13 @@
+apiVersion: skaffold/v1alpha5
+kind: ""
+build:
+  artifacts:
+  - image: gcr.io/priya-wadhwa/gvisor
+    context: .
+    docker:
+      dockerfile: deploy/addons/gvisor/Dockerfile
+deploy:
+  kubectl:
+    manifests:
+    - deploy/addons/gvisor/gvisor-installer.yaml
+
