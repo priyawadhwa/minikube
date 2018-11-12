@@ -1,2 +1,2 @@
 out/buildroot*
-
+deploy/addons/gvisor/*

@@ -23,11 +23,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/docker/machine/libmachine/drivers"
-	"github.com/docker/machine/libmachine/provision/serviceaction"
 	"github.com/pkg/errors"
-	"k8s.io/minikube/pkg/provision"
-	"k8s.io/minikube/pkg/minikube/cluster"
 )
 
 const (
@@ -155,19 +151,44 @@ func rewriteContainerdToml() error {
 	return nil
 }
 
+const runfile = "/node/tmp/run.sh"
+
+func rewriterunsh() error {
+	f, err := os.Create(runfile)
+	if err != nil {
+		return errors.Wrapf(err, "creating %s", runfile)
+	}
+	if _, err := f.Write([]byte(run)); err != nil {
+		return errors.Wrapf(err, "writing %s", runfile)
+	}
+	return nil
+}
+
+const run = `#!/bin/sh
+sudo systemctl stop rpc-statd.service
+sudo systemctl restart containerd
+sudo systemctl start rpc-statd.service`
+
 func systemctl() error {
-	log.Print("trying to restart containerd now")
-	cluster.CheckIfHostExistsAndLoad(api, config.GetMachineName())
-
-
-	p := provision.NewBuildrootProvisioner(drivers.BaseDriver{})
-	if err := p.Service("rpc-statd.service", serviceaction.Stop); err != nil {
-		return errors.Wrap(err, "stopping rpc-statd.service")
+	cmd := exec.Command("which", "systemctl")
+	out, err := cmd.Output()
+	fmt.Println(string(out))
+	if err != nil {
+		fmt.Println(string(out))
+		return errors.Wrap(err, "which systemctl")
 	}
 
+	dir := filepath.Join(nodeDir, "usr/libexec/sudo")
+	if err := os.Setenv("LD_LIBRARY_PATH", dir); err != nil {
+		return errors.Wrap(err, dir)
+	}
+
+	log.Print("getting env value")
+	log.Print(os.Getenv("LD_LIBRARY_PATH"))
+
 	// first, stop  rpc-statd.service
-	cmd := exec.Command("/node/bin/sudo", "systemctl", "stop", "rpc-statd.service")
-	if out, err := cmd.Output(); err != nil {
+	cmd = exec.Command("sudo", "-E", "systemctl", "stop", "rpc-statd.service")
+	if out, err := cmd.CombinedOutput(); err != nil {
 		fmt.Println(string(out))
 		return errors.Wrap(err, "stopping rpc-statd.service")
 	}

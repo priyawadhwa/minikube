@@ -36,4 +36,5 @@ spec:
     hostPath:
       # directory location on host
       path: /
+  restartPolicy: Never
 
