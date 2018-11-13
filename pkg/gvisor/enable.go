@@ -33,17 +33,17 @@ const (
 // Enable follows these steps for enabling gvisor in minikube:
 //   1. rewrites the /etc/conntainerd/config.toml on the host  (or is it /run/docker/containerd/containerd.toml?)
 //   2. downloads gvisor + shim
-//   3. restarts containerd (TODO: see if this actually works)
+//   3. restarts containerd (TODO: see if this actually works) with docker run --pid="host" -v /bin:/bin   -v /etc:/etc -v /usr/lib:/usr/lib -v /usr/share:/usr/share -v /tmp:/tmp -v /run/systemd:/run/systemd -v /sys:/sys -v /mnt:/mnt -v /var/lib:/var/lib -v /usr/libexec:/usr/libexec gcr.io/priya-wadhwa/gvisor:latest
 func Enable() error {
-	if err := makeDirs(); err != nil {
-		return errors.Wrap(err, "creating directories on node")
-	}
-	if err := downloadBinaries(); err != nil {
-		return errors.Wrap(err, "downloading binaries")
-	}
-	if err := copyFiles(); err != nil {
-		return errors.Wrap(err, "copying files")
-	}
+	// if err := makeDirs(); err != nil {
+	// 	return errors.Wrap(err, "creating directories on node")
+	// }
+	// if err := downloadBinaries(); err != nil {
+	// 	return errors.Wrap(err, "downloading binaries")
+	// }
+	// if err := copyFiles(); err != nil {
+	// 	return errors.Wrap(err, "copying files")
+	// }
 	if err := systemctl(); err != nil {
 		return errors.Wrap(err, "systemctl")
 	}
@@ -104,6 +104,7 @@ func runsc() error {
 	if err := os.Chmod("/node/usr/local/bin/runsc", 0777); err != nil {
 		return errors.Wrap(err, "fixing perms on runsc")
 	}
+	// TODO: create /tmp/runsc
 	return nil
 }
 
@@ -151,34 +152,9 @@ func rewriteContainerdToml() error {
 	return nil
 }
 
-const runfile = "/node/tmp/run.sh"
-
-func rewriterunsh() error {
-	f, err := os.Create(runfile)
-	if err != nil {
-		return errors.Wrapf(err, "creating %s", runfile)
-	}
-	if _, err := f.Write([]byte(run)); err != nil {
-		return errors.Wrapf(err, "writing %s", runfile)
-	}
-	return nil
-}
-
-const run = `#!/bin/sh
-sudo systemctl stop rpc-statd.service
-sudo systemctl restart containerd
-sudo systemctl start rpc-statd.service`
-
 func systemctl() error {
-	cmd := exec.Command("which", "systemctl")
-	out, err := cmd.Output()
-	fmt.Println(string(out))
-	if err != nil {
-		fmt.Println(string(out))
-		return errors.Wrap(err, "which systemctl")
-	}
-
 	dir := filepath.Join(nodeDir, "usr/libexec/sudo")
+	// dir := "/usr/lib/sudo/"
 	if err := os.Setenv("LD_LIBRARY_PATH", dir); err != nil {
 		return errors.Wrap(err, dir)
 	}
@@ -186,19 +162,20 @@ func systemctl() error {
 	log.Print("getting env value")
 	log.Print(os.Getenv("LD_LIBRARY_PATH"))
 
+	log.Print("Trying to stop rpc-statd.service")
 	// first, stop  rpc-statd.service
-	cmd = exec.Command("sudo", "-E", "systemctl", "stop", "rpc-statd.service")
+	cmd := exec.Command("sudo", "-E", "systemctl", "stop", "rpc-statd.service")
 	if out, err := cmd.CombinedOutput(); err != nil {
 		fmt.Println(string(out))
 		return errors.Wrap(err, "stopping rpc-statd.service")
 	}
 	// restart containerd
-	cmd = exec.Command("sudo", "/node/bin/systemctl", "restart", "containerd")
+	cmd = exec.Command("sudo", "-E", "systemctl", "restart", "containerd")
 	if err := cmd.Run(); err != nil {
 		return errors.Wrap(err, "restarting containerd")
 	}
 	// start rpd-statd.service
-	cmd = exec.Command("sudo", "/node/bin/systemctl", "start", "rpc-statd.service")
+	cmd = exec.Command("sudo", "-E", "systemctl", "start", "rpc-statd.service")
 	if err := cmd.Run(); err != nil {
 		return errors.Wrap(err, "restarting rpc-statd.service")
 	}

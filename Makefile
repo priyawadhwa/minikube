@@ -304,8 +304,12 @@ push-storage-provisioner-image: storage-provisioner-image
 	gcloud docker -- push $(REGISTRY)/storage-provisioner:$(STORAGE_PROVISIONER_TAG)
 
 
+.PHONY: out/gvisor
+out/gvisor:
+	go build -o $@ cmd/gvisor/gvisor.go
+
 .PHONY: gvisor-image
-gvisor-image: 
+gvisor-image: out/gvisor
 	docker build -t gcr.io/priya-wadhwa/gvisor:latest -f deploy/addons/gvisor/Dockerfile .
 
 .PHONY: push-gvisor-image
