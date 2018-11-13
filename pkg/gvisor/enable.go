@@ -35,19 +35,18 @@ const (
 //   2. downloads gvisor + shim
 //   3. restarts containerd (TODO: see if this actually works) with docker run --pid="host" -v /bin:/bin   -v /etc:/etc -v /usr/lib:/usr/lib -v /usr/share:/usr/share -v /tmp:/tmp -v /run/systemd:/run/systemd -v /sys:/sys -v /mnt:/mnt -v /var/lib:/var/lib -v /usr/libexec:/usr/libexec gcr.io/priya-wadhwa/gvisor:latest
 func Enable() error {
-	// if err := makeDirs(); err != nil {
-	// 	return errors.Wrap(err, "creating directories on node")
-	// }
-	// if err := downloadBinaries(); err != nil {
-	// 	return errors.Wrap(err, "downloading binaries")
-	// }
-	// if err := copyFiles(); err != nil {
-	// 	return errors.Wrap(err, "copying files")
-	// }
+	if err := makeDirs(); err != nil {
+		return errors.Wrap(err, "creating directories on node")
+	}
+	if err := downloadBinaries(); err != nil {
+		return errors.Wrap(err, "downloading binaries")
+	}
+	if err := copyFiles(); err != nil {
+		return errors.Wrap(err, "copying files")
+	}
 	if err := systemctl(); err != nil {
 		return errors.Wrap(err, "systemctl")
 	}
-
 	return nil
 }
 
@@ -62,6 +61,11 @@ func makeDirs() error {
 	fp = filepath.Join(nodeDir, "usr/local/bin")
 	if err := os.MkdirAll(fp, 0755); err != nil {
 		return errors.Wrap(err, "creating usr/local/bin dir")
+	}
+
+	fp = filepath.Join(nodeDir, "tmp/runsc")
+	if err := os.MkdirAll(fp, 0755); err != nil {
+		return errors.Wrap(err, "creating runsc logs dir")
 	}
 
 	return nil
@@ -104,7 +108,6 @@ func runsc() error {
 	if err := os.Chmod("/node/usr/local/bin/runsc", 0777); err != nil {
 		return errors.Wrap(err, "fixing perms on runsc")
 	}
-	// TODO: create /tmp/runsc
 	return nil
 }
 
@@ -154,13 +157,9 @@ func rewriteContainerdToml() error {
 
 func systemctl() error {
 	dir := filepath.Join(nodeDir, "usr/libexec/sudo")
-	// dir := "/usr/lib/sudo/"
 	if err := os.Setenv("LD_LIBRARY_PATH", dir); err != nil {
 		return errors.Wrap(err, dir)
 	}
-
-	log.Print("getting env value")
-	log.Print(os.Getenv("LD_LIBRARY_PATH"))
 
 	log.Print("Trying to stop rpc-statd.service")
 	// first, stop  rpc-statd.service

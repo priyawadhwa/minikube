@@ -3,7 +3,7 @@ kind: Pod
 metadata:
   name: nginx-untrusted
   annotations:
-    # io.kubernetes.cri.untrusted-workload: "true"
+    io.kubernetes.cri.untrusted-workload: "true"
 spec:
   containers:
   - name: nginx
