@@ -276,6 +276,13 @@ var Addons = map[string]*Addon{
 			"nvidia-gpu-device-plugin.yaml",
 			"0640"),
 	}, false, "nvidia-gpu-device-plugin"),
+	"gvisor": NewAddon([]*BinDataAsset{
+		NewBinDataAsset(
+			"deploy/addons/gvisor/gvisor-installer.yaml",
+			constants.AddonsPath,
+			"gvisor-installer.yaml",
+			"0640"),
+	}, false, "gvisor"),
 }
 
 func AddMinikubeDirAssets(assets *[]CopyableFile) error {
