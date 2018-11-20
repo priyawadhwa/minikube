@@ -306,7 +306,7 @@ push-storage-provisioner-image: storage-provisioner-image
 
 .PHONY: out/gvisor
 out/gvisor:
-	go build -o $@ cmd/gvisor/gvisor.go
+	GOOS=linux CGO_ENABLED=0 go build -o $@ cmd/gvisor/gvisor.go
 
 .PHONY: gvisor-image
 gvisor-image: out/gvisor

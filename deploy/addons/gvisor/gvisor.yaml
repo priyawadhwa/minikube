@@ -17,7 +17,7 @@
 apiVersion: v1
 kind: Pod
 metadata: 
-  name: gvisor-installer
+  name: gvisor
 spec: 
   containers: 
     - name: "gvisor"
@@ -32,14 +32,12 @@ spec:
         name: sudo
       - mountPath: /etc
         name: etc
-      - mountPath: /usr/lib
-        name: usrlib
+      # - mountPath: /usr/lib
+      #   name: usrlib
       - mountPath: /usr/share
         name: usrshare
       - mountPath: /tmp
         name: tmp
-      # - mountPath: /run/systemd
-        # name: run
       - mountPath: /sys
         name: sys
       - mountPath: /mnt

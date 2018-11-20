@@ -18,7 +18,9 @@ package gvisor
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -83,30 +85,55 @@ func downloadBinaries() error {
 
 // downloads the gvisor-containerd-shim
 func gvisorContainerdShim() error {
-	expectedDir := filepath.Join(nodeDir, "usr/bin")
-
-	cmd := exec.Command("wget", "http://storage.googleapis.com/balintp-minikube/gvisor-containerd-shim")
-	cmd.Dir = expectedDir
-	if err := cmd.Run(); err != nil {
-		return errors.Wrap(err, "downloading gvisor-containerd shim")
-	}
-	if err := os.Chmod("/node/usr/bin/gvisor-containerd-shim", 0777); err != nil {
-		return errors.Wrap(err, "fixing perms on shim")
-	}
-	return nil
+	dest := filepath.Join(nodeDir, "usr/bin/gvisor-containerd-shim")
+	return wget("http://storage.googleapis.com/balintp-minikube/gvisor-containerd-shim", dest)
 }
 
 // downloads the runsc binary and returns a path to the binary
 func runsc() error {
-	expectedDir := filepath.Join(nodeDir, "usr/local/bin")
+	dest := filepath.Join(nodeDir, "usr/local/bin/runsc")
+	return wget("http://storage.googleapis.com/gvisor/releases/nightly/latest/runsc", dest)
+}
 
-	cmd := exec.Command("wget", "http://storage.googleapis.com/gvisor/releases/nightly/latest/runsc")
-	cmd.Dir = expectedDir
-	if err := cmd.Run(); err != nil {
-		return errors.Wrap(err, "downloading runsc binary")
+func wget(url, dest string) error {
+	cmd := exec.Command("wget", url)
+	cmd.Dir = filepath.Dir(dest)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		log.Print(string(out))
+		return errors.Wrap(err, "downloading binary")
 	}
-	if err := os.Chmod("/node/usr/local/bin/runsc", 0777); err != nil {
-		return errors.Wrap(err, "fixing perms on runsc")
+	if err := os.Chmod(dest, 0777); err != nil {
+		return errors.Wrap(err, "fixing perms")
+	}
+	return nil
+}
+
+func curlFile(url, dest string) error {
+	cmd := exec.Command("curl", "-X", "GET", "-L0", url, "--output", filepath.Base(dest))
+	cmd.Dir = filepath.Dir(dest)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		log.Print(string(out))
+		return errors.Wrapf(err, "downloading %s", filepath.Base(dest))
+	}
+	return nil
+}
+
+func downloadFileToDest(url, dest string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	fi, err := os.Create(dest)
+	if err != nil {
+		return errors.Wrapf(err, "creating %s", dest)
+	}
+	defer fi.Close()
+	if _, err := io.Copy(fi, resp.Body); err != nil {
+		return errors.Wrap(err, "copying binary")
+	}
+	if err := fi.Chmod(0777); err != nil {
+		return errors.Wrap(err, "fixing perms")
 	}
 	return nil
 }
