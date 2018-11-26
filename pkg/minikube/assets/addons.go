@@ -282,7 +282,7 @@ var Addons = map[string]*Addon{
 			constants.AddonsPath,
 			"gvisor.yaml",
 			"0640"),
-	}, true, "gvisor"),
+	}, false, "gvisor"),
 }
 
 func AddMinikubeDirAssets(assets *[]CopyableFile) error {

@@ -17,16 +17,33 @@ limitations under the License.
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
 	"k8s.io/minikube/pkg/gvisor"
 )
 
+var (
+	restart bool
+)
+
+func init() {
+	flag.BoolVar(&restart, "restart", false, "set to true to restart containerd")
+	flag.Parse()
+}
+
 func main() {
-	if err := gvisor.Enable(); err != nil {
+	if err := execute(); err != nil {
 		fmt.Printf("error enabling gvisor: %v", err)
 		os.Exit(1)
 	}
 	fmt.Println("successfully enabled gvisor addon")
+}
+
+func execute() error {
+	if restart {
+		return gvisor.Systemctl()
+	}
+	return gvisor.Enable()
 }

@@ -30,20 +30,8 @@ spec:
         name: node
       - mountPath: /usr/libexec/sudo
         name: sudo
-      - mountPath: /etc
-        name: etc
-      # - mountPath: /usr/lib
-      #   name: usrlib
-      - mountPath: /usr/share
-        name: usrshare
-      - mountPath: /tmp
-        name: tmp
-      - mountPath: /sys
-        name: sys
-      - mountPath: /mnt
-        name: mnt
-      - mountPath: /var/lib
-        name: varlib
+      - mountPath: /var/run
+        name: varrun
       env:
         - name: PATH
           value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/node/bin
@@ -56,37 +44,8 @@ spec:
     hostPath:
       # directory location on host
       path: /usr/libexec/sudo
-  - name: etc
+  - name: varrun
     hostPath:
       # directory location on host
-      path: /etc
-  - name: usrlib
-    hostPath:
-      # directory location on host
-      path: /usr/lib
-  - name: usrshare
-    hostPath:
-      # directory location on host
-      path: /usr/share
-  - name: tmp
-    hostPath:
-      # directory location on host
-      path: /tmp
-  - name: run
-    hostPath:
-      # directory location on host
-      path: /run/systemd
-  - name: sys
-    hostPath:
-      # directory location on host
-      path: /sys
-  - name: mnt
-    hostPath:
-      # directory location on host
-      path: /mnt
-  - name: varlib
-    hostPath:
-      # directory location on host
-      path: /var/lib
+      path: /var/run
   restartPolicy: Never
-

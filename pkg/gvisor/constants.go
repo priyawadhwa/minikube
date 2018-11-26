@@ -92,3 +92,7 @@ const gvisorShim = `runc_shim = "/bin/containerd-shim"
  debug="true"
  log="/tmp/runsc/out.log"
 `
+
+const (
+	image = "gcr.io/priya-wadhwa/gvisor:latest"
+)

@@ -46,8 +46,8 @@ func Enable() error {
 	if err := copyFiles(); err != nil {
 		return errors.Wrap(err, "copying files")
 	}
-	if err := systemctl(); err != nil {
-		return errors.Wrap(err, "systemctl")
+	if err := Restart(); err != nil {
+		return errors.Wrap(err, "restarting containerd")
 	}
 	return nil
 }
@@ -104,16 +104,6 @@ func wget(url, dest string) error {
 	}
 	if err := os.Chmod(dest, 0777); err != nil {
 		return errors.Wrap(err, "fixing perms")
-	}
-	return nil
-}
-
-func curlFile(url, dest string) error {
-	cmd := exec.Command("curl", "-X", "GET", "-L0", url, "--output", filepath.Base(dest))
-	cmd.Dir = filepath.Dir(dest)
-	if out, err := cmd.CombinedOutput(); err != nil {
-		log.Print(string(out))
-		return errors.Wrapf(err, "downloading %s", filepath.Base(dest))
 	}
 	return nil
 }
@@ -182,13 +172,43 @@ func rewriteContainerdToml() error {
 	return nil
 }
 
-func systemctl() error {
+//   3. restarts containerd (TODO: see if this actually works) with docker run --pid="host" -v /bin:/bin   -v /etc:/etc -v /usr/lib:/usr/lib -v /usr/share:/usr/share -v /tmp:/tmp -v /run/systemd:/run/systemd -v /sys:/sys -v /mnt:/mnt -v /var/lib:/var/lib -v /usr/libexec:/usr/libexec gcr.io/priya-wadhwa/gvisor:latest
+
+// Restart runs a docker container which will restart containerd
+func Restart() error {
+	log.Print("Trying to restart containerd...")
+	mounts := []string{
+		"/bin", // this will mount in systemctl
+		// the following mount in libraries needed by systemctl
+		"/usr/lib/systemd",
+		"/mnt",
+		"/usr/libexec/sudo",
+		"/var/lib",
+		"/etc",
+		"/run/systemd",
+		"/usr/bin",
+	}
+	args := []string{"run", "--pid=host"}
+	for _, m := range mounts {
+		args = append(args, []string{"-v", fmt.Sprintf("%s:%s", m, m)}...)
+	}
+	args = append(args, []string{image, "/gvisor", "-restart"}...)
+
+	cmd := exec.Command("docker", args...)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		log.Print(string(out))
+		return errors.Wrap(err, "running docker command")
+	}
+	return nil
+}
+
+func Systemctl() error {
 	dir := filepath.Join(nodeDir, "usr/libexec/sudo")
 	if err := os.Setenv("LD_LIBRARY_PATH", dir); err != nil {
 		return errors.Wrap(err, dir)
 	}
 
-	log.Print("Trying to stop rpc-statd.service")
+	log.Print("Stopping rpc-statd.service...")
 	// first, stop  rpc-statd.service
 	cmd := exec.Command("sudo", "-E", "systemctl", "stop", "rpc-statd.service")
 	if out, err := cmd.CombinedOutput(); err != nil {
@@ -196,11 +216,13 @@ func systemctl() error {
 		return errors.Wrap(err, "stopping rpc-statd.service")
 	}
 	// restart containerd
+	log.Print("Restarting containerd...")
 	cmd = exec.Command("sudo", "-E", "systemctl", "restart", "containerd")
 	if err := cmd.Run(); err != nil {
 		return errors.Wrap(err, "restarting containerd")
 	}
-	// start rpd-statd.service
+	// start rpc-statd.service
+	log.Print("Starting rpc-statd...")
 	cmd = exec.Command("sudo", "-E", "systemctl", "start", "rpc-statd.service")
 	if err := cmd.Run(); err != nil {
 		return errors.Wrap(err, "restarting rpc-statd.service")
