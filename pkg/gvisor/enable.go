@@ -24,6 +24,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -46,9 +47,11 @@ func Enable() error {
 	if err := copyFiles(); err != nil {
 		return errors.Wrap(err, "copying files")
 	}
-	if err := Restart(); err != nil {
+	if err := Systemctl(); err != nil {
 		return errors.Wrap(err, "restarting containerd")
 	}
+	// sleep for one year so the pod continuously runs
+	time.Sleep(24 * 7 * 52 * time.Hour)
 	return nil
 }
 
@@ -86,13 +89,13 @@ func downloadBinaries() error {
 // downloads the gvisor-containerd-shim
 func gvisorContainerdShim() error {
 	dest := filepath.Join(nodeDir, "usr/bin/gvisor-containerd-shim")
-	return wget("http://storage.googleapis.com/balintp-minikube/gvisor-containerd-shim", dest)
+	return downloadFileToDest("http://storage.googleapis.com/balintp-minikube/gvisor-containerd-shim", dest)
 }
 
 // downloads the runsc binary and returns a path to the binary
 func runsc() error {
 	dest := filepath.Join(nodeDir, "usr/local/bin/runsc")
-	return wget("http://storage.googleapis.com/gvisor/releases/nightly/latest/runsc", dest)
+	return downloadFileToDest("http://storage.googleapis.com/gvisor/releases/nightly/latest/runsc", dest)
 }
 
 func wget(url, dest string) error {
@@ -114,6 +117,11 @@ func downloadFileToDest(url, dest string) error {
 		return err
 	}
 	defer resp.Body.Close()
+	if _, err := os.Stat(dest); err == nil {
+		if err := os.Remove(dest); err != nil {
+			return errors.Wrapf(err, "removing %s for overwrite", dest)
+		}
+	}
 	fi, err := os.Create(dest)
 	if err != nil {
 		return errors.Wrapf(err, "creating %s", dest)
@@ -132,7 +140,7 @@ func downloadFileToDest(url, dest string) error {
 //    1. gvisor-containerd-shim.toml
 //    2. containerd config.toml
 func copyFiles() error {
-	if err := rewriteContainerdToml(); err != nil {
+	if err := rewrite(filepath.Join(nodeDir, "etc/containerd/config.toml"), gvisorConfigToml); err != nil {
 		return errors.Wrap(err, "rewriting config.toml")
 	}
 	if err := rewriteShimToml(); err != nil {
@@ -155,18 +163,15 @@ func rewriteShimToml() error {
 	return nil
 }
 
-func rewriteContainerdToml() error {
-	// delete the current config.toml and replace it with the one we want
-	path := filepath.Join(nodeDir, "etc/containerd/config.toml")
+func rewrite(path, contents string) error {
 	if err := os.Remove(path); err != nil {
-		return errors.Wrap(err, "removing config.toml")
+		return errors.Wrapf(err, "removing %s", path)
 	}
-	// Now, create the new config.toml
 	f, err := os.Create(path)
 	if err != nil {
 		return errors.Wrapf(err, "creating %s", path)
 	}
-	if _, err := f.Write([]byte(configToml)); err != nil {
+	if _, err := f.Write([]byte(contents)); err != nil {
 		return errors.Wrap(err, "writing config.toml")
 	}
 	return nil
@@ -218,14 +223,17 @@ func Systemctl() error {
 	// restart containerd
 	log.Print("Restarting containerd...")
 	cmd = exec.Command("sudo", "-E", "systemctl", "restart", "containerd")
-	if err := cmd.Run(); err != nil {
+	if out, err := cmd.CombinedOutput(); err != nil {
+		log.Print(string(out))
 		return errors.Wrap(err, "restarting containerd")
 	}
 	// start rpc-statd.service
 	log.Print("Starting rpc-statd...")
 	cmd = exec.Command("sudo", "-E", "systemctl", "start", "rpc-statd.service")
-	if err := cmd.Run(); err != nil {
+	if out, err := cmd.CombinedOutput(); err != nil {
+		log.Print(string(out))
 		return errors.Wrap(err, "restarting rpc-statd.service")
 	}
+	log.Print("containerd restart complete")
 	return nil
 }

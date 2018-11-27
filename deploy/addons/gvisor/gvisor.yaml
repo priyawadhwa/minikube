@@ -18,11 +18,13 @@ apiVersion: v1
 kind: Pod
 metadata: 
   name: gvisor
+  labels:
+    addonmanager.kubernetes.io/mode: Reconcile
 spec: 
+  hostPID: true
   containers: 
     - name: "gvisor"
       image: "gcr.io/priya-wadhwa/gvisor:latest"
-      args:
       securityContext:
         privileged: true
       volumeMounts:
@@ -32,9 +34,21 @@ spec:
         name: sudo
       - mountPath: /var/run
         name: varrun
+      - mountPath: /usr/bin
+        name: usrbin
+      - mountPath: /usr/lib
+        name: usrlib
+      - mountPath: /bin
+        name: bin
       env:
         - name: PATH
           value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/node/bin
+        - name: SYSTEMD_IGNORE_CHROOT
+          value: "yes"
+      lifecycle:
+        preStop:
+          exec:
+            command: ["/gvisor","-disable"]
   volumes:
   - name: node
     hostPath:
@@ -48,4 +62,16 @@ spec:
     hostPath:
       # directory location on host
       path: /var/run
+  - name: usrlib
+    hostPath:
+      # directory location on host
+      path: /usr/lib
+  - name: usrbin
+    hostPath:
+      # directory location on host
+      path: /usr/bin
+  - name: bin
+    hostPath:
+      # directory location on host
+      path: /bin
   restartPolicy: Never

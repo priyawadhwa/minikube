@@ -1,5 +1,5 @@
 /*
-Copyright 2018 The Kubernetes Authors All rights reserved.
+Copyright 2016 The Kubernetes Authors All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,40 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package gvisor
 
 import (
-	"flag"
 	"log"
-	"os"
+	"path/filepath"
 
-	"k8s.io/minikube/pkg/gvisor"
+	"github.com/pkg/errors"
 )
 
-var (
-	restart bool
-	disable bool
-)
-
-func init() {
-	flag.BoolVar(&restart, "restart", false, "set to true to restart containerd")
-	flag.BoolVar(&disable, "disable", false, "disable gvisor addon")
-	flag.Parse()
-}
-
-func main() {
-	if err := execute(); err != nil {
-		log.Print(err)
-		os.Exit(1)
+// Disable disables gvisor and returns state back to normal
+func Disable() error {
+	log.Print("Disabling gvisor...")
+	// replace with old version of config.toml
+	if err := rewrite(filepath.Join(nodeDir, "etc/containerd/config.toml"), defaultConfigToml); err != nil {
+		return errors.Wrap(err, "rewriting config.toml")
 	}
-}
-
-func execute() error {
-	if restart {
-		return gvisor.Systemctl()
+	// restart containerd
+	if err := Systemctl(); err != nil {
+		return errors.Wrap(err, "restarting containerd")
 	}
-	if disable {
-		return gvisor.Disable()
-	}
-	return gvisor.Enable()
+	return nil
 }
