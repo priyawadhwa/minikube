@@ -40,6 +40,8 @@ spec:
         name: usrlib
       - mountPath: /bin
         name: bin
+      - mountPath: /tmp/gvisor
+        name: gvisor
       env:
         - name: PATH
           value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/node/bin
@@ -74,4 +76,8 @@ spec:
     hostPath:
       # directory location on host
       path: /bin
+  - name: gvisor
+    hostPath:
+      # directory location on host
+      path: /tmp/gvisor
   restartPolicy: Never

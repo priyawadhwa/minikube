@@ -19,6 +19,7 @@ package gvisor
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -26,7 +27,10 @@ import (
 	"path/filepath"
 	"time"
 
+	"k8s.io/minikube/pkg/minikube/constants"
+
 	"github.com/pkg/errors"
+	"k8s.io/minikube/pkg/minikube/assets"
 )
 
 const (
@@ -36,7 +40,7 @@ const (
 // Enable follows these steps for enabling gvisor in minikube:
 //   1. rewrites the /etc/conntainerd/config.toml on the host  (or is it /run/docker/containerd/containerd.toml?)
 //   2. downloads gvisor + shim
-//   3. restarts containerd (TODO: see if this actually works) with docker run --pid="host" -v /bin:/bin   -v /etc:/etc -v /usr/lib:/usr/lib -v /usr/share:/usr/share -v /tmp:/tmp -v /run/systemd:/run/systemd -v /sys:/sys -v /mnt:/mnt -v /var/lib:/var/lib -v /usr/libexec:/usr/libexec gcr.io/priya-wadhwa/gvisor:latest
+//   3. restarts containerd
 func Enable() error {
 	if err := makeDirs(); err != nil {
 		return errors.Wrap(err, "creating directories on node")
@@ -47,7 +51,7 @@ func Enable() error {
 	if err := copyFiles(); err != nil {
 		return errors.Wrap(err, "copying files")
 	}
-	if err := Systemctl(); err != nil {
+	if err := restartContainerd(); err != nil {
 		return errors.Wrap(err, "restarting containerd")
 	}
 	// sleep for one year so the pod continuously runs
@@ -98,19 +102,6 @@ func runsc() error {
 	return downloadFileToDest("http://storage.googleapis.com/gvisor/releases/nightly/latest/runsc", dest)
 }
 
-func wget(url, dest string) error {
-	cmd := exec.Command("wget", url)
-	cmd.Dir = filepath.Dir(dest)
-	if out, err := cmd.CombinedOutput(); err != nil {
-		log.Print(string(out))
-		return errors.Wrap(err, "downloading binary")
-	}
-	if err := os.Chmod(dest, 0777); err != nil {
-		return errors.Wrap(err, "fixing perms")
-	}
-	return nil
-}
-
 func downloadFileToDest(url, dest string) error {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -136,78 +127,50 @@ func downloadFileToDest(url, dest string) error {
 	return nil
 }
 
-// Must rewrite the following files:
+// Must write the following files:
 //    1. gvisor-containerd-shim.toml
-//    2. containerd config.toml
+//    2. gvisor containerd config.toml
 func copyFiles() error {
-	if err := rewrite(filepath.Join(nodeDir, "etc/containerd/config.toml"), gvisorConfigToml); err != nil {
-		return errors.Wrap(err, "rewriting config.toml")
+	log.Print("Copying gvisor-containerd-shim.toml...")
+	if err := copyAssetToDest(gvisorContainerdShimTargetName, filepath.Join(nodeDir, gvisorContainerdShimPath)); err != nil {
+		return errors.Wrap(err, "copying gvisor-containerd-shim.toml")
 	}
-	if err := rewriteShimToml(); err != nil {
-		return errors.Wrap(err, "rewriting gvisor-containerd-shim.toml")
+	log.Print("Copying containerd config.toml with gvisor...")
+	if err := copyAssetToDest(gvisorConfigTomlTargetName, filepath.Join(nodeDir, configTomlPath)); err != nil {
+		return errors.Wrap(err, "copying gvisor version of config.toml")
 	}
 	return nil
 }
 
-func rewriteShimToml() error {
-	// delete the current shim.toml and replace it with the one we want
-	path := filepath.Join(nodeDir, "etc/containerd/gvisor-containerd-shim.toml")
-	// Now, create the new shim.toml
-	f, err := os.Create(path)
+func copyAssetToDest(targetName, dest string) error {
+	var asset *assets.BinDataAsset
+	for _, a := range assets.Addons["gvisor"].Assets {
+		if a.GetTargetName() == targetName {
+			asset = a
+		}
+	}
+	// Now, copy the data from this asset to dest
+	src := filepath.Join(constants.GvisorFilesPath, asset.GetTargetName())
+	contents, err := ioutil.ReadFile(src)
 	if err != nil {
-		return errors.Wrapf(err, "creating %s", path)
+		return errors.Wrapf(err, "getting contents of %s", asset.GetAssetName())
 	}
-	if _, err := f.Write([]byte(gvisorShim)); err != nil {
-		return errors.Wrap(err, "writing gvisor-containerd-shim.toml")
+	if _, err := os.Stat(dest); err == nil {
+		if err := os.Remove(dest); err != nil {
+			return errors.Wrapf(err, "removing %s", dest)
+		}
 	}
-	return nil
-}
-
-func rewrite(path, contents string) error {
-	if err := os.Remove(path); err != nil {
-		return errors.Wrapf(err, "removing %s", path)
-	}
-	f, err := os.Create(path)
+	f, err := os.Create(dest)
 	if err != nil {
-		return errors.Wrapf(err, "creating %s", path)
+		return errors.Wrapf(err, "creating %s", dest)
 	}
-	if _, err := f.Write([]byte(contents)); err != nil {
-		return errors.Wrap(err, "writing config.toml")
-	}
-	return nil
-}
-
-//   3. restarts containerd (TODO: see if this actually works) with docker run --pid="host" -v /bin:/bin   -v /etc:/etc -v /usr/lib:/usr/lib -v /usr/share:/usr/share -v /tmp:/tmp -v /run/systemd:/run/systemd -v /sys:/sys -v /mnt:/mnt -v /var/lib:/var/lib -v /usr/libexec:/usr/libexec gcr.io/priya-wadhwa/gvisor:latest
-
-// Restart runs a docker container which will restart containerd
-func Restart() error {
-	log.Print("Trying to restart containerd...")
-	mounts := []string{
-		"/bin", // this will mount in systemctl
-		// the following mount in libraries needed by systemctl
-		"/usr/lib/systemd",
-		"/mnt",
-		"/usr/libexec/sudo",
-		"/var/lib",
-		"/etc",
-		"/run/systemd",
-		"/usr/bin",
-	}
-	args := []string{"run", "--pid=host"}
-	for _, m := range mounts {
-		args = append(args, []string{"-v", fmt.Sprintf("%s:%s", m, m)}...)
-	}
-	args = append(args, []string{image, "/gvisor", "-restart"}...)
-
-	cmd := exec.Command("docker", args...)
-	if out, err := cmd.CombinedOutput(); err != nil {
-		log.Print(string(out))
-		return errors.Wrap(err, "running docker command")
+	if _, err := f.Write(contents); err != nil {
+		return errors.Wrapf(err, "writing contents to %s", f.Name())
 	}
 	return nil
 }
 
-func Systemctl() error {
+func restartContainerd() error {
 	dir := filepath.Join(nodeDir, "usr/libexec/sudo")
 	if err := os.Setenv("LD_LIBRARY_PATH", dir); err != nil {
 		return errors.Wrap(err, dir)

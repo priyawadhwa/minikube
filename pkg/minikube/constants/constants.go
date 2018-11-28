@@ -139,6 +139,7 @@ const ReportingURL = "https://clouderrorreporting.googleapis.com/v1beta1/project
 
 const AddonsPath = "/etc/kubernetes/addons"
 const FilesPath = "/files"
+const GvisorFilesPath = "/tmp/gvisor"
 
 const (
 	KubeletServiceFile     = "/lib/systemd/system/kubelet.service"

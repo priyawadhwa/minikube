@@ -25,12 +25,10 @@ import (
 )
 
 var (
-	restart bool
 	disable bool
 )
 
 func init() {
-	flag.BoolVar(&restart, "restart", false, "set to true to restart containerd")
 	flag.BoolVar(&disable, "disable", false, "disable gvisor addon")
 	flag.Parse()
 }
@@ -43,9 +41,6 @@ func main() {
 }
 
 func execute() error {
-	if restart {
-		return gvisor.Systemctl()
-	}
 	if disable {
 		return gvisor.Disable()
 	}

@@ -26,12 +26,11 @@ import (
 // Disable disables gvisor and returns state back to normal
 func Disable() error {
 	log.Print("Disabling gvisor...")
-	// replace with old version of config.toml
-	if err := rewrite(filepath.Join(nodeDir, "etc/containerd/config.toml"), defaultConfigToml); err != nil {
-		return errors.Wrap(err, "rewriting config.toml")
+	if err := copyAssetToDest(defaultConfigTomlTargetName, filepath.Join(nodeDir, configTomlPath)); err != nil {
+		return errors.Wrap(err, "reverting config.toml to default")
 	}
 	// restart containerd
-	if err := Systemctl(); err != nil {
+	if err := restartContainerd(); err != nil {
 		return errors.Wrap(err, "restarting containerd")
 	}
 	return nil

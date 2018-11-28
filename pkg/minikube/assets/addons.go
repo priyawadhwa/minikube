@@ -282,6 +282,21 @@ var Addons = map[string]*Addon{
 			constants.AddonsPath,
 			"gvisor.yaml",
 			"0640"),
+		NewBinDataAsset(
+			"deploy/addons/gvisor/gvisor-config.toml",
+			constants.GvisorFilesPath,
+			"gvisor-config.toml",
+			"0640"),
+		NewBinDataAsset(
+			"deploy/addons/gvisor/gvisor-containerd-shim.toml",
+			constants.GvisorFilesPath,
+			"gvisor-containerd-shim.toml",
+			"0640"),
+		NewBinDataAsset(
+			"deploy/addons/gvisor/config.toml",
+			constants.GvisorFilesPath,
+			"config.toml",
+			"0640"),
 	}, false, "gvisor"),
 }
 

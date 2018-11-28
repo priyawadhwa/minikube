@@ -164,5 +164,13 @@ const gvisorShim = `runc_shim = "/bin/containerd-shim"
 `
 
 const (
-	image = "gcr.io/priya-wadhwa/gvisor:latest"
+	image                    = "gcr.io/priya-wadhwa/gvisor:latest"
+	configTomlPath           = "/etc/containerd/config.toml"
+	gvisorContainerdShimPath = "/etc/containerd/gvisor-containerd-shim.toml"
+
+	gvisorConfigTomlTargetName     = "gvisor-config.toml"
+	gvisorContainerdShimTargetName = "gvisor-containerd-shim.toml"
+	defaultConfigTomlTargetName    = "config.toml"
+
+	gvisorFilesDir = "/tmp/gvisor"
 )
