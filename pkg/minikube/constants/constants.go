@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/blang/semver"
@@ -28,7 +27,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 	minikubeVersion "k8s.io/minikube/pkg/version"
-	"time"
 )
 
 // APIServerPort is the port that the API server should listen on.
@@ -118,7 +116,6 @@ const (
 	GithubMinikubeReleasesURL  = "https://storage.googleapis.com/minikube/releases.json"
 	DefaultWait                = 20
 	DefaultInterval            = 6
-	DefaultK8sClientTimeout    = 60 * time.Second
 	DefaultClusterBootstrapper = "kubeadm"
 )
 
@@ -193,7 +190,7 @@ const (
 )
 
 func GetKubernetesReleaseURL(binaryName, version string) string {
-	return fmt.Sprintf("https://storage.googleapis.com/kubernetes-release/release/%s/bin/linux/%s/%s", version, runtime.GOARCH, binaryName)
+	return fmt.Sprintf("https://storage.googleapis.com/kubernetes-release/release/%s/bin/linux/amd64/%s", version, binaryName)
 }
 
 func GetKubernetesReleaseURLSha1(binaryName, version string) string {
