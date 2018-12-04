@@ -285,17 +285,17 @@ var Addons = map[string]*Addon{
 		NewBinDataAsset(
 			"deploy/addons/gvisor/gvisor-config.toml",
 			constants.GvisorFilesPath,
-			"gvisor-config.toml",
+			constants.GvisorConfigTomlTargetName,
 			"0640"),
 		NewBinDataAsset(
 			"deploy/addons/gvisor/gvisor-containerd-shim.toml",
 			constants.GvisorFilesPath,
-			"gvisor-containerd-shim.toml",
+			constants.GvisorContainerdShimTargetName,
 			"0640"),
 		NewBinDataAsset(
 			"deploy/addons/gvisor/config.toml",
 			constants.GvisorFilesPath,
-			"config.toml",
+			constants.DefaultConfigTomlTargetName,
 			"0640"),
 	}, false, "gvisor"),
 }

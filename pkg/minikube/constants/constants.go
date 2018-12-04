@@ -139,7 +139,22 @@ const ReportingURL = "https://clouderrorreporting.googleapis.com/v1beta1/project
 
 const AddonsPath = "/etc/kubernetes/addons"
 const FilesPath = "/files"
-const GvisorFilesPath = "/tmp/gvisor"
+
+const (
+	// GvisorFilesPath is the path to the gvisor files saved by go-bindata
+	GvisorFilesPath = "/tmp/gvisor"
+	// ContainerdConfigTomlPath is the path to the containerd config.toml
+	ContainerdConfigTomlPath = "/etc/containerd/config.toml"
+	// GvisorContainerdShimTomlPath is the path to givosr-containerd-shim.toml
+	GvisorContainerdShimTomlPath = "/etc/containerd/gvisor-containerd-shim.toml"
+
+	//GvisorConfigTomlTargetName is the go-bindata target name for the gvisor config.toml
+	GvisorConfigTomlTargetName = "gvisor-config.toml"
+	// GvisorContainerdShimTargetName is the go-bindata target name for gvisor-containerd-shim
+	GvisorContainerdShimTargetName = "gvisor-containerd-shim.toml"
+	// DefaultConfigTomlTargetName is the go-bindata target name for the default config.toml
+	DefaultConfigTomlTargetName = "config.toml"
+)
 
 const (
 	KubeletServiceFile     = "/lib/systemd/system/kubelet.service"

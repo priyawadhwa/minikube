@@ -20,7 +20,7 @@ VERSION ?= v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_BUILD)
 DEB_VERSION ?= $(VERSION_MAJOR).$(VERSION_MINOR)-$(VERSION_BUILD)
 INSTALL_SIZE ?= $(shell du out/minikube-windows-amd64.exe | cut -f1)
 BUILDROOT_BRANCH ?= 2018.05
-REGISTRY?=gcr.io/k8s-minikube
+REGISTRY?=gcr.io/priya-wadhwa
 
 HYPERKIT_BUILD_IMAGE 	?= karalabe/xgo-1.10.x
 BUILD_IMAGE 	?= k8s.gcr.io/kube-cross:v1.10.1-1
@@ -100,12 +100,12 @@ out/minikube-%-$(GOARCH): pkg/minikube/assets/assets.go
 ifeq ($(MINIKUBE_BUILD_IN_DOCKER),y)
 	$(call DOCKER,$(BUILD_IMAGE),/usr/bin/make $@)
 else
-ifneq ($(GOPATH)/src/$(REPOPATH),$(PWD))
+ifneq ($(GOPATH)/src/$(REPOPATH),$(CURDIR))
 	$(warning ******************************************************************************)
 	$(warning WARNING: You are building minikube outside the expected GOPATH:)
 	$(warning )
 	$(warning expected: $(GOPATH)/src/$(REPOPATH) )
-	$(warning   got:      $(PWD) )
+	$(warning   got:      $(CURDIR) )
 	$(warning )
 	$(warning You will likely encounter unusual build failures. For proper setup, read: )
 	$(warning https://github.com/kubernetes/minikube/blob/master/docs/contributors/build_guide.md)
@@ -304,18 +304,18 @@ push-storage-provisioner-image: storage-provisioner-image
 	gcloud docker -- push $(REGISTRY)/storage-provisioner:$(STORAGE_PROVISIONER_TAG)
 
 
-.PHONY: out/gvisor
-out/gvisor:
+.PHONY: out/gvisor-addon
+out/gvisor-addon:
 	GOOS=linux CGO_ENABLED=0 go build -o $@ cmd/gvisor/gvisor.go
 
-.PHONY: gvisor-image
-gvisor-image: out/gvisor
-	docker build -t gcr.io/priya-wadhwa/gvisor:latest -f deploy/addons/gvisor/Dockerfile .
+.PHONY: gvisor-addon-image
+gvisor-addon-image: out/gvisor-addon
+	docker build -t $(REGISTRY)/gvisor-addon:latest -f deploy/gvisor/Dockerfile .
 
-.PHONY: push-gvisor-image
-push-gvisor-image: gvisor-image
-	docker push gcr.io/priya-wadhwa/gvisor:latest
- 
+.PHONY: push-gvisor-addon-image
+push-gvisor-addon-image: gvisor-addon-image
+	gcloud docker -- push $(REGISTRY)/gvisor-addon:latest
+
 .PHONY: release-iso
 release-iso: minikube_iso checksum
 	gsutil cp out/minikube.iso gs://$(ISO_BUCKET)/minikube-$(ISO_VERSION).iso

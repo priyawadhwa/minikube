@@ -38,9 +38,10 @@ const (
 )
 
 // Enable follows these steps for enabling gvisor in minikube:
-//   1. rewrites the /etc/conntainerd/config.toml on the host  (or is it /run/docker/containerd/containerd.toml?)
-//   2. downloads gvisor + shim
-//   3. restarts containerd
+//   1. creates necessary directories for storing binaries and runsc logs
+//   2. downloads runsc and gvisor-containerd-shim
+//   3. copies necessary containerd config files
+//   4. restarts containerd
 func Enable() error {
 	if err := makeDirs(); err != nil {
 		return errors.Wrap(err, "creating directories on node")
@@ -102,6 +103,8 @@ func runsc() error {
 	return downloadFileToDest("http://storage.googleapis.com/gvisor/releases/nightly/latest/runsc", dest)
 }
 
+// downloadFileToDest downlaods the given file to the dest
+// if something already exists at dest, first remove it
 func downloadFileToDest(url, dest string) error {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -132,11 +135,11 @@ func downloadFileToDest(url, dest string) error {
 //    2. gvisor containerd config.toml
 func copyFiles() error {
 	log.Print("Copying gvisor-containerd-shim.toml...")
-	if err := copyAssetToDest(gvisorContainerdShimTargetName, filepath.Join(nodeDir, gvisorContainerdShimPath)); err != nil {
+	if err := copyAssetToDest(constants.GvisorContainerdShimTargetName, filepath.Join(nodeDir, constants.GvisorContainerdShimTomlPath)); err != nil {
 		return errors.Wrap(err, "copying gvisor-containerd-shim.toml")
 	}
 	log.Print("Copying containerd config.toml with gvisor...")
-	if err := copyAssetToDest(gvisorConfigTomlTargetName, filepath.Join(nodeDir, configTomlPath)); err != nil {
+	if err := copyAssetToDest(constants.GvisorConfigTomlTargetName, filepath.Join(nodeDir, constants.ContainerdConfigTomlPath)); err != nil {
 		return errors.Wrap(err, "copying gvisor version of config.toml")
 	}
 	return nil

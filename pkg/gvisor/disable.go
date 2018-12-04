@@ -21,12 +21,13 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
+	"k8s.io/minikube/pkg/minikube/constants"
 )
 
-// Disable disables gvisor and returns state back to normal
+// Disable reverts containerd config files and restarts containerd
 func Disable() error {
 	log.Print("Disabling gvisor...")
-	if err := copyAssetToDest(defaultConfigTomlTargetName, filepath.Join(nodeDir, configTomlPath)); err != nil {
+	if err := copyAssetToDest(constants.DefaultConfigTomlTargetName, filepath.Join(nodeDir, constants.ContainerdConfigTomlPath)); err != nil {
 		return errors.Wrap(err, "reverting config.toml to default")
 	}
 	// restart containerd
