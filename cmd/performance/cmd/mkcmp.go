@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -32,7 +33,7 @@ var rootCmd = &cobra.Command{
 		return validateArgs(args)
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return performance.CompareMinikubeStart(args[0], args[1])
+		return performance.CompareMinikubeStart(context.Background(), args[0], args[1])
 	},
 }
 
