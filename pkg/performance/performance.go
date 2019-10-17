@@ -32,20 +32,23 @@ const (
 )
 
 // CompareMinikubeStart compares the time to run `minikube start` between two minikube binaries
-func CompareMinikubeStart(ctx context.Context, firstBinary, secondBinary string) error {
+func CompareMinikubeStart(ctx context.Context, binaries []*Binary) error {
 	var old []float64
 	var new []float64
+
+	firstBinary := binaries[0]
+	secondBinary := binaries[1]
 
 	for r := 0; r < runs; r++ {
 		log.Printf("Executing run %d...", r)
 		duration, err := timeMinikubeStart(ctx, firstBinary)
 		if err != nil {
-			return errors.Wrapf(err, "timing run %d with binary %s", r, firstBinary)
+			return errors.Wrapf(err, "timing run %d with binary %s", r, firstBinary.path)
 		}
 		old = append(old, duration)
 		duration, err = timeMinikubeStart(ctx, secondBinary)
 		if err != nil {
-			return errors.Wrapf(err, "timing run %d with binary %s", r, secondBinary)
+			return errors.Wrapf(err, "timing run %d with binary %s", r, secondBinary.path)
 		}
 		new = append(new, duration)
 	}
@@ -65,12 +68,12 @@ func average(array []float64) float64 {
 
 // timeMinikubeStart returns the time it takes to execute `minikube start`
 // It deletes the VM after `minikube start`.
-func timeMinikubeStart(ctx context.Context, binary string) (float64, error) {
-	startCmd := exec.CommandContext(ctx, binary, "start")
+func timeMinikubeStart(ctx context.Context, binary *Binary) (float64, error) {
+	startCmd := exec.CommandContext(ctx, binary.path, startArgs(binary)...)
 	startCmd.Stdout = os.Stdout
 	startCmd.Stderr = os.Stderr
 
-	deleteCmd := exec.CommandContext(ctx, binary, "delete")
+	deleteCmd := exec.CommandContext(ctx, binary.path, "delete")
 	defer deleteCmd.Run()
 
 	log.Printf("Running `minikube start` with %s...", binary)
@@ -81,4 +84,12 @@ func timeMinikubeStart(ctx context.Context, binary string) (float64, error) {
 
 	startDuration := time.Since(start).Seconds()
 	return startDuration, nil
+}
+
+func startArgs(b *Binary) []string {
+	args := []string{"start"}
+	if b.isoURL != "" {
+		args = append(args, "--iso-url", b.isoURL)
+	}
+	return args
 }
