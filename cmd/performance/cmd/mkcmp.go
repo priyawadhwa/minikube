@@ -32,12 +32,16 @@ var rootCmd = &cobra.Command{
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		return validateArgs(args)
 	},
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		binaries, err := getBinaries(args)
 		if err != nil {
-			return err
+			fmt.Println(err)
+			os.Exit(1)
 		}
-		return performance.CompareMinikubeStart(context.Background(), binaries)
+		if err := performance.CompareMinikubeStart(context.Background(), binaries); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	},
 }
 
