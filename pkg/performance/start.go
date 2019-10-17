@@ -76,7 +76,7 @@ func timeMinikubeStart(ctx context.Context, binary *Binary) (float64, error) {
 	deleteCmd := exec.CommandContext(ctx, binary.path, "delete")
 	defer deleteCmd.Run()
 
-	log.Printf("Running `minikube start` with %s...", binary)
+	log.Printf("Running: %v...", startCmd.Args)
 	start := time.Now()
 	if err := startCmd.Run(); err != nil {
 		return 0, errors.Wrap(err, "starting minikube")
