@@ -21,10 +21,12 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
+	"k8s.io/minikube/pkg/minikube/constants"
 )
 
 type Binary struct {
@@ -72,13 +74,22 @@ func remoteMinikubeURL(pr int) string {
 	return fmt.Sprintf("https://storage.googleapis.com/minikube-builds/%d/minikube-linux-amd64", pr)
 }
 
+// remoteMinikubeIsoURL returns the url for minikube.iso if it exists for this PR
 func remoteMinikubeIsoURL(pr int) string {
-	return fmt.Sprintf("https://storage.googleapis.com/minikube-builds/%d/minikube.iso", pr)
+	url := fmt.Sprintf("https://storage.googleapis.com/minikube-builds/%d/minikube.iso", pr)
+	// Return url if it exists
+	resp, err := http.Get(url)
+	if err != nil {
+		return ""
+	}
+	if resp.StatusCode != http.StatusOK {
+		return ""
+	}
+	return url
 }
 
 func localMinikubePath(pr int) string {
-	home := os.Getenv("HOME")
-	return fmt.Sprintf("%s/minikube-binaries/%d/minikube", home, pr)
+	return fmt.Sprintf("%s/minikube-binaries/%d/minikube", constants.DefaultMinipath, pr)
 }
 
 func downloadBinary(url, path string) error {
@@ -88,16 +99,16 @@ func downloadBinary(url, path string) error {
 	}
 	defer resp.Body.Close()
 
-	if err := os.MkdirAll(path, 0777); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0777); err != nil {
 		return err
 	}
 
-	out, err := os.Create(path)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0777)
 	if err != nil {
 		return err
 	}
-	defer out.Close()
+	defer f.Close()
 
-	_, err = io.Copy(out, resp.Body)
+	_, err = io.Copy(f, resp.Body)
 	return err
 }

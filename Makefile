@@ -557,5 +557,16 @@ out/mkcmp:
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o $@ cmd/performance/main.go
 
 .PHONY: compare
-compare: out/mkcmp
-	out/mkcmp ${BINARIES}
+compare: out/mkcmp out/minikube
+	cp out/minikube out/proposed.minikube
+	BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
+	git checkout master
+	make out/minikube
+	cp out/minikube out/master.minikube
+	git checkout $BRANCH
+	if [ -z "$BINARIES" ]
+	then
+		out/mkcmp out/master.minikube out/proposed.minikube
+	else
+		out/mkcmp ${BINARIES}
+	fi

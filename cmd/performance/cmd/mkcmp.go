@@ -71,3 +71,7 @@ func Execute() {
 		os.Exit(1)
 	}
 }
+
+func init() {
+	rootCmd.Flags().String("gcs-bucket", "", "Specify a GCS bucket to upload results too.")
+}
