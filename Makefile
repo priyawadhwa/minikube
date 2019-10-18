@@ -70,6 +70,7 @@ GOARCH ?= $(shell go env GOARCH)
 GOPATH ?= $(shell go env GOPATH)
 BUILD_DIR ?= ./out
 $(shell mkdir -p $(BUILD_DIR))
+CURRENT_GIT_BRANCH ?= $(shell git branch | grep \* | cut -d ' ' -f2)
 
 # Use system python if it exists, otherwise use Docker.
 PYTHON := $(shell command -v python || echo "docker run --rm -it -v $(shell pwd):/minikube -w /minikube python python")
@@ -558,15 +559,15 @@ out/mkcmp:
 
 .PHONY: compare
 compare: out/mkcmp out/minikube
+	if [ ! -z "${BINARIES}" ]; then \
+		out/mkcmp ${BINARIES}; \
+		exit 0; \
+	fi;
+
 	cp out/minikube out/proposed.minikube
-	BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
 	git checkout master
 	make out/minikube
 	cp out/minikube out/master.minikube
-	git checkout $BRANCH
-	if [ -z "$BINARIES" ]
-	then
-		out/mkcmp out/master.minikube out/proposed.minikube
-	else
-		out/mkcmp ${BINARIES}
-	fi
+	git checkout $(CURRENT_GIT_BRANCH)
+	out/mkcmp out/master.minikube out/proposed.minikube
+
