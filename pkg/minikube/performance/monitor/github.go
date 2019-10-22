@@ -70,36 +70,23 @@ func (g *Client) CommentOnPR(pr int, message string) error {
 	return nil
 }
 
-// RemoveLabelFromPR removes label from pr
-func (g *Client) RemoveLabelFromPR(pr int, label string) error {
-	_, err := g.Client.Issues.RemoveLabelForIssue(g.ctx, g.owner, g.repo, pr, label)
-	if err != nil {
-		return errors.Wrap(err, "deleting label")
-	}
-	log.Printf("Successfully deleted label from PR %d", pr)
-	return nil
-}
-
-// ListOpenPRs returns all open PRs with the specified label
-func ListOpenPRsWithLabel(label string) ([]int, error) {
+// ListOpenPRsWithLabel returns all open PRs with the specified label
+func (g *Client) ListOpenPRsWithLabel(label string) ([]int, error) {
+	// TODO: priyawadhwa@
 	return []int{5694}, nil
 }
 
-// newCommitsExist checks if new commits exist since minikube-bot
+// NewCommitsExist checks if new commits exist since minikube-bot
 // commented on the PR. If so, return true.
-func (g *Client) newCommitsExist(pr int, login string) (bool, error) {
-	lastCommentTime, err := g.TimeOfLastComment(pr, login)
+func (g *Client) NewCommitsExist(pr int, login string) (bool, error) {
+	lastCommentTime, err := g.timeOfLastComment(pr, login)
 	if err != nil {
 		return false, errors.Wrapf(err, "getting time of last comment by %s on pr %d", login, pr)
-	}
-	if lastCommentTime == nil {
-		return true, nil
 	}
 	lastCommitTime, err := g.timeOfLastCommit(pr)
 	if err != nil {
 		return false, errors.Wrapf(err, "getting time of last commit on pr %d", pr)
 	}
-
 	return lastCommentTime.Before(lastCommitTime), nil
 }
 
@@ -112,20 +99,20 @@ func (g *Client) timeOfLastCommit(pr int) (time.Time, error) {
 	return lastCommit.GetCommit().GetAuthor().GetDate(), nil
 }
 
-func (g *Client) TimeOfLastComment(pr int, login string) (*time.Time, error) {
+func (g *Client) timeOfLastComment(pr int, login string) (time.Time, error) {
 	comments, _, err := g.Client.Issues.ListComments(g.ctx, g.owner, g.repo, pr, &github.IssueListCommentsOptions{})
 	if err != nil {
-		return nil, err
+		return time.Time{}, err
 	}
 	// go through comments backwards to find the most recent
 	for i := len(comments) - 1; i >= 0; i-- {
 		c := comments[i]
 		if u := c.GetUser(); u != nil {
 			if u.GetLogin() == login {
-				return c.CreatedAt, nil
+				return c.GetCreatedAt(), nil
 			}
 		}
 	}
 
-	return nil, nil
+	return time.Time{}, nil
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/pkg/errors"
 	"k8s.io/minikube/pkg/minikube/performance/monitor"
 )
 
@@ -17,6 +18,21 @@ func main() {
 
 func execute() error {
 	client := monitor.NewClient(context.Background(), "kubernetes", "minikube")
-	fmt.Println(client.TimeOfLastComment(5694, "minikube-bot"))
+	prs, err := client.ListOpenPRsWithLabel("")
+	if err != nil {
+		return errors.Wrap(err, "listing open prs")
+	}
+	// TODO: priyawadhwa@ for each PR we should comment the error if we get one?
+	for _, pr := range prs {
+		newCommitsExist, err := client.NewCommitsExist(pr, "minikube-bot")
+		if err != nil {
+			return err
+		}
+		if !newCommitsExist {
+			continue
+		}
+		// TODO: priyawadhwa@ we should download mkcmp for each run?
+
+	}
 	return nil
 }
