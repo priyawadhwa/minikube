@@ -20,10 +20,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"os"
 
 	"github.com/spf13/cobra"
 	"k8s.io/minikube/pkg/performance"
+)
+
+var (
+	quiet bool
 )
 
 var rootCmd = &cobra.Command{
@@ -38,7 +44,12 @@ var rootCmd = &cobra.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		if err := performance.CompareMinikubeStart(context.Background(), binaries); err != nil {
+		var out io.Writer
+		out = os.Stdout
+		if quiet {
+			out = ioutil.Discard
+		}
+		if err := performance.CompareMinikubeStart(context.Background(), out, binaries); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
@@ -73,5 +84,5 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().String("gcs-bucket", "", "Specify a GCS bucket to upload results too.")
+	rootCmd.Flags().BoolVarP(&quiet, "quiet", "", false, "only output results")
 }
