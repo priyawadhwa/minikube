@@ -10,7 +10,7 @@ import (
 // RunMkcmp runs minikube built at the given pr against minikube at master
 // TODO: priyawadhwa@ to figure this out.
 func RunMkcmp(ctx context.Context, pr int) (string, error) {
-	cmd := exec.CommandContext(ctx, "mkcmp", "minikube", fmt.Sprintf("pr://%d", pr))
+	cmd := exec.CommandContext(ctx, "mkcmp", "minikube", fmt.Sprintf("pr://%d", pr), "--quiet")
 	stdOut := bytes.NewBuffer([]byte{})
 	stdErr := bytes.NewBuffer([]byte{})
 	cmd.Stdout = stdOut
