@@ -54,7 +54,7 @@ func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []*Binary
 		new = append(new, duration)
 	}
 
-	fmt.Fprintf(os.Stdout, " Old binary: %v\n New binary: %v\n Average Old: %f\n Average New: %f\n", old, new, average(old), average(new))
+	fmt.Fprintf(os.Stdout, " Original binary: %v\n New binary (PR %d): %v\n Average Old: %f\n Average New (PR %d): %f\n", old, secondBinary.pr, new, average(old), secondBinary.pr, average(new))
 
 	return nil
 }
