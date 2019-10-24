@@ -1,34 +1,40 @@
 package monitor
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
-	"bytes"
+	"path/filepath"
+
 	"github.com/pkg/errors"
 )
+
 // RunMkcmp runs minikube built at the given pr against minikube at master
 // TODO: priyawadhwa@ to figure this out.
 func RunMkcmp(ctx context.Context, pr int) (string, error) {
-	if err := buildMinikubeAtHead(); err != nil {
+	if err := buildMinikubeAtHead(ctx); err != nil {
 		return "", errors.Wrap(err, "building minikube at head")
 	}
 	minikubeAtHead := filepath.Join(minikubeDir(), "out/minikube")
-	
+
+	log.Print("running mkcmp")
 	cmd := exec.CommandContext(ctx, "mkcmp", minikubeAtHead, fmt.Sprintf("pr://%d", pr), "--quiet")
 	stdOut := bytes.NewBuffer([]byte{})
 	stdErr := os.Stderr
 	cmd.Stdout = stdOut
 	cmd.Stderr = stdErr
- 
+
 	if err := cmd.Run(); err != nil {
 		return "", errors.Wrap(err, "running mkcmp")
 	}
 	return stdOut.String(), nil
-}  
+}
 
 func buildMinikubeAtHead(ctx context.Context) error {
+	log.Print("building minikube at head")
 	gitPull := exec.CommandContext(ctx, "git", "pull", "origin", "master")
 	gitPull.Dir = minikubeDir()
 
@@ -37,7 +43,7 @@ func buildMinikubeAtHead(ctx context.Context) error {
 	}
 
 	makeMinikube := exec.CommandContext(ctx, "make")
-	makeminikube.Dir = minikubeDir()
+	makeMinikube.Dir = minikubeDir()
 
 	if err := makeMinikube.Run(); err != nil {
 		return errors.Wrap(err, "building minikube via make")
