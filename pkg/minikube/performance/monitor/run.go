@@ -38,14 +38,14 @@ func buildMinikubeAtHead(ctx context.Context) error {
 	gitPull := exec.CommandContext(ctx, "git", "pull", "origin", "master")
 	gitPull.Dir = minikubeDir()
 
-	if err := gitPull.Run(); err != nil {
+	if err := runCmd(gitPull); err != nil {
 		return errors.Wrap(err, "updating minikube master branch")
 	}
 
 	makeMinikube := exec.CommandContext(ctx, "make")
 	makeMinikube.Dir = minikubeDir()
 
-	if err := makeMinikube.Run(); err != nil {
+	if err := runCmd(makeMinikube); err != nil {
 		return errors.Wrap(err, "building minikube via make")
 	}
 	return nil
@@ -53,4 +53,15 @@ func buildMinikubeAtHead(ctx context.Context) error {
 
 func minikubeDir() string {
 	return filepath.Join(os.Getenv("HOME"), "minikube")
+}
+
+func runCmd(cmd *exec.Cmd) error {
+	buf := bytes.NewBuffer([]byte{})
+	cmd.Stdout = buf
+	cmd.Stderr = buf
+
+	if err := cmd.Run(); err != nil {
+		return errors.Wrapf(err, "runnig %v:\n%s", cmd.Args, buf.String())
+	}
+	return nil
 }
