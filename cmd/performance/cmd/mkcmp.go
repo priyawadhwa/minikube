@@ -1,5 +1,9 @@
 /*
+<<<<<<< HEAD
 Copyright 2016 The Kubernetes Authors All rights reserved.
+=======
+Copyright 2017 The Kubernetes Authors All rights reserved.
+>>>>>>> origin/compare
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -58,7 +62,7 @@ var rootCmd = &cobra.Command{
 
 func validateArgs(args []string) error {
 	if len(args) != 2 {
-		return errors.New("mkcmp requries two minikube binaries to compare: mkcmp [path to first binary] [path to second binary]")
+		return errors.New("mkcmp requires two minikube binaries to compare: mkcmp [path to first binary] [path to second binary]")
 	}
 	return nil
 }
@@ -75,14 +79,14 @@ func getBinaries(args []string) ([]*performance.Binary, error) {
 	return binaries, nil
 }
 
+func init() {
+	rootCmd.Flags().BoolVarP(&quiet, "quiet", "", false, "only output results")
+}
+
 // Execute runs the mkcmp command
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
-}
-
-func init() {
-	rootCmd.Flags().BoolVarP(&quiet, "quiet", "", false, "only output results")
 }
