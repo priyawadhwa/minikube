@@ -20,13 +20,13 @@ func RunMkcmp(ctx context.Context, pr int) (string, error) {
 	}
 	minikubeAtHead := filepath.Join(minikubeDir(), "out/minikube")
 
-	log.Print("running mkcmp")
 	cmd := exec.CommandContext(ctx, "mkcmp", minikubeAtHead, fmt.Sprintf("pr://%d", pr), "--quiet")
 	stdOut := bytes.NewBuffer([]byte{})
 	stdErr := os.Stderr
 	cmd.Stdout = stdOut
 	cmd.Stderr = stdErr
 
+	log.Print("running mkcmp: ", cmd.Args)
 	if err := cmd.Run(); err != nil {
 		return "", errors.Wrap(err, "running mkcmp")
 	}
