@@ -35,6 +35,11 @@ func RunMkcmp(ctx context.Context, pr int) (string, error) {
 
 func buildMinikubeAtHead(ctx context.Context) error {
 	log.Print("building minikube at head in", minikubeDir())
+	log.Print("who am i?", os.Getenv("USER"))
+	whoAmI := exec.Command("whoami")
+	whoAmI.Stdout = os.Stderr
+
+	log.Print(whoAmI.Run())
 	gitPull := exec.CommandContext(ctx, "git", "pull", "origin", "master")
 	gitPull.Dir = minikubeDir()
 
