@@ -1,5 +1,5 @@
 /*
-Copyright 2016 The Kubernetes Authors All rights reserved.
+Copyright 2017 The Kubernetes Authors All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,16 +36,16 @@ var (
 
 // CompareMinikubeStart compares the time to run `minikube start` between two minikube binaries
 func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []*Binary) error {
-	durations, err := collectTimes(ctx, out, binaries)
+	durations, err := collectTimes(ctx, binaries)
 	if err != nil {
 		return err
 	}
 
-	fmt.Fprintf(os.Stdout, "Old binary: %v\nNew binary: %v\nAverage Old: %f\nAverage New: %f\n", durations[0], durations[1], average(durations[0]), average(durations[1]))
+	fmt.Fprintf(out, "Old binary: %v\nNew binary: %v\nAverage Old: %f\nAverage New: %f\n", durations[0], durations[1], average(durations[0]), average(durations[1]))
 	return nil
 }
 
-func collectTimes(ctx context.Context, out io.Writer, binaries []*Binary) ([][]float64, error) {
+func collectTimes(ctx context.Context, binaries []*Binary) ([][]float64, error) {
 	durations := make([][]float64, len(binaries))
 	for i := range durations {
 		durations[i] = make([]float64, runs)
@@ -54,7 +54,7 @@ func collectTimes(ctx context.Context, out io.Writer, binaries []*Binary) ([][]f
 	for r := 0; r < runs; r++ {
 		log.Printf("Executing run %d...", r)
 		for index, binary := range binaries {
-			duration, err := collectTimeMinikubeStart(ctx, out, binary)
+			duration, err := collectTimeMinikubeStart(ctx, binary)
 			if err != nil {
 				return nil, errors.Wrapf(err, "timing run %d with %s", r, binary.path)
 			}
@@ -75,9 +75,9 @@ func average(array []float64) float64 {
 
 // timeMinikubeStart returns the time it takes to execute `minikube start`
 // It deletes the VM after `minikube start`.
-func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (float64, error) {
+func timeMinikubeStart(ctx context.Context, binary *Binary) (float64, error) {
 	startCmd := exec.CommandContext(ctx, binary.path, "start")
-	startCmd.Stdout = os.Stderr
+	startCmd.Stdout = os.Stdout
 	startCmd.Stderr = os.Stderr
 
 	deleteCmd := exec.CommandContext(ctx, binary.path, "delete")
@@ -95,12 +95,4 @@ func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (floa
 
 	startDuration := time.Since(start).Seconds()
 	return startDuration, nil
-}
-
-func startArgs(b *Binary) []string {
-	args := []string{"start"}
-	if b.isoURL != "" {
-		args = append(args, "--iso-url", b.isoURL)
-	}
-	return args
 }

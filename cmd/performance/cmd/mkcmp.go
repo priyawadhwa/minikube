@@ -1,5 +1,9 @@
 /*
+<<<<<<< HEAD
+Copyright 2016 The Kubernetes Authors All rights reserved.
+=======
 Copyright 2017 The Kubernetes Authors All rights reserved.
+>>>>>>> origin/compare
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,11 +21,19 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"os"
 
 	"github.com/spf13/cobra"
+	"k8s.io/minikube/pkg/performance"
+)
+
+var (
+	quiet bool
 )
 
 var rootCmd = &cobra.Command{
@@ -30,7 +42,22 @@ var rootCmd = &cobra.Command{
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		return validateArgs(args)
 	},
-	Run: func(cmd *cobra.Command, args []string) {},
+	Run: func(cmd *cobra.Command, args []string) {
+		binaries, err := getBinaries(args)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		var out io.Writer
+		out = os.Stdout
+		if quiet {
+			out = ioutil.Discard
+		}
+		if err := performance.CompareMinikubeStart(context.Background(), out, binaries); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
 }
 
 func validateArgs(args []string) error {
@@ -40,10 +67,26 @@ func validateArgs(args []string) error {
 	return nil
 }
 
+func getBinaries(args []string) ([]*performance.Binary, error) {
+	var binaries []*performance.Binary
+	for _, a := range args {
+		b, err := performance.NewBinary(a)
+		if err != nil {
+			return nil, err
+		}
+		binaries = append(binaries, b)
+	}
+	return binaries, nil
+}
+
+func init() {
+	rootCmd.Flags().BoolVarP(&quiet, "quiet", "", false, "only output results")
+}
+
 // Execute runs the mkcmp command
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
 }
