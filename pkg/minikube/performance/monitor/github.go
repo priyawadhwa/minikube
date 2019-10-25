@@ -75,28 +75,68 @@ func (g *Client) NewCommitsExist(pr int, login string) (bool, error) {
 }
 
 func (g *Client) timeOfLastCommit(pr int) (time.Time, error) {
-	commits, _, err := g.Client.PullRequests.ListCommits(g.ctx, g.owner, g.repo, pr, &github.ListOptions{})
-	if err != nil {
-		return time.Time{}, err
+	var commits []*github.RepositoryCommit
+
+	page := 0
+	resultsPerPage := 30
+	for {
+		c, _, err := g.Client.PullRequests.ListCommits(g.ctx, g.owner, g.repo, pr, &github.ListOptions{
+			Page:    page,
+			PerPage: resultsPerPage,
+		})
+		if err != nil {
+			return time.Time{}, nil
+		}
+		commits = append(commits, c...)
+		if len(c) < resultsPerPage {
+			break
+		}
+		page++
 	}
-	lastCommit := commits[len(commits)-1]
-	return lastCommit.GetCommit().GetAuthor().GetDate(), nil
+
+	lastCommitTime := time.Time{}
+	for _, c := range commits {
+		if newCommitTime := c.GetCommit().GetAuthor().GetDate(); newCommitTime.After(lastCommitTime) {
+			lastCommitTime = newCommitTime
+		}
+	}
+	return lastCommitTime, nil
 }
 
 func (g *Client) timeOfLastComment(pr int, login string) (time.Time, error) {
-	comments, _, err := g.Client.Issues.ListComments(g.ctx, g.owner, g.repo, pr, &github.IssueListCommentsOptions{})
-	if err != nil {
-		return time.Time{}, err
+	var comments []*github.IssueComment
+
+	page := 0
+	resultsPerPage := 30
+	for {
+		c, _, err := g.Client.Issues.ListComments(g.ctx, g.owner, g.repo, pr, &github.IssueListCommentsOptions{
+			ListOptions: github.ListOptions{
+				Page:    page,
+				PerPage: resultsPerPage,
+			},
+		})
+		if err != nil {
+			return time.Time{}, nil
+		}
+		comments = append(comments, c...)
+		if len(c) < resultsPerPage {
+			break
+		}
+		page++
 	}
+
 	// go through comments backwards to find the most recent
-	for i := len(comments) - 1; i >= 0; i-- {
-		c := comments[i]
+	lastCommentTime := time.Time{}
+
+	for _, c := range comments {
 		if u := c.GetUser(); u != nil {
 			if u.GetLogin() == login {
-				return c.GetCreatedAt(), nil
+				if c.GetCreatedAt().After(lastCommentTime) {
+					lastCommentTime = c.GetCreatedAt()
+				}
 			}
 		}
 	}
 
-	return time.Time{}, nil
+	return lastCommentTime, nil
 }
