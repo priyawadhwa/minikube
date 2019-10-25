@@ -48,6 +48,7 @@ func buildMinikubeAtHead(ctx context.Context) error {
 	}
 
 	makeMinikube := exec.CommandContext(ctx, "make", "out/minikube")
+	makeMinikube.Env = []string{"PATH=/usr/bin:/usr/local/go/bin:/bin", "HOME=/home/priyawadhwa"}
 	makeMinikube.Dir = minikubeDir()
 
 	if err := runCmd(makeMinikube); err != nil {
