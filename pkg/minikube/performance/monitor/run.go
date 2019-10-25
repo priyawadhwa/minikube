@@ -34,7 +34,7 @@ func RunMkcmp(ctx context.Context, pr int) (string, error) {
 }
 
 func buildMinikubeAtHead(ctx context.Context) error {
-	log.Print("building minikube at head")
+	log.Print("building minikube at head in", minikubeDir())
 	gitPull := exec.CommandContext(ctx, "git", "pull", "origin", "master")
 	gitPull.Dir = minikubeDir()
 
@@ -52,7 +52,7 @@ func buildMinikubeAtHead(ctx context.Context) error {
 }
 
 func minikubeDir() string {
-	return filepath.Join(os.Getenv("HOME"), "minikube")
+	return filepath.Join(os.Getenv("HOME"), "out/minikube")
 }
 
 func runCmd(cmd *exec.Cmd) error {
@@ -61,7 +61,7 @@ func runCmd(cmd *exec.Cmd) error {
 	cmd.Stderr = buf
 
 	if err := cmd.Run(); err != nil {
-		return errors.Wrapf(err, "runnig %v:\n%s", cmd.Args, buf.String())
+		return errors.Wrapf(err, "running %v in %s:\n%s", cmd.Args, cmd.Dir, buf.String())
 	}
 	return nil
 }
