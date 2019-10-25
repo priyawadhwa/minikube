@@ -52,7 +52,7 @@ func buildMinikubeAtHead(ctx context.Context) error {
 }
 
 func minikubeDir() string {
-	return filepath.Join(os.Getenv("HOME"), "out/minikube")
+	return filepath.Join(os.Getenv("HOME"), "minikube")
 }
 
 func runCmd(cmd *exec.Cmd) error {
