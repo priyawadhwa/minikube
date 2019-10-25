@@ -42,7 +42,7 @@ func buildMinikubeAtHead(ctx context.Context) error {
 		return errors.Wrap(err, "updating minikube master branch")
 	}
 
-	makeMinikube := exec.CommandContext(ctx, "make")
+	makeMinikube := exec.CommandContext(ctx, "make", "out/minikube")
 	makeMinikube.Dir = minikubeDir()
 
 	if err := runCmd(makeMinikube); err != nil {
