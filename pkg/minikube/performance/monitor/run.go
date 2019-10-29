@@ -62,7 +62,9 @@ func runCmd(cmd *exec.Cmd) error {
 	buf := bytes.NewBuffer([]byte{})
 	cmd.Stdout = buf
 	cmd.Stderr = buf
+	cmd.Env = os.Environ() 
 
+	log.Printf("Running %v with env %v", cmd.Args, cmd.Env)
 	if err := cmd.Run(); err != nil {
 		return errors.Wrapf(err, "running %v in %s:\n%s", cmd.Args, cmd.Dir, buf.String())
 	}
