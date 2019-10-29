@@ -8,15 +8,15 @@ import (
 
 	"github.com/pkg/errors"
 	"k8s.io/minikube/pkg/performance/monitor"
-) 
- 
+)
+
 func main() {
 
 	for {
+		log.Print("~~~~~~~~~ Starting performance analysis ~~~~~~~~~~~~~~")
 		if err := execute(context.Background()); err != nil {
-			fmt.Println(err)
+			log.Printf("Error executing: %v", err)
 		}
-		log.Print("sleeping 10 minutes")
 		time.Sleep(10 * time.Minute)
 	}
 

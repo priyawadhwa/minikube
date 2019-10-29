@@ -24,8 +24,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"k8s.io/minikube/pkg/performance"
 	"github.com/spf13/cobra"
+	"k8s.io/minikube/pkg/performance"
 )
 
 var (
