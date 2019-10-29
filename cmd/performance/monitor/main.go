@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"k8s.io/minikube/pkg/minikube/performance/monitor"
-)
-
+	"k8s.io/minikube/pkg/performance/monitor"
+) 
+ 
 func main() {
 
 	for {
