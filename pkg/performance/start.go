@@ -29,7 +29,7 @@ import (
 )
 
 var (
-	runs = 1
+	runs = 3
 	// For testing
 	collectTimeMinikubeStart = timeMinikubeStart
 )
