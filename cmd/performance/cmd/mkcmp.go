@@ -1,9 +1,5 @@
 /*
-<<<<<<< HEAD
-Copyright 2016 The Kubernetes Authors All rights reserved.
-=======
 Copyright 2017 The Kubernetes Authors All rights reserved.
->>>>>>> origin/compare
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,8 +24,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/spf13/cobra"
 	"k8s.io/minikube/pkg/performance"
+	"github.com/spf13/cobra"
 )
 
 var (
