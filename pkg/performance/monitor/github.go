@@ -57,7 +57,7 @@ func (g *Client) CommentOnPR(pr int, message string) error {
 // ListOpenPRsWithLabel returns all open PRs with the specified label
 func (g *Client) ListOpenPRsWithLabel(label string) ([]int, error) {
 	// TODO: priyawadhwa@
-	return []int{5694}, nil
+	return []int{5694, 5805}, nil
 }
 
 // NewCommitsExist checks if new commits exist since minikube-bot
