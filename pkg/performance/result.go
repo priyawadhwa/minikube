@@ -16,6 +16,12 @@ limitations under the License.
 
 package performance
 
+import (
+	"errors"
+	"fmt"
+	"io"
+)
+
 type Result struct {
 	logs  []string
 	times []float64
@@ -48,4 +54,47 @@ func (r *Result) timeForLog(log string) (bool, float64) {
 		}
 	}
 	return false, 0
+}
+
+type DataStorage struct {
+	Data map[*Binary][]*Result
+}
+
+func NewDataStorage(binaries []*Binary) *DataStorage {
+	ds := &DataStorage{
+		Data: map[*Binary][]*Result{},
+	}
+	for _, b := range binaries {
+		ds.Data[b] = []*Result{}
+	}
+	return ds
+}
+
+func (d *DataStorage) addResult(b *Binary, result *Result) error {
+	if arr, ok := d.Data[b]; ok {
+		d.Data[b] = append(arr, result)
+		return nil
+	}
+	return errors.New("unknown binary")
+}
+
+func (d *DataStorage) summarizeData(out io.Writer) {
+	for binary, results := range d.Data {
+		fmt.Fprintf(out, "All Times For %s: [", binary.path)
+		for _, r := range results {
+			fmt.Fprintf(out, " %f", r.totalTime())
+		}
+		fmt.Fprintf(out, "]\n")
+	}
+	for binary, results := range d.Data {
+		fmt.Fprintf(out, "Average Runtime for %s: %f\n", binary.path, averageTimeForResults(results))
+	}
+}
+
+func averageTimeForResults(results []*Result) float64 {
+	total := 0.0
+	for _, r := range results {
+		total += r.totalTime()
+	}
+	return total / float64(len(results))
 }

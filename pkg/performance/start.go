@@ -19,7 +19,6 @@ package performance
 import (
 	"bufio"
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -38,33 +37,33 @@ var (
 
 // CompareMinikubeStart compares the time to run `minikube start` between two minikube binaries
 func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []*Binary) error {
-	durations, err := collectTimes(ctx, out, binaries)
+	ds, err := collectTimes(ctx, out, binaries)
 	if err != nil {
 		return err
 	}
-
-	fmt.Fprintf(os.Stdout, "Old binary: %v\nNew binary: %v\nAverage Old: %f\nAverage New: %f\n", durations[0], durations[1], average(durations[0]), average(durations[1]))
+	ds.summarizeData(os.Stdout)
 	return nil
 }
 
-func collectTimes(ctx context.Context, out io.Writer, binaries []*Binary) ([][]float64, error) {
+func collectTimes(ctx context.Context, out io.Writer, binaries []*Binary) (*DataStorage, error) {
 	durations := make([][]float64, len(binaries))
 	for i := range durations {
 		durations[i] = make([]float64, runs)
 	}
+	dataStorage := NewDataStorage(binaries)
 
 	for r := 0; r < runs; r++ {
 		log.Printf("Executing run %d/%d...", r+1, runs)
-		for index, binary := range binaries {
+		for _, binary := range binaries {
 			result, err := collectTimeMinikubeStart(ctx, out, binary)
 			if err != nil {
 				return nil, errors.Wrapf(err, "timing run %d with %s", r, binary.path)
 			}
-			durations[index][r] = result.totalTime()
+			dataStorage.addResult(binary, result)
 		}
 	}
 
-	return durations, nil
+	return dataStorage, nil
 }
 
 func average(array []float64) float64 {
