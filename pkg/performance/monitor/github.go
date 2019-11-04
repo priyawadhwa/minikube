@@ -56,8 +56,29 @@ func (g *Client) CommentOnPR(pr int, message string) error {
 
 // ListOpenPRsWithLabel returns all open PRs with the specified label
 func (g *Client) ListOpenPRsWithLabel(label string) ([]int, error) {
-	// TODO: priyawadhwa@
-	return []int{5694, 5805}, nil
+	validPrs := []int{}
+	prs, _, err := g.Client.PullRequests.List(g.ctx, g.owner, g.repo, &github.PullRequestListOptions{})
+	if err != nil {
+		return nil, errors.Wrap(err, "listing pull requests")
+	}
+	for _, pr := range prs {
+		if prContainsLabel(pr.Labels, "ok-to-test") {
+			validPrs = append(validPrs, pr.GetNumber())
+		}
+	}
+	return validPrs, nil
+}
+
+func prContainsLabel(labels []*github.Label, label string) bool {
+	for _, l := range labels {
+		if l == nil {
+			continue
+		}
+		if l.GetName() == label {
+			return true
+		}
+	}
+	return false
 }
 
 // NewCommitsExist checks if new commits exist since minikube-bot
