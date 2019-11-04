@@ -17,6 +17,7 @@ limitations under the License.
 package performance
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -33,6 +34,12 @@ var (
 	// For testing
 	collectTimeMinikubeStart = timeMinikubeStart
 )
+
+type Result struct {
+	durations        [][]float64
+	logToTime        map[string][]float64
+	averageLogToTime map[string]float64
+}
 
 // CompareMinikubeStart compares the time to run `minikube start` between two minikube binaries
 func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []*Binary) error {
@@ -76,10 +83,6 @@ func average(array []float64) float64 {
 // timeMinikubeStart returns the time it takes to execute `minikube start`
 // It deletes the VM after `minikube start`.
 func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (float64, error) {
-	startCmd := exec.CommandContext(ctx, binary.path, "start")
-	startCmd.Stdout = os.Stderr
-	startCmd.Stderr = os.Stderr
-
 	deleteCmd := exec.CommandContext(ctx, binary.path, "delete")
 	defer func() {
 		if err := deleteCmd.Run(); err != nil {
@@ -87,13 +90,36 @@ func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (floa
 		}
 	}()
 
+	startCmd := exec.CommandContext(ctx, binary.path, "start")
+	startCmd.Stderr = os.Stderr
+
+	stdout, _ := startCmd.StdoutPipe()
+	scanner := bufio.NewScanner(stdout)
+	scanner.Split(bufio.ScanLines)
+
 	log.Printf("Running: %v...", startCmd.Args)
+	if err := startCmd.Start(); err != nil {
+		return 0, err
+	}
+
+	logTimes := time.Now()
+	logsToTimes := map[string]float64{}
+
+	for scanner.Scan() {
+		text := scanner.Text()
+		timeTaken := time.Since(logTimes).Seconds()
+		logTimes = time.Now()
+		logsToTimes[text] = timeTaken
+		log.Print(text)
+	}
+
 	start := time.Now()
-	if err := startCmd.Run(); err != nil {
-		return 0, errors.Wrap(err, "starting minikube")
+	if err := startCmd.Wait(); err != nil {
+		return 0, errors.Wrap(err, "waiting for minikube")
 	}
 
 	startDuration := time.Since(start).Seconds()
+	fmt.Println(logsToTimes)
 	return startDuration, nil
 }
 
