@@ -24,6 +24,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -118,7 +119,7 @@ func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (floa
 
 	stdout, _ := startCmd.StdoutPipe()
 	scanner := bufio.NewScanner(stdout)
-	scanner.Split(bufio.ScanLines)
+	scanner.Split(bufio.ScanBytes)
 
 	log.Printf("Running: %v...", startCmd.Args)
 	if err := startCmd.Start(); err != nil {
@@ -129,18 +130,27 @@ func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (floa
 	logsToTimes := map[string]float64{}
 
 	lastLog := ""
+	currentLog := ""
 
 	for scanner.Scan() {
 		text := scanner.Text()
-		if lastLog == "" {
-			lastLog = text
+		currentLog = currentLog + text
+
+		if strings.Contains(currentLog, "\n") {
+			lastLog = currentLog
+			currentLog = ""
 			continue
 		}
+
+		if !strings.Contains(lastLog, "\n") {
+			continue
+		}
+
 		timeTaken := time.Since(logTimes).Seconds()
 		logTimes = time.Now()
 		logsToTimes[lastLog] = timeTaken
 		log.Printf("%f: %s", timeTaken, lastLog)
-		lastLog = text
+		lastLog = ""
 	}
 
 	start := time.Now()
@@ -149,7 +159,6 @@ func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (floa
 	}
 
 	startDuration := time.Since(start).Seconds()
-	fmt.Println(logsToTimes)
 	return startDuration, nil
 }
 
