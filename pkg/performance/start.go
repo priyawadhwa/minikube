@@ -36,9 +36,32 @@ var (
 )
 
 type Result struct {
-	durations        [][]float64
-	logToTime        map[string][]float64
-	averageLogToTime map[string]float64
+	durations [][]float64
+	logToTime map[string][]float64
+}
+
+func newResult() *Result {
+	return &Result{
+		logToTime: map[string][]float64{},
+	}
+}
+
+func (r *Result) addLogToTime(ltt map[string]float64) {
+	for k, v := range ltt {
+		if array, ok := r.logToTime[k]; ok {
+			r.logToTime[k] = append(array, v)
+			continue
+		}
+		r.logToTime[k] = []float64{v}
+	}
+}
+
+func (r *Result) averageLogToTime() map[string]float64 {
+	a := map[string]float64{}
+	for k, v := range r.logToTime {
+		a[k] = average(v)
+	}
+	return a
 }
 
 // CompareMinikubeStart compares the time to run `minikube start` between two minikube binaries
