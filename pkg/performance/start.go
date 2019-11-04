@@ -36,35 +36,6 @@ var (
 	collectTimeMinikubeStart = timeMinikubeStart
 )
 
-type Result struct {
-	durations [][]float64
-	logToTime map[string][]float64
-}
-
-func newResult() *Result {
-	return &Result{
-		logToTime: map[string][]float64{},
-	}
-}
-
-func (r *Result) addLogToTime(ltt map[string]float64) {
-	for k, v := range ltt {
-		if array, ok := r.logToTime[k]; ok {
-			r.logToTime[k] = append(array, v)
-			continue
-		}
-		r.logToTime[k] = []float64{v}
-	}
-}
-
-func (r *Result) averageLogToTime() map[string]float64 {
-	a := map[string]float64{}
-	for k, v := range r.logToTime {
-		a[k] = average(v)
-	}
-	return a
-}
-
 // CompareMinikubeStart compares the time to run `minikube start` between two minikube binaries
 func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []*Binary) error {
 	durations, err := collectTimes(ctx, out, binaries)
@@ -85,11 +56,11 @@ func collectTimes(ctx context.Context, out io.Writer, binaries []*Binary) ([][]f
 	for r := 0; r < runs; r++ {
 		log.Printf("Executing run %d/%d...", r+1, runs)
 		for index, binary := range binaries {
-			duration, err := collectTimeMinikubeStart(ctx, out, binary)
+			result, err := collectTimeMinikubeStart(ctx, out, binary)
 			if err != nil {
 				return nil, errors.Wrapf(err, "timing run %d with %s", r, binary.path)
 			}
-			durations[index][r] = duration
+			durations[index][r] = result.totalTime()
 		}
 	}
 
@@ -106,13 +77,15 @@ func average(array []float64) float64 {
 
 // timeMinikubeStart returns the time it takes to execute `minikube start`
 // It deletes the VM after `minikube start`.
-func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (float64, error) {
+func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (*Result, error) {
 	deleteCmd := exec.CommandContext(ctx, binary.path, "delete")
 	defer func() {
 		if err := deleteCmd.Run(); err != nil {
 			log.Printf("error deleting minikube: %v", err)
 		}
 	}()
+
+	result := newResult()
 
 	startCmd := exec.CommandContext(ctx, binary.path, "start")
 	startCmd.Stderr = os.Stderr
@@ -122,13 +95,11 @@ func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (floa
 	scanner.Split(bufio.ScanBytes)
 
 	log.Printf("Running: %v...", startCmd.Args)
-	initialTime := time.Now()
 	if err := startCmd.Start(); err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	logTimes := time.Now()
-	logsToTimes := map[string]float64{}
 
 	lastLog := ""
 	currentLog := ""
@@ -149,17 +120,16 @@ func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (floa
 
 		timeTaken := time.Since(logTimes).Seconds()
 		logTimes = time.Now()
-		logsToTimes[lastLog] = timeTaken
+		result.addLogAndTime(lastLog, timeTaken)
 		log.Printf("%f: %s", timeTaken, lastLog)
 		lastLog = ""
 	}
 
 	if err := startCmd.Wait(); err != nil {
-		return 0, errors.Wrap(err, "waiting for minikube")
+		return nil, errors.Wrap(err, "waiting for minikube")
 	}
 
-	startDuration := time.Since(initialTime).Seconds()
-	return startDuration, nil
+	return result, nil
 }
 
 func startArgs(b *Binary) []string {
