@@ -82,7 +82,7 @@ func collectTimes(ctx context.Context, out io.Writer, binaries []*Binary) ([][]f
 	}
 
 	for r := 0; r < runs; r++ {
-		log.Printf("Executing run %d/%d...", r, runs)
+		log.Printf("Executing run %d/%d...", r+1, runs)
 		for index, binary := range binaries {
 			duration, err := collectTimeMinikubeStart(ctx, out, binary)
 			if err != nil {
