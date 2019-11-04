@@ -105,12 +105,19 @@ func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (floa
 	logTimes := time.Now()
 	logsToTimes := map[string]float64{}
 
+	lastLog := ""
+
 	for scanner.Scan() {
 		text := scanner.Text()
+		if lastLog == "" {
+			lastLog = text
+			continue
+		}
 		timeTaken := time.Since(logTimes).Seconds()
 		logTimes = time.Now()
-		logsToTimes[text] = timeTaken
-		log.Print(text)
+		logsToTimes[lastLog] = timeTaken
+		log.Printf("%f: %s", timeTaken, lastLog)
+		lastLog = text
 	}
 
 	start := time.Now()
