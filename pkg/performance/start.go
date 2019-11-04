@@ -122,6 +122,7 @@ func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (floa
 	scanner.Split(bufio.ScanBytes)
 
 	log.Printf("Running: %v...", startCmd.Args)
+	initialTime := time.Now()
 	if err := startCmd.Start(); err != nil {
 		return 0, err
 	}
@@ -153,12 +154,11 @@ func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (floa
 		lastLog = ""
 	}
 
-	start := time.Now()
 	if err := startCmd.Wait(); err != nil {
 		return 0, errors.Wrap(err, "waiting for minikube")
 	}
 
-	startDuration := time.Since(start).Seconds()
+	startDuration := time.Since(initialTime).Seconds()
 	return startDuration, nil
 }
 
