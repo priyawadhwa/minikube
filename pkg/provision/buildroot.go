@@ -382,6 +382,7 @@ func copyRemoteCerts(authOptions auth.Options, driver drivers.Driver) error {
 		if err != nil {
 			return errors.Wrapf(err, "error copying %s to %s", src, dst)
 		}
+		fmt.Println("copying remote certs")
 		if err := sshRunner.Copy(f); err != nil {
 			return errors.Wrapf(err, "transferring file to machine %v", f)
 		}

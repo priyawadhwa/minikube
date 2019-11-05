@@ -23,6 +23,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"time"
 
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
@@ -36,6 +37,7 @@ type CopyableFile interface {
 	GetTargetDir() string
 	GetTargetName() string
 	GetPermissions() string
+	GetModTime() time.Time
 }
 
 // BaseAsset is the base asset class
@@ -44,6 +46,7 @@ type BaseAsset struct {
 	TargetDir   string
 	TargetName  string
 	Permissions string
+	ModTime     time.Time
 }
 
 // GetAssetName returns asset name
@@ -66,6 +69,11 @@ func (b *BaseAsset) GetPermissions() string {
 	return b.Permissions
 }
 
+// GetModTime returns mod time
+func (b *BaseAsset) GetModTime() time.Time {
+	return b.ModTime
+}
+
 // FileAsset is an asset using a file
 type FileAsset struct {
 	BaseAsset
@@ -84,12 +92,17 @@ func NewFileAsset(src, targetDir, targetName, permissions string) (*FileAsset, e
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error opening file asset: %s", src)
 	}
+	fi, err := os.Stat(src)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Error stat file asset: %s", src)
+	}
 	return &FileAsset{
 		BaseAsset: BaseAsset{
 			AssetName:   src,
 			TargetDir:   targetDir,
 			TargetName:  targetName,
 			Permissions: permissions,
+			ModTime:     fi.ModTime(),
 		},
 		reader: f,
 	}, nil
