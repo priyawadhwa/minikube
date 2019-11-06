@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/olekukonko/tablewriter"
 )
@@ -136,13 +137,15 @@ func (d *DataStorage) summarizeTimesPerLog() {
 		t.Append(v)
 	}
 	fmt.Println("Averages Time Per Log")
+	fmt.Println("```")
 	t.Render() // Send output
+	fmt.Println("```")
 
 }
 
 func indexForLog(logs []string, log string) int {
 	for i, l := range logs {
-		if l == log {
+		if strings.Contains(log, l) {
 			return i
 		}
 	}
@@ -150,10 +153,7 @@ func indexForLog(logs []string, log string) int {
 }
 
 func (d *DataStorage) logs() []string {
-	for _, results := range d.Data {
-		return results[0].logs
-	}
-	return nil
+	return []string{"minikube v", "Creating kvm2", "Preparing Kubernetes", "Pulling images", "Launching Kubernetes", "Waiting for: apiserver"}
 }
 
 func (d *DataStorage) averageTimeForLog(binary *Binary) map[string]float64 {
