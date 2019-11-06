@@ -20,6 +20,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
+
+	"github.com/olekukonko/tablewriter"
 )
 
 type Result struct {
@@ -57,12 +60,14 @@ func (r *Result) timeForLog(log string) (bool, float64) {
 }
 
 type DataStorage struct {
-	Data map[*Binary][]*Result
+	Binaries []*Binary
+	Data     map[*Binary][]*Result
 }
 
 func NewDataStorage(binaries []*Binary) *DataStorage {
 	ds := &DataStorage{
-		Data: map[*Binary][]*Result{},
+		Binaries: binaries,
+		Data:     map[*Binary][]*Result{},
 	}
 	for _, b := range binaries {
 		ds.Data[b] = []*Result{}
@@ -89,6 +94,76 @@ func (d *DataStorage) summarizeData(out io.Writer) {
 	for binary, results := range d.Data {
 		fmt.Fprintf(out, "Average Runtime for %s: %f\n", binary.path, averageTimeForResults(results))
 	}
+
+	d.summarizeTimesPerLog()
+}
+func (d *DataStorage) summarizeTotalTime() {
+	
+}
+
+func (d *DataStorage) summarizeTimesPerLog() {
+	logs := d.logs()
+	binaries := d.Binaries
+
+	table := make([][]string, len(logs))
+	for i := range table {
+		table[i] = make([]string, len(binaries)+1)
+	}
+
+	for i, l := range logs {
+		table[i][0] = l
+	}
+
+	for i, b := range binaries {
+		averageTimeForLog := d.averageTimeForLog(b)
+		for log, time := range averageTimeForLog {
+			table[indexForLog(logs, log)][i+1] = fmt.Sprintf("%f", time)
+		}
+	}
+
+	t := tablewriter.NewWriter(os.Stdout)
+	t.SetHeader([]string{"Log", binaries[0].path, binaries[1].path})
+
+	for _, v := range table {
+		t.Append(v)
+	}
+	fmt.Println("Averages Time Per Log")
+	t.Render() // Send output
+
+}
+
+func indexForLog(logs []string, log string) int {
+	for i, l := range logs {
+		if l == log {
+			return i
+		}
+	}
+	return -1
+}
+
+func (d *DataStorage) logs() []string {
+	for _, results := range d.Data {
+		return results[0].logs
+	}
+	return nil
+}
+
+func (d *DataStorage) averageTimeForLog(binary *Binary) map[string]float64 {
+	logToTimings := map[string][]float64{}
+	for _, result := range d.Data[binary] {
+		for i, l := range result.logs {
+			if _, ok := logToTimings[l]; ok {
+				logToTimings[l] = append(logToTimings[l], result.times[i])
+				continue
+			}
+			logToTimings[l] = []float64{result.times[i]}
+		}
+	}
+	logToAverageTiming := map[string]float64{}
+	for log, timings := range logToTimings {
+		logToAverageTiming[log] = average(timings)
+	}
+	return logToAverageTiming
 }
 
 func averageTimeForResults(results []*Result) float64 {

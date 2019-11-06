@@ -52,8 +52,8 @@ func collectTimes(ctx context.Context, out io.Writer, binaries []*Binary) (*Data
 	}
 	dataStorage := NewDataStorage(binaries)
 
-	for r := 0; r < runs; r++ {
-		log.Printf("Executing run %d/%d...", r+1, runs)
+	for r := 1; r <= runs; r++ {
+		log.Printf("Executing run %d/%d...", r, runs)
 		for _, binary := range binaries {
 			result, err := collectTimeMinikubeStart(ctx, out, binary)
 			if err != nil {
@@ -119,7 +119,7 @@ func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (*Res
 
 		timeTaken := time.Since(logTimes).Seconds()
 		logTimes = time.Now()
-		result.addLogAndTime(lastLog, timeTaken)
+		result.addLogAndTime(strings.Trim(lastLog, "\n"), timeTaken)
 		log.Printf("%f: %s", timeTaken, lastLog)
 		lastLog = ""
 	}
