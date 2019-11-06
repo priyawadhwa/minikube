@@ -45,6 +45,7 @@ func NewBinary(b string) (*Binary, error) {
 	if !strings.HasPrefix(b, prPrefix) {
 		return &Binary{
 			path: b,
+			name: filepath.Base(b),
 		}, nil
 	}
 	return newBinaryFromPR(b)

@@ -85,16 +85,20 @@ func (d *DataStorage) addResult(b *Binary, result *Result) error {
 
 func (d *DataStorage) summarizeData(out io.Writer) {
 	for binary, results := range d.Data {
-		fmt.Fprintf(out, "All Times For %s: [", binary.path)
+		fmt.Fprintf(out, "All Times %s: [", binary.name)
 		for _, r := range results {
 			fmt.Fprintf(out, " %f", r.totalTime())
 		}
 		fmt.Fprintf(out, "]\n")
 	}
+	fmt.Println()
+	var averages []float64
 	for binary, results := range d.Data {
-		fmt.Fprintf(out, "Average Runtime for %s: %f\n", binary.path, averageTimeForResults(results))
+		avg := averageTimeForResults(results)
+		averages = append(averages, avg)
+		fmt.Fprintf(out, "Average %s: **%f**\n", binary.name, avg)
 	}
-
+	fmt.Println()
 	d.summarizeTimesPerLog()
 }
 func (d *DataStorage) summarizeTotalTime() {
@@ -126,7 +130,7 @@ func (d *DataStorage) summarizeTimesPerLog() {
 	}
 
 	t := tablewriter.NewWriter(os.Stdout)
-	t.SetHeader([]string{"Log", binaries[0].path, binaries[1].path})
+	t.SetHeader([]string{"Log", binaries[0].name, binaries[1].name})
 
 	for _, v := range table {
 		t.Append(v)
