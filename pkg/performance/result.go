@@ -98,7 +98,7 @@ func (d *DataStorage) summarizeData(out io.Writer) {
 	d.summarizeTimesPerLog()
 }
 func (d *DataStorage) summarizeTotalTime() {
-	
+
 }
 
 func (d *DataStorage) summarizeTimesPerLog() {
@@ -117,7 +117,11 @@ func (d *DataStorage) summarizeTimesPerLog() {
 	for i, b := range binaries {
 		averageTimeForLog := d.averageTimeForLog(b)
 		for log, time := range averageTimeForLog {
-			table[indexForLog(logs, log)][i+1] = fmt.Sprintf("%f", time)
+			index := indexForLog(logs, log)
+			if index == -1 {
+				continue
+			}
+			table[index][i+1] = fmt.Sprintf("%f", time)
 		}
 	}
 
