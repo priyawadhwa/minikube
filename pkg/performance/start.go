@@ -76,25 +76,19 @@ func average(array []float64) float64 {
 
 // timeMinikubeStart returns the time it takes to execute `minikube start`
 // It deletes the VM after `minikube start`.
-func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (*Result, error) {
-	deleteCmd := exec.CommandContext(ctx, binary.path, "delete")
-	defer func() {
-		if err := deleteCmd.Run(); err != nil {
-			log.Printf("error deleting minikube: %v", err)
-		}
-	}()
 
+
+func timeCommand(ctx context.Context, out io.Writer, cmd *exec.Cmd) (*Result, error) {
 	result := newResult()
 
-	startCmd := exec.CommandContext(ctx, binary.path, "start")
-	startCmd.Stderr = os.Stderr
+	cmd.Stderr = os.Stderr
 
-	stdout, _ := startCmd.StdoutPipe()
+	stdout, _ := cmd.StdoutPipe()
 	scanner := bufio.NewScanner(stdout)
 	scanner.Split(bufio.ScanBytes)
 
-	log.Printf("Running: %v...", startCmd.Args)
-	if err := startCmd.Start(); err != nil {
+	log.Printf("Running: %v...", cmd.Args)
+	if err := cmd.Start(); err != nil {
 		return nil, err
 	}
 
@@ -124,12 +118,37 @@ func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (*Res
 		lastLog = ""
 	}
 
-	if err := startCmd.Wait(); err != nil {
+	if err := cmd.Wait(); err != nil {
 		return nil, errors.Wrap(err, "waiting for minikube")
 	}
 
 	return result, nil
 }
+
+func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (*Result, error) {
+	deleteCmd := exec.CommandContext(ctx, binary.path, "delete")
+	defer func() {
+		if err := deleteCmd.Run(); err != nil {
+			log.Printf("error deleting minikube: %v", err)
+		}
+	}()
+
+	startCmd := exec.CommandContext(ctx, binary.path, "start")
+	return timeCommand(ctx, out, startCmd)
+}
+
+func timeMinikubeRestart(ctx context.Context, out io.Writer, binary *Binary) (*Result, error) {
+	deleteCmd := exec.CommandContext(ctx, binary.path, "stop")
+	defer func() {
+		if err := deleteCmd.Run(); err != nil {
+			log.Printf("error deleting minikube: %v", err)
+		}
+	}()
+
+	startCmd := exec.CommandContext(ctx, binary.path, "start")
+	return timeCommand(ctx, out, startCmd)
+}
+
 
 func startArgs(b *Binary) []string {
 	args := []string{"start"}
