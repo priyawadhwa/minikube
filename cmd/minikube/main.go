@@ -52,10 +52,6 @@ var (
 )
 
 func main() {
-
-	// Run go tool pprof -http=:8080 cpu.pprof
-	defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
-
 	bridgeLogMessages()
 	defer glog.Flush()
 

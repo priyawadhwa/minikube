@@ -92,17 +92,12 @@ func NewFileAsset(src, targetDir, targetName, permissions string) (*FileAsset, e
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error opening file asset: %s", src)
 	}
-	fi, err := os.Stat(src)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Error stat file asset: %s", src)
-	}
 	return &FileAsset{
 		BaseAsset: BaseAsset{
 			AssetName:   src,
 			TargetDir:   targetDir,
 			TargetName:  targetName,
 			Permissions: permissions,
-			ModTime:     fi.ModTime(),
 		},
 		reader: f,
 	}, nil
@@ -115,6 +110,15 @@ func (f *FileAsset) GetLength() (flen int) {
 		return 0
 	}
 	return int(fi.Size())
+}
+
+// GetModTime returns modification timeof the file
+func (f *FileAsset) GetModTime() time.Time {
+	fi, err := os.Stat(f.AssetName)
+	if err != nil {
+		return time.Time{}
+	}
+	return fi.ModTime()
 }
 
 func (f *FileAsset) Read(p []byte) (int, error) {
