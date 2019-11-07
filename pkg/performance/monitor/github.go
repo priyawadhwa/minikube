@@ -56,18 +56,17 @@ func (g *Client) CommentOnPR(pr int, message string) error {
 
 // ListOpenPRsWithLabel returns all open PRs with the specified label
 func (g *Client) ListOpenPRsWithLabel(label string) ([]int, error) {
-	return []int{5694}, nil
-	// validPrs := []int{}
-	// prs, _, err := g.Client.PullRequests.List(g.ctx, g.owner, g.repo, &github.PullRequestListOptions{})
-	// if err != nil {
-	// 	return nil, errors.Wrap(err, "listing pull requests")
-	// }
-	// for _, pr := range prs {
-	// 	if prContainsLabel(pr.Labels, "ok-to-test") {
-	// 		validPrs = append(validPrs, pr.GetNumber())
-	// 	}
-	// }
-	// return validPrs, nil
+	validPrs := []int{}
+	prs, _, err := g.Client.PullRequests.List(g.ctx, g.owner, g.repo, &github.PullRequestListOptions{})
+	if err != nil {
+		return nil, errors.Wrap(err, "listing pull requests")
+	}
+	for _, pr := range prs {
+		if prContainsLabel(pr.Labels, "ok-to-test") {
+			validPrs = append(validPrs, pr.GetNumber())
+		}
+	}
+	return validPrs, nil
 }
 
 func prContainsLabel(labels []*github.Label, label string) bool {
