@@ -51,6 +51,11 @@ func buildMinikubeAtHead(ctx context.Context) error {
 	if err := runCmd(makeMinikube); err != nil {
 		return errors.Wrap(err, "building minikube via make")
 	}
+
+	checkout := exec.CommandContext(ctx, "git", "checkout", "origin/master", ".")
+	if err := runCmd(checkout); err != nil {
+		return errors.Wrap(err, "checkout to upstream/master")
+	}
 	return nil
 }
 
