@@ -17,12 +17,13 @@ limitations under the License.
 package performance
 
 import (
+	"bufio"
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -36,33 +37,33 @@ var (
 
 // CompareMinikubeStart compares the time to run `minikube start` between two minikube binaries
 func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []*Binary) error {
-	durations, err := collectTimes(ctx, out, binaries)
+	ds, err := collectTimes(ctx, out, binaries)
 	if err != nil {
 		return err
 	}
-
-	fmt.Fprintf(os.Stdout, "Old binary: %v\nNew binary: %v\nAverage Old: %f\nAverage New: %f\n", durations[0], durations[1], average(durations[0]), average(durations[1]))
+	ds.summarizeData(os.Stdout)
 	return nil
 }
 
-func collectTimes(ctx context.Context, out io.Writer, binaries []*Binary) ([][]float64, error) {
+func collectTimes(ctx context.Context, out io.Writer, binaries []*Binary) (*DataStorage, error) {
 	durations := make([][]float64, len(binaries))
 	for i := range durations {
 		durations[i] = make([]float64, runs)
 	}
+	dataStorage := NewDataStorage(binaries)
 
-	for r := 0; r < runs; r++ {
+	for r := 1; r <= runs; r++ {
 		log.Printf("Executing run %d/%d...", r, runs)
-		for index, binary := range binaries {
-			duration, err := collectTimeMinikubeStart(ctx, out, binary)
+		for _, binary := range binaries {
+			result, err := collectTimeMinikubeStart(ctx, out, binary)
 			if err != nil {
 				return nil, errors.Wrapf(err, "timing run %d with %s", r, binary.path)
 			}
-			durations[index][r] = duration
+			dataStorage.addResult(binary, result)
 		}
 	}
 
-	return durations, nil
+	return dataStorage, nil
 }
 
 func average(array []float64) float64 {
@@ -75,11 +76,56 @@ func average(array []float64) float64 {
 
 // timeMinikubeStart returns the time it takes to execute `minikube start`
 // It deletes the VM after `minikube start`.
-func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (float64, error) {
-	startCmd := exec.CommandContext(ctx, binary.path, "start")
-	startCmd.Stdout = os.Stderr
-	startCmd.Stderr = os.Stderr
 
+
+func timeCommand(ctx context.Context, out io.Writer, cmd *exec.Cmd) (*Result, error) {
+	result := newResult()
+
+	cmd.Stderr = os.Stderr
+
+	stdout, _ := cmd.StdoutPipe()
+	scanner := bufio.NewScanner(stdout)
+	scanner.Split(bufio.ScanBytes)
+
+	log.Printf("Running: %v...", cmd.Args)
+	if err := cmd.Start(); err != nil {
+		return nil, err
+	}
+
+	logTimes := time.Now()
+
+	lastLog := ""
+	currentLog := ""
+
+	for scanner.Scan() {
+		text := scanner.Text()
+		currentLog = currentLog + text
+
+		if strings.Contains(currentLog, "\n") {
+			lastLog = currentLog
+			currentLog = ""
+			continue
+		}
+
+		if !strings.Contains(lastLog, "\n") {
+			continue
+		}
+
+		timeTaken := time.Since(logTimes).Seconds()
+		logTimes = time.Now()
+		result.addLogAndTime(strings.Trim(lastLog, "\n"), timeTaken)
+		log.Printf("%f: %s", timeTaken, lastLog)
+		lastLog = ""
+	}
+
+	if err := cmd.Wait(); err != nil {
+		return nil, errors.Wrap(err, "waiting for minikube")
+	}
+
+	return result, nil
+}
+
+func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (*Result, error) {
 	deleteCmd := exec.CommandContext(ctx, binary.path, "delete")
 	defer func() {
 		if err := deleteCmd.Run(); err != nil {
@@ -87,15 +133,22 @@ func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (floa
 		}
 	}()
 
-	log.Printf("Running: %v...", startCmd.Args)
-	start := time.Now()
-	if err := startCmd.Run(); err != nil {
-		return 0, errors.Wrap(err, "starting minikube")
-	}
-
-	startDuration := time.Since(start).Seconds()
-	return startDuration, nil
+	startCmd := exec.CommandContext(ctx, binary.path, "start")
+	return timeCommand(ctx, out, startCmd)
 }
+
+func timeMinikubeRestart(ctx context.Context, out io.Writer, binary *Binary) (*Result, error) {
+	deleteCmd := exec.CommandContext(ctx, binary.path, "stop")
+	defer func() {
+		if err := deleteCmd.Run(); err != nil {
+			log.Printf("error deleting minikube: %v", err)
+		}
+	}()
+
+	startCmd := exec.CommandContext(ctx, binary.path, "start")
+	return timeCommand(ctx, out, startCmd)
+}
+
 
 func startArgs(b *Binary) []string {
 	args := []string{"start"}

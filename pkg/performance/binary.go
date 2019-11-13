@@ -30,6 +30,7 @@ import (
 )
 
 type Binary struct {
+	name   string
 	path   string
 	isoURL string
 	pr     int
@@ -44,9 +45,14 @@ func NewBinary(b string) (*Binary, error) {
 	if !strings.HasPrefix(b, prPrefix) {
 		return &Binary{
 			path: b,
+			name: filepath.Base(b),
 		}, nil
 	}
 	return newBinaryFromPR(b)
+}
+
+func (b *Binary) SetName(name string) {
+	b.name = name
 }
 
 func newBinaryFromPR(pr string) (*Binary, error) {
@@ -61,6 +67,7 @@ func newBinaryFromPR(pr string) (*Binary, error) {
 		path:   localMinikubePath(i),
 		isoURL: remoteMinikubeIsoURL(i),
 		pr:     i,
+		name:   fmt.Sprintf("Minikube (PR %d)", i),
 	}
 
 	if err := downloadBinary(remoteMinikubeURL(i), b.path); err != nil {
