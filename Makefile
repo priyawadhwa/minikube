@@ -596,7 +596,12 @@ compare: out/mkcmp out/minikube
 	mv out/minikube out/master.minikube
 	git checkout $(CURRENT_GIT_BRANCH)
 	out/mkcmp out/master.minikube out/$(CURRENT_GIT_BRANCH).minikube
-	
+
+.PHONY: upload-gcs
+upload-gcs: out/mkcmp out/performance-monitor
+	gsutil cp out/mkcmp out/performance-monitor gs://priya-minikube-builds
+	gsutil acl ch -u AllUsers:R gs://priya-minikube-builds/**
+
 .PHONY: help
 help:
 	@printf "\033[1mAvailable targets for minikube ${VERSION}\033[21m\n"
