@@ -153,7 +153,7 @@ func indexForLog(logs []string, log string) int {
 }
 
 func (d *DataStorage) logs() []string {
-	return []string{"minikube v", "Creating kvm2", "Preparing Kubernetes", "Pulling images", "Launching Kubernetes", "Waiting for: apiserver"}
+	return []string{"minikube v", "Creating kvm2", "Preparing Kubernetes", "Pulling images", "Launching Kubernetes", "Waiting for cluster"}
 }
 
 func (d *DataStorage) averageTimeForLog(binary *Binary) map[string]float64 {
