@@ -121,6 +121,8 @@ const (
 	minimumCPUS           = 2
 	minimumDiskSize       = "2000mb"
 	autoUpdate            = "auto-update-drivers"
+	upToVMCreation        = "up-to-vm-creation"
+	upToKubeadm           = "up-to-kubeadm"
 )
 
 var (
@@ -174,6 +176,9 @@ func initMinikubeFlags() {
 	startCmd.Flags().Duration(waitTimeout, 6*time.Minute, "max time to wait per Kubernetes core services to be healthy.")
 	startCmd.Flags().Bool(nativeSSH, true, "Use native Golang SSH client (default true). Set to 'false' to use the command line 'ssh' command when accessing the docker machine. Useful for the machine drivers when they will not start with 'Waiting for SSH'.")
 	startCmd.Flags().Bool(autoUpdate, true, "If set, automatically updates drivers to the latest version. Defaults to true.")
+	startCmd.Flags().Bool(upToVMCreation, false, "If set, only start the vm.")
+	startCmd.Flags().Bool(upToKubeadm, false, "If set, only start the VM and install kubeadm.")
+
 }
 
 // initKubernetesFlags inits the commandline flags for kubernetes related options
@@ -323,6 +328,7 @@ func runStart(cmd *cobra.Command, args []string) {
 	}
 
 	// Now that the ISO is downloaded, pull images in the background while the VM boots.
+
 	var cacheGroup errgroup.Group
 	beginCacheImages(&cacheGroup, config.KubernetesConfig.ImageRepository, k8sVersion)
 
@@ -336,6 +342,9 @@ func runStart(cmd *cobra.Command, args []string) {
 	handleDownloadOnly(&cacheGroup, k8sVersion)
 	mRunner, preExists, machineAPI, host := startMachine(&config)
 	defer machineAPI.Close()
+	if viper.GetBool(upToVMCreation) {
+		return
+	}
 	// configure the runtime (docker, containerd, crio)
 	cr := configureRuntimes(mRunner, driverName, config.KubernetesConfig)
 	showVersionInfo(k8sVersion, cr)
@@ -349,6 +358,10 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	// setup kubeadm (must come after setupKubeconfig)
 	bs := setupKubeAdm(machineAPI, config.KubernetesConfig)
+
+	if viper.GetBool(upToKubeadm) {
+		return
+	}
 
 	// pull images or restart cluster
 	bootstrapCluster(bs, cr, mRunner, config.KubernetesConfig, preExists, isUpgrade)
