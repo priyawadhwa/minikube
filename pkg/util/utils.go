@@ -109,7 +109,7 @@ func GetBinaryDownloadURL(version, platform string) string {
 
 // IsDirectory checks if path is a directory
 func IsDirectory(path string) (bool, error) {
-	fileInfo, err := os.Stat(path)
+	fileInfo, err := os.Lstat(path)
 	if err != nil {
 		return false, errors.Wrapf(err, "Error calling os.Stat on file %s", path)
 	}
