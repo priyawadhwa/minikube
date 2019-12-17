@@ -21,6 +21,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
+	"k8s.io/minikube/pkg/minikube/addons"
 	"k8s.io/minikube/pkg/minikube/config"
 	"k8s.io/minikube/pkg/minikube/localpath"
 )
@@ -145,13 +146,13 @@ var settings = []Setting{
 		name:        "dashboard",
 		set:         SetBool,
 		validations: []setFn{IsValidAddon},
-		callbacks:   []setFn{EnableOrDisableAddon},
+		callbacks:   []setFn{addons.EnableOrDisableAddon},
 	},
 	{
 		name:        "addon-manager",
 		set:         SetBool,
 		validations: []setFn{IsValidAddon},
-		callbacks:   []setFn{EnableOrDisableAddon},
+		callbacks:   []setFn{addons.EnableOrDisableAddon},
 	},
 	{
 		name:        "default-storageclass",
@@ -163,43 +164,43 @@ var settings = []Setting{
 		name:        "efk",
 		set:         SetBool,
 		validations: []setFn{IsValidAddon},
-		callbacks:   []setFn{EnableOrDisableAddon},
+		callbacks:   []setFn{addons.EnableOrDisableAddon},
 	},
 	{
 		name:        "ingress",
 		set:         SetBool,
 		validations: []setFn{IsValidAddon},
-		callbacks:   []setFn{EnableOrDisableAddon},
+		callbacks:   []setFn{addons.EnableOrDisableAddon},
 	},
 	{
 		name:        "insecure-registry",
 		set:         SetBool,
 		validations: []setFn{IsValidAddon},
-		callbacks:   []setFn{EnableOrDisableAddon},
+		callbacks:   []setFn{addons.EnableOrDisableAddon},
 	},
 	{
 		name:        "registry",
 		set:         SetBool,
 		validations: []setFn{IsValidAddon},
-		callbacks:   []setFn{EnableOrDisableAddon},
+		callbacks:   []setFn{addons.EnableOrDisableAddon},
 	},
 	{
 		name:        "registry-creds",
 		set:         SetBool,
 		validations: []setFn{IsValidAddon},
-		callbacks:   []setFn{EnableOrDisableAddon},
+		callbacks:   []setFn{addons.EnableOrDisableAddon},
 	},
 	{
 		name:        "freshpod",
 		set:         SetBool,
 		validations: []setFn{IsValidAddon},
-		callbacks:   []setFn{EnableOrDisableAddon},
+		callbacks:   []setFn{addons.EnableOrDisableAddon},
 	},
 	{
 		name:        "storage-provisioner",
 		set:         SetBool,
 		validations: []setFn{IsValidAddon},
-		callbacks:   []setFn{EnableOrDisableAddon},
+		callbacks:   []setFn{addons.EnableOrDisableAddon},
 	},
 	{
 		name:        "storage-provisioner-gluster",
@@ -211,19 +212,19 @@ var settings = []Setting{
 		name:        "metrics-server",
 		set:         SetBool,
 		validations: []setFn{IsValidAddon},
-		callbacks:   []setFn{EnableOrDisableAddon},
+		callbacks:   []setFn{addons.EnableOrDisableAddon},
 	},
 	{
 		name:        "nvidia-driver-installer",
 		set:         SetBool,
 		validations: []setFn{IsValidAddon},
-		callbacks:   []setFn{EnableOrDisableAddon},
+		callbacks:   []setFn{addons.EnableOrDisableAddon},
 	},
 	{
 		name:        "nvidia-gpu-device-plugin",
 		set:         SetBool,
 		validations: []setFn{IsValidAddon},
-		callbacks:   []setFn{EnableOrDisableAddon},
+		callbacks:   []setFn{addons.EnableOrDisableAddon},
 	},
 	{
 		name:        "logviewer",
@@ -234,19 +235,19 @@ var settings = []Setting{
 		name:        "gvisor",
 		set:         SetBool,
 		validations: []setFn{IsValidAddon, IsContainerdRuntime},
-		callbacks:   []setFn{EnableOrDisableAddon},
+		callbacks:   []setFn{addons.EnableOrDisableAddon},
 	},
 	{
 		name:        "helm-tiller",
 		set:         SetBool,
 		validations: []setFn{IsValidAddon},
-		callbacks:   []setFn{EnableOrDisableAddon},
+		callbacks:   []setFn{addons.EnableOrDisableAddon},
 	},
 	{
 		name:        "ingress-dns",
 		set:         SetBool,
 		validations: []setFn{IsValidAddon},
-		callbacks:   []setFn{EnableOrDisableAddon},
+		callbacks:   []setFn{addons.EnableOrDisableAddon},
 	},
 	{
 		name: "hyperv-virtual-switch",
