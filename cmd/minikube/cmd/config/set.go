@@ -78,3 +78,12 @@ func Set(name string, value string) error {
 	// Write the value
 	return pkgConfig.WriteConfig(localpath.ConfigFile, config)
 }
+
+func SetPerProfile(name, value string, profiles []string) error {
+	if profiles == nil {
+		profiles = []string{"minikube"}
+	}
+	for _, p := range profiles {
+
+	}
+}

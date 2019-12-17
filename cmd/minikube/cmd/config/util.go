@@ -101,7 +101,7 @@ func SetBool(m config.MinikubeConfig, name string, val string) error {
 }
 
 // EnableOrDisableStorageClasses enables or disables storage classes
-func EnableOrDisableStorageClasses(name, val string) error {
+func EnableOrDisableStorageClasses(name, val, profile string) error {
 	enable, err := strconv.ParseBool(val)
 	if err != nil {
 		return errors.Wrap(err, "Error parsing boolean")
@@ -130,7 +130,7 @@ func EnableOrDisableStorageClasses(name, val string) error {
 		}
 	}
 
-	return addons.EnableOrDisableAddon(name, val)
+	return addons.EnableOrDisableAddon(name, val, profile)
 }
 
 // ErrValidateProfile Error to validate profile

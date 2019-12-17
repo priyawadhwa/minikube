@@ -32,7 +32,7 @@ import (
 )
 
 // EnableOrDisableAddon updates addon status executing any commands necessary
-func EnableOrDisableAddon(name string, val string) error {
+func EnableOrDisableAddon(name string, val string, profile string) error {
 	enable, err := strconv.ParseBool(val)
 	if err != nil {
 		return errors.Wrapf(err, "parsing bool: %s", name)
