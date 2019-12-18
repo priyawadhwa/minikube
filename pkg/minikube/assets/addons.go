@@ -55,7 +55,7 @@ func (a *Addon) Name() string {
 }
 
 // IsEnabled checks if an Addon is enabled
-func (a *Addon) IsEnabled() (bool, error) {
+func (a *Addon) IsEnabled(profile string) (bool, error) {
 	addonStatusText, err := config.Get(a.addonName)
 	if err == nil {
 		addonStatus, err := strconv.ParseBool(addonStatusText)

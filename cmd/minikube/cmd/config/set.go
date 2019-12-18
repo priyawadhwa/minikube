@@ -18,6 +18,7 @@ package config
 
 import (
 	"github.com/spf13/cobra"
+	"k8s.io/minikube/pkg/minikube/config"
 	pkgConfig "k8s.io/minikube/pkg/minikube/config"
 	"k8s.io/minikube/pkg/minikube/exit"
 	"k8s.io/minikube/pkg/minikube/localpath"
@@ -79,11 +80,37 @@ func Set(name string, value string) error {
 	return pkgConfig.WriteConfig(localpath.ConfigFile, config)
 }
 
-func SetPerProfile(name, value string, profiles []string) error {
-	if profiles == nil {
-		profiles = []string{"minikube"}
+func SetPerProfile(name, value string, profile string) error {
+	if profile == "" {
+		profile = "minikube"
 	}
-	for _, p := range profiles {
+	s, err := findSetting(name)
+	if err != nil {
+		return err
+	}
+	// Validate the new value
+	if err := runPerProfile(name, value, profile, s.validationsPerProfile); err != nil {
+		return err
+	}
 
+	// Set the value
+	c, err := pkgConfig.ReadConfig(config.ProfileFilePath(profile))
+	if err != nil {
+		return err
 	}
+
+	if err := s.set(c, name, value); err != nil {
+		return err
+	}
+
+	// Run any callbacks for this property
+	if err := runPerProfile(name, value, profile, s.callbacksPerProfile); err != nil {
+		return err
+	}
+
+	// Write the value
+	if err := pkgConfig.WriteConfig(config.ProfileFilePath(profile), c); err != nil {
+		return err
+	}
+	return nil
 }

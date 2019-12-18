@@ -40,7 +40,7 @@ func EnableOrDisableAddon(name string, val string, profile string) error {
 	addon := assets.Addons[name]
 
 	// check addon status before enabling/disabling it
-	alreadySet, err := isAddonAlreadySet(addon, enable)
+	alreadySet, err := isAddonAlreadySet(addon, profile, enable)
 	if err != nil {
 		out.ErrT(out.Conflict, "{{.error}}", out.V{"error": err})
 		return err
@@ -82,8 +82,8 @@ func EnableOrDisableAddon(name string, val string, profile string) error {
 	return enableOrDisableAddonInternal(addon, cmd, data, enable)
 }
 
-func isAddonAlreadySet(addon *assets.Addon, enable bool) (bool, error) {
-	addonStatus, err := addon.IsEnabled()
+func isAddonAlreadySet(addon *assets.Addon, profile string, enable bool) (bool, error) {
+	addonStatus, err := addon.IsEnabled(profile)
 
 	if err != nil {
 		return false, errors.Wrap(err, "get the addon status")

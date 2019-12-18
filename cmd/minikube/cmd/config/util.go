@@ -46,6 +46,21 @@ func run(name string, value string, fns []setFn) error {
 	return nil
 }
 
+// Runs all the validation or callback functions and collects errors for a specific profile
+func runPerProfile(name string, value string, profile string, fns []setFnPerProfile) error {
+	var errors []error
+	for _, fn := range fns {
+		err := fn(name, value, profile)
+		if err != nil {
+			errors = append(errors, err)
+		}
+	}
+	if len(errors) > 0 {
+		return fmt.Errorf("%v", errors)
+	}
+	return nil
+}
+
 func findSetting(name string) (Setting, error) {
 	for _, s := range settings {
 		if name == s.name {

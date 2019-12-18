@@ -30,25 +30,17 @@ import (
 const Bootstrapper = "bootstrapper"
 
 type setFn func(string, string) error
-
 type setFnPerProfile func(string, string, string) error
 
 // Setting represents a setting
 type Setting struct {
-	name        string
-	set         func(config.MinikubeConfig, string, string) error
-	setMap      func(config.MinikubeConfig, string, map[string]interface{}) error
-	validations []setFn
-	callbacks   []setFn
-}
-
-// SettingPerProfile represents per-profile settings
-type SettingPerProfile struct {
-	name        string
-	set         func(config.MinikubeConfig, string, string) error
-	setMap      func(config.MinikubeConfig, string, map[string]interface{}) error
-	validations []setFnPerProfile
-	callbacks   []setFnPerProfile
+	name                  string
+	set                   func(config.MinikubeConfig, string, string) error
+	setMap                func(config.MinikubeConfig, string, map[string]interface{}) error
+	validations           []setFn
+	callbacks             []setFn
+	validationsPerProfile []setFnPerProfile
+	callbacksPerProfile   []setFnPerProfile
 }
 
 // These are all the settings that are configurable
@@ -158,6 +150,107 @@ var settings = []Setting{
 		set:  SetString,
 	},
 	{
+		name:                  "dashboard",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+		callbacksPerProfile:   []setFnPerProfile{addons.EnableOrDisableAddon},
+	},
+	{
+		name:                  "addon-manager",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+		callbacksPerProfile:   []setFnPerProfile{addons.EnableOrDisableAddon},
+	},
+	{
+		name:                  "default-storageclass",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+		callbacksPerProfile:   []setFnPerProfile{EnableOrDisableStorageClasses},
+	},
+	{
+		name:                  "efk",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+		callbacksPerProfile:   []setFnPerProfile{addons.EnableOrDisableAddon},
+	},
+	{
+		name:                  "ingress",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+		callbacksPerProfile:   []setFnPerProfile{addons.EnableOrDisableAddon},
+	},
+	{
+		name:                  "registry",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+		callbacksPerProfile:   []setFnPerProfile{addons.EnableOrDisableAddon},
+	},
+	{
+		name:                  "registry-creds",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+		callbacksPerProfile:   []setFnPerProfile{addons.EnableOrDisableAddon},
+	},
+	{
+		name:                  "freshpod",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+		callbacksPerProfile:   []setFnPerProfile{addons.EnableOrDisableAddon},
+	},
+	{
+		name:                  "storage-provisioner",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+		callbacksPerProfile:   []setFnPerProfile{addons.EnableOrDisableAddon},
+	},
+	{
+		name:                  "storage-provisioner-gluster",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+		callbacksPerProfile:   []setFnPerProfile{EnableOrDisableStorageClasses},
+	},
+	{
+		name:                  "metrics-server",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+		callbacksPerProfile:   []setFnPerProfile{addons.EnableOrDisableAddon},
+	},
+	{
+		name:                  "nvidia-driver-installer",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+		callbacksPerProfile:   []setFnPerProfile{addons.EnableOrDisableAddon},
+	},
+	{
+		name:                  "nvidia-gpu-device-plugin",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+		callbacksPerProfile:   []setFnPerProfile{addons.EnableOrDisableAddon},
+	},
+	{
+		name:                  "logviewer",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+	},
+	{
+		name:                  "gvisor",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon, IsContainerdRuntime},
+		callbacksPerProfile:   []setFnPerProfile{addons.EnableOrDisableAddon},
+	},
+	{
+		name:                  "helm-tiller",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+		callbacksPerProfile:   []setFnPerProfile{addons.EnableOrDisableAddon},
+	},
+	{
+		name:                  "ingress-dns",
+		set:                   SetBool,
+		validationsPerProfile: []setFnPerProfile{IsValidAddon},
+		callbacksPerProfile:   []setFnPerProfile{addons.EnableOrDisableAddon},
+	},
+	{
 		name: "hyperv-virtual-switch",
 		set:  SetString,
 	},
@@ -177,110 +270,6 @@ var settings = []Setting{
 	{
 		name: "native-ssh",
 		set:  SetBool,
-	},
-}
-
-var settingsPerProfile = []SettingPerProfile{
-	{
-		name:        "dashboard",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-		callbacks:   []setFnPerProfile{addons.EnableOrDisableAddon},
-	},
-	{
-		name:        "addon-manager",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-		callbacks:   []setFnPerProfile{addons.EnableOrDisableAddon},
-	},
-	{
-		name:        "default-storageclass",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-		callbacks:   []setFnPerProfile{EnableOrDisableStorageClasses},
-	},
-	{
-		name:        "efk",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-		callbacks:   []setFnPerProfile{addons.EnableOrDisableAddon},
-	},
-	{
-		name:        "ingress",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-		callbacks:   []setFnPerProfile{addons.EnableOrDisableAddon},
-	},
-	{
-		name:        "gvisor",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon, IsContainerdRuntime},
-		callbacks:   []setFnPerProfile{addons.EnableOrDisableAddon},
-	},
-	{
-		name:        "helm-tiller",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-		callbacks:   []setFnPerProfile{addons.EnableOrDisableAddon},
-	},
-	{
-		name:        "ingress-dns",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-		callbacks:   []setFnPerProfile{addons.EnableOrDisableAddon},
-	},
-	{
-		name:        "metrics-server",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-		callbacks:   []setFnPerProfile{addons.EnableOrDisableAddon},
-	},
-	{
-		name:        "nvidia-driver-installer",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-		callbacks:   []setFnPerProfile{addons.EnableOrDisableAddon},
-	},
-	{
-		name:        "nvidia-gpu-device-plugin",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-		callbacks:   []setFnPerProfile{addons.EnableOrDisableAddon},
-	},
-	{
-		name:        "logviewer",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-	},
-	{
-		name:        "storage-provisioner",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-		callbacks:   []setFnPerProfile{addons.EnableOrDisableAddon},
-	},
-	{
-		name:        "storage-provisioner-gluster",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-		callbacks:   []setFnPerProfile{EnableOrDisableStorageClasses},
-	},
-	{
-		name:        "registry",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-		callbacks:   []setFnPerProfile{addons.EnableOrDisableAddon},
-	},
-	{
-		name:        "registry-creds",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-		callbacks:   []setFnPerProfile{addons.EnableOrDisableAddon},
-	},
-	{
-		name:        "freshpod",
-		set:         SetBool,
-		validations: []setFnPerProfile{IsValidAddon},
-		callbacks:   []setFnPerProfile{addons.EnableOrDisableAddon},
 	},
 }
 
