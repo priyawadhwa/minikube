@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 
@@ -159,6 +160,7 @@ func indexForLog(logs []string, log string) int {
 func (d *DataStorage) logs() ([]string, error) {
 	contents, err := ioutil.ReadFile("logs.txt")
 	if err != nil {
+		log.Printf("error reading logs.txt file: %v", err)
 		return nil, err
 	}
 	logs := strings.Split(string(contents), "\n")
