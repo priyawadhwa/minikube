@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
 
@@ -84,7 +85,7 @@ func (d *DataStorage) addResult(b *Binary, result *Result) error {
 	return errors.New("unknown binary")
 }
 
-func (d *DataStorage) summarizeData(out io.Writer) {
+func (d *DataStorage) summarizeData(out io.Writer) error {
 	for binary, results := range d.Data {
 		fmt.Fprintf(out, "All Times %s: [", binary.name)
 		for _, r := range results {
@@ -100,14 +101,17 @@ func (d *DataStorage) summarizeData(out io.Writer) {
 		fmt.Fprintf(out, "Average %s: **%f**\n", binary.name, avg)
 	}
 	fmt.Println()
-	d.summarizeTimesPerLog()
+	return d.summarizeTimesPerLog()
 }
 func (d *DataStorage) summarizeTotalTime() {
 
 }
 
-func (d *DataStorage) summarizeTimesPerLog() {
-	logs := d.logs()
+func (d *DataStorage) summarizeTimesPerLog() error {
+	logs, err := d.logs()
+	if err != nil {
+		return err
+	}
 	binaries := d.Binaries
 
 	table := make([][]string, len(logs))
@@ -140,7 +144,7 @@ func (d *DataStorage) summarizeTimesPerLog() {
 	fmt.Println("```")
 	t.Render() // Send output
 	fmt.Println("```")
-
+	return nil
 }
 
 func indexForLog(logs []string, log string) int {
@@ -152,8 +156,14 @@ func indexForLog(logs []string, log string) int {
 	return -1
 }
 
-func (d *DataStorage) logs() []string {
-	return []string{"minikube v", "Creating kvm2", "Preparing Kubernetes", "Pulling images", "Launching Kubernetes", "Waiting for cluster"}
+func (d *DataStorage) logs() ([]string, error) {
+	contents, err := ioutil.ReadFile("logs.txt")
+	if err != nil {
+		return nil, err
+	}
+	logs := strings.Split(string(contents), "\n")
+	return logs, nil
+	// return []string{"minikube v", "Creating kvm2", "Preparing Kubernetes", "Pulling images", "Launching Kubernetes", "Waiting for cluster"}
 }
 
 func (d *DataStorage) averageTimeForLog(binary *Binary) map[string]float64 {

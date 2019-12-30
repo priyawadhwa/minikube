@@ -41,8 +41,7 @@ func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []*Binary
 	if err != nil {
 		return err
 	}
-	ds.summarizeData(os.Stdout)
-	return nil
+	return ds.summarizeData(os.Stdout)
 }
 
 func collectTimes(ctx context.Context, out io.Writer, binaries []*Binary) (*DataStorage, error) {
@@ -76,7 +75,6 @@ func average(array []float64) float64 {
 
 // timeMinikubeStart returns the time it takes to execute `minikube start`
 // It deletes the VM after `minikube start`.
-
 
 func timeCommand(ctx context.Context, out io.Writer, cmd *exec.Cmd) (*Result, error) {
 	result := newResult()
@@ -148,7 +146,6 @@ func timeMinikubeRestart(ctx context.Context, out io.Writer, binary *Binary) (*R
 	startCmd := exec.CommandContext(ctx, binary.path, "start")
 	return timeCommand(ctx, out, startCmd)
 }
-
 
 func startArgs(b *Binary) []string {
 	args := []string{"start"}

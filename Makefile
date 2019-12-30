@@ -582,11 +582,11 @@ site: site/themes/docsy/assets/vendor/bootstrap/package.js out/hugo/hugo ## Serv
 
 .PHONY: out/mkcmp
 out/mkcmp:
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o $@ cmd/performance/main.go
+	GOOS=linux GOARCH=$(GOARCH) go build -o $@ cmd/performance/main.go
 
 .PHONY: out/performance-monitor
  out/performance-monitor:
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o $@ cmd/performance/monitor/main.go
+	GOOS=linux GOARCH=$(GOARCH) go build -o $@ cmd/performance/monitor/main.go
 
 .PHONY: compare
 compare: out/mkcmp out/minikube
