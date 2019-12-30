@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/pkg/errors"
@@ -23,6 +24,10 @@ func main() {
 }
 
 func execute(ctx context.Context) error {
+	logsFile := "/home/performance-monitor/logs.txt"
+	if _, err := os.Stat(logsFile); err != nil {
+		return err
+	}
 	client := monitor.NewClient(context.Background(), "kubernetes", "minikube")
 	prs, err := client.ListOpenPRsWithLabel("")
 	if err != nil {

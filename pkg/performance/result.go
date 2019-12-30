@@ -158,7 +158,7 @@ func indexForLog(logs []string, log string) int {
 }
 
 func (d *DataStorage) logs() ([]string, error) {
-	contents, err := ioutil.ReadFile("logs.txt")
+	contents, err := ioutil.ReadFile("/home/performance-monitor/logs.txt")
 	if err != nil {
 		log.Printf("error reading logs.txt file: %v", err)
 		return nil, err
