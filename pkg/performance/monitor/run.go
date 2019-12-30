@@ -22,13 +22,13 @@ func RunMkcmp(ctx context.Context, pr int) (string, error) {
 
 	cmd := exec.CommandContext(ctx, "mkcmp", minikubeAtHead, fmt.Sprintf("pr://%d", pr), "--quiet")
 	stdOut := bytes.NewBuffer([]byte{})
-	stdErr := os.Stderr
+	stdErr := bytes.NewBuffer([]byte{})
 	cmd.Stdout = stdOut
 	cmd.Stderr = stdErr
 
 	log.Print("running mkcmp: ", cmd.Args)
 	if err := cmd.Run(); err != nil {
-		return "", errors.Wrap(err, "running mkcmp")
+		return "", errors.Wrapf(err, "running mkcmp\n%s", stdErr.String())
 	}
 	return stdOut.String(), nil
 }
