@@ -609,3 +609,10 @@ help:
 	@printf "\033[1mAvailable targets for minikube ${VERSION}\033[21m\n"
 	@printf "\033[1m--------------------------------------\033[21m\n"
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+.PHONY: generate-docker-images-tar
+generate-docker-images-tar:
+	minikube start --memory 6000 --alsologtostderr
+	minikube ssh -- sudo tar cvf docker.tar /var/lib/docker 
+	scp -i $(minikube ssh-key) docker@$(minikube ip):/home/docker/docker.tar .
+	minikube delete
