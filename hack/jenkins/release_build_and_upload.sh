@@ -45,8 +45,8 @@ env GOPATH=$HOME/go BUILD_IN_DOCKER=y \
   out/minikube-installer.exe \
   "out/minikube_${DEB_VERSION}-0_amd64.deb" \
   "out/minikube-${RPM_VERSION}-0.x86_64.rpm" \
-  "out/docker-machine-driver-kvm2_${DEB_VERSION}-0_amd64.deb" \
-  "out/docker-machine-driver-kvm2-${RPM_VERSION}-0.x86_64.rpm"
+  "out/docker-machine-driver-kvm2_${DEB_VERSION}.deb" \
+  "out/docker-machine-driver-kvm2-${RPM_VERSION}.rpm"
 
 make checksum
 

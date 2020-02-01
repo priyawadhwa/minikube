@@ -16,7 +16,7 @@
 VERSION_MAJOR ?= 1
 VERSION_MINOR ?= 7
 VERSION_BUILD ?= 0-beta.2
-RAW_VERSION=$(VERSION_MAJOR).$(VERSION_MINOR).${VERSION_BUILD}
+RAW_VERSION=$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_BUILD)
 VERSION ?= v$(RAW_VERSION)
 
 # Default to .0 for higher cache hit rates, as build increments typically don't require new ISO versions
