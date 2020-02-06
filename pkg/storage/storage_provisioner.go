@@ -45,9 +45,9 @@ type hostPathProvisioner struct {
 }
 
 // NewHostPathProvisioner creates a new Provisioner using host paths
-func NewHostPathProvisioner(pvDir string) controller.Provisioner {
+func NewHostPathProvisioner() controller.Provisioner {
 	return &hostPathProvisioner{
-		pvDir:    pvDir,
+		pvDir:    "/tmp/hostpath-provisioner",
 		identity: uuid.NewUUID(),
 	}
 }
@@ -57,7 +57,7 @@ var _ controller.Provisioner = &hostPathProvisioner{}
 // Provision creates a storage asset and returns a PV object representing it.
 func (p *hostPathProvisioner) Provision(options controller.ProvisionOptions) (*core.PersistentVolume, error) {
 	glog.Infof("Provisioning volume %v", options)
-	path := path.Join(p.pvDir, options.PVC.Name)
+	path := path.Join(p.pvDir, options.PVName)
 	if err := os.MkdirAll(path, 0777); err != nil {
 		return nil, err
 	}
@@ -103,7 +103,8 @@ func (p *hostPathProvisioner) Delete(volume *core.PersistentVolume) error {
 		return &controller.IgnoredError{Reason: "identity annotation on PV does not match ours"}
 	}
 
-	if err := os.RemoveAll(volume.Spec.PersistentVolumeSource.HostPath.Path); err != nil {
+	path := path.Join(p.pvDir, volume.Name)
+	if err := os.RemoveAll(path); err != nil {
 		return errors.Wrap(err, "removing hostpath PV")
 	}
 
@@ -111,7 +112,7 @@ func (p *hostPathProvisioner) Delete(volume *core.PersistentVolume) error {
 }
 
 // StartStorageProvisioner will start storage provisioner server
-func StartStorageProvisioner(pvDir string) error {
+func StartStorageProvisioner() error {
 	glog.Infof("Initializing the Minikube storage provisioner...")
 	config, err := rest.InClusterConfig()
 	if err != nil {
@@ -131,7 +132,7 @@ func StartStorageProvisioner(pvDir string) error {
 
 	// Create the provisioner: it implements the Provisioner interface expected by
 	// the controller
-	hostPathProvisioner := NewHostPathProvisioner(pvDir)
+	hostPathProvisioner := NewHostPathProvisioner()
 
 	// Start the provision controller which will dynamically provision hostPath
 	// PVs

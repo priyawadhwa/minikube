@@ -80,13 +80,14 @@ func TestFlagDefaults(t *testing.T) {
 	}
 }
 
-func TestSuggest(t *testing.T) {
+func TestChoices(t *testing.T) {
 
 	tests := []struct {
-		def     registry.DriverDef
-		choices []string
-		pick    string
-		alts    []string
+		def       registry.DriverDef
+		choices   []string
+		pick      string
+		alts      []string
+		requested string
 	}{
 		{
 			def: registry.DriverDef{
@@ -128,6 +129,12 @@ func TestSuggest(t *testing.T) {
 			pick:    "preferred",
 			alts:    []string{"default", "discouraged"},
 		},
+		{
+			requested: "unhealthy",
+			choices:   []string{"preferred", "default", "discouraged", "unhealthy"},
+			pick:      "unhealthy",
+			alts:      []string{"preferred", "default", "discouraged"},
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.def.Name, func(t *testing.T) {
@@ -147,7 +154,7 @@ func TestSuggest(t *testing.T) {
 				t.Errorf("choices mismatch (-want +got):\n%s", diff)
 			}
 
-			pick, alts := Suggest(got)
+			pick, alts := Choose(tc.requested, got)
 			if pick.Name != tc.pick {
 				t.Errorf("pick = %q, expected %q", pick.Name, tc.pick)
 			}

@@ -1,4 +1,9 @@
 ARG COMMIT_SHA
+
+FROM busybox 
+COPY out/preloaded-images.tar /preloaded-images.tar
+RUN tar xvf /preloaded-images.tar -C /
+
 # using base image created by kind https://github.com/kubernetes-sigs/kind
 # which is an ubuntu 19.10 with an entry-point that helps running systemd
 # could be changed to any debian that can run systemd
@@ -33,13 +38,16 @@ USER root
 # kind base-image entry-point expects a "kind" folder for product_name,product_uuid
 # https://github.com/kubernetes-sigs/kind/blob/master/images/base/files/usr/local/bin/entrypoint
 RUN mkdir -p /kind
+
 RUN rm -rf \
-    /var/cache/debconf/* \
-    /var/lib/apt/lists/* \
-    /var/log/* \
-    /tmp/* \
-    /var/tmp/* \
-    /usr/share/doc/* \
-    /usr/share/man/* \
-    /usr/share/local/* \
-RUN echo "kic! Build: ${COMMIT_SHA} Time :$(date)" > "/kic.txt"
+  /var/cache/debconf/* \
+  /var/lib/apt/lists/* \
+  /var/log/* \
+  /tmp/* \
+  /var/tmp/* \
+  /usr/share/doc/* \
+  /usr/share/man/* \
+  /usr/share/local/* \
+  RUN echo "kic! Build: ${COMMIT_SHA} Time :$(date)" > "/kic.txt"
+
+COPY --from=0 /var/lib/docker /var/lib/docker 

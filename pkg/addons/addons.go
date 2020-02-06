@@ -174,8 +174,7 @@ func isAddonAlreadySet(addon *assets.Addon, enable bool, profile string) (bool, 
 }
 
 func enableOrDisableAddonInternal(addon *assets.Addon, cmd command.Runner, data interface{}, enable bool, profile string) error {
-	deployFiles := []string{}
-
+	files := []string{}
 	for _, addon := range addon.Assets {
 		var f assets.CopyableFile
 		var err error
@@ -203,16 +202,13 @@ func enableOrDisableAddonInternal(addon *assets.Addon, cmd command.Runner, data 
 				}
 			}()
 		}
-		if strings.HasSuffix(fPath, ".yaml") {
-			deployFiles = append(deployFiles, fPath)
-		}
+		files = append(files, fPath)
 	}
-
-	command, err := kubectlCommand(profile, deployFiles, enable)
+	command, err := kubectlCommand(profile, files, enable)
 	if err != nil {
 		return err
 	}
-	glog.Infof("Running: %v", command)
+	glog.Infof("Running: %s", command)
 	rr, err := cmd.RunCmd(command)
 	if err != nil {
 		return errors.Wrapf(err, "addon apply")

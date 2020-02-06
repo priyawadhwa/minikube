@@ -91,7 +91,7 @@ endif
 
 # Set the version information for the Kubernetes servers
 MINIKUBE_LDFLAGS := -X k8s.io/minikube/pkg/version.version=$(VERSION) -X k8s.io/minikube/pkg/version.isoVersion=$(ISO_VERSION) -X k8s.io/minikube/pkg/version.isoPath=$(ISO_BUCKET) -X k8s.io/minikube/pkg/version.gitCommitID=$(COMMIT)
-PROVISIONER_LDFLAGS := "-X k8s.io/minikube/pkg/storage.version=$(STORAGE_PROVISIONER_TAG) -s -w -extldflags '-static'"
+PROVISIONER_LDFLAGS := "-X k8s.io/minikube/pkg/storage.version=$(STORAGE_PROVISIONER_TAG) -s -w"
 
 MINIKUBEFILES := ./cmd/minikube/
 HYPERKIT_FILES := ./cmd/drivers/hyperkit
@@ -500,10 +500,13 @@ storage-provisioner-image: out/storage-provisioner-$(GOARCH) ## Build storage-pr
 	docker build -t $(STORAGE_PROVISIONER_IMAGE) -f deploy/storage-provisioner/Dockerfile  --build-arg arch=$(GOARCH) .
 
 .PHONY: kic-base-image
-kic-base-image: ## builds the base image used for kic.
+kic-base-image: generate-preloaded-images-tar  ## builds the base image used for kic.
 	docker rmi -f $(REGISTRY)/kicbase:v0.0.5-snapshot || true
 	docker build -f ./hack/images/kicbase.Dockerfile -t $(REGISTRY)/kicbase:v0.0.5-snapshot  --build-arg COMMIT_SHA=${VERSION}-$(COMMIT)  .
 
+.PHONY: generate-preloaded-images-tar
+generate-preloaded-images-tar: out/minikube
+	./generate-preloaded-images-tar.sh
 
 
 .PHONY: push-storage-provisioner-image

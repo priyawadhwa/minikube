@@ -47,7 +47,6 @@ import (
 	"k8s.io/minikube/pkg/minikube/bootstrapper/images"
 	"k8s.io/minikube/pkg/minikube/command"
 	"k8s.io/minikube/pkg/minikube/config"
-	"k8s.io/minikube/pkg/minikube/constants"
 	"k8s.io/minikube/pkg/minikube/cruntime"
 	"k8s.io/minikube/pkg/minikube/driver"
 	"k8s.io/minikube/pkg/minikube/machine"
@@ -420,9 +419,10 @@ func (k *Bootstrapper) UpdateCluster(cfg config.MachineConfig) error {
 	}
 
 	if cfg.KubernetesConfig.ShouldLoadCachedImages {
-		if err := machine.LoadImages(&cfg, k.c, images, constants.ImageCacheDir); err != nil {
-			out.FailureT("Unable to load cached images: {{.error}}", out.V{"error": err})
-		}
+		fmt.Println("skipping load images ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+		// if err := machine.LoadImages(&cfg, k.c, images, constants.ImageCacheDir); err != nil {
+		// 	out.FailureT("Unable to load cached images: {{.error}}", out.V{"error": err})
+		// }
 	}
 	r, err := cruntime.New(cruntime.Config{Type: cfg.KubernetesConfig.ContainerRuntime,
 		Runner: k.c, Socket: cfg.KubernetesConfig.CRISocket})
@@ -434,8 +434,7 @@ func (k *Bootstrapper) UpdateCluster(cfg config.MachineConfig) error {
 		return errors.Wrap(err, "generating kubeadm cfg")
 	}
 
-	// TODO: multiple nodes
-	kubeletCfg, err := bsutil.NewKubeletConfig(cfg, cfg.Nodes[0], r)
+	kubeletCfg, err := bsutil.NewKubeletConfig(cfg, r)
 	if err != nil {
 		return errors.Wrap(err, "generating kubelet config")
 	}
