@@ -28,13 +28,12 @@ import (
 
 func TestGuestEnvironment(t *testing.T) {
 	MaybeParallel(t)
-	WaitForStartSlot(t)
 
 	profile := UniqueProfileName("guest")
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 	defer CleanupWithLogs(t, profile, cancel)
 
-	args := append([]string{"start", "-p", profile, "--wait=false"}, StartArgs()...)
+	args := append([]string{"start", "-p", profile, "--install-addons=false", "--wait=false"}, StartArgs()...)
 	rr, err := Run(t, exec.CommandContext(ctx, Target(), args...))
 	if err != nil {
 		t.Errorf("%s failed: %v", rr.Args, err)

@@ -20,12 +20,12 @@ import (
 	"time"
 
 	"github.com/docker/machine/libmachine/mcnerror"
+	"github.com/golang/glog"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"k8s.io/minikube/pkg/minikube/cluster"
 	pkg_config "k8s.io/minikube/pkg/minikube/config"
-	"k8s.io/minikube/pkg/minikube/constants"
 	"k8s.io/minikube/pkg/minikube/exit"
 	"k8s.io/minikube/pkg/minikube/kubeconfig"
 	"k8s.io/minikube/pkg/minikube/machine"
@@ -54,6 +54,11 @@ func runStop(cmd *cobra.Command, args []string) {
 	nonexistent := false
 	stop := func() (err error) {
 		err = cluster.StopHost(api)
+		if err == nil {
+			return nil
+		}
+		glog.Warningf("stop host returned error: %v", err)
+
 		switch err := errors.Cause(err).(type) {
 		case mcnerror.ErrHostDoesNotExist:
 			out.T(out.Meh, `"{{.profile_name}}" VM does not exist, nothing to stop`, out.V{"profile_name": profile})
@@ -76,7 +81,7 @@ func runStop(cmd *cobra.Command, args []string) {
 		out.T(out.WarningType, "Unable to kill mount process: {{.error}}", out.V{"error": err})
 	}
 
-	err = kubeconfig.UnsetCurrentContext(profile, constants.KubeconfigPath)
+	err = kubeconfig.UnsetCurrentContext(profile, kubeconfig.PathFromEnv())
 	if err != nil {
 		exit.WithError("update config", err)
 	}

@@ -27,51 +27,52 @@ import (
 type Profile struct {
 	Name   string
 	Status string // running, stopped
-	Config []*MachineConfig
+	Config *MachineConfig
 }
 
 // MachineConfig contains the parameters used to start a cluster.
 type MachineConfig struct {
-	Name                string
-	KeepContext         bool // used by start and profile command to or not to switch kubectl's current context
-	EmbedCerts          bool // used by kubeconfig.Setup
-	MinikubeISO         string
-	Memory              int
-	CPUs                int
-	DiskSize            int
-	VMDriver            string
-	ContainerRuntime    string
-	HyperkitVpnKitSock  string   // Only used by the Hyperkit driver
-	HyperkitVSockPorts  []string // Only used by the Hyperkit driver
-	DockerEnv           []string // Each entry is formatted as KEY=VALUE.
-	InsecureRegistry    []string
-	RegistryMirror      []string
-	HostOnlyCIDR        string // Only used by the virtualbox driver
-	HypervVirtualSwitch string
-	KVMNetwork          string             // Only used by the KVM driver
-	KVMQemuURI          string             // Only used by kvm2
-	KVMGPU              bool               // Only used by kvm2
-	KVMHidden           bool               // Only used by kvm2
-	Downloader          util.ISODownloader `json:"-"`
-	DockerOpt           []string           // Each entry is formatted as KEY=VALUE.
-	DisableDriverMounts bool               // Only used by virtualbox
-	NFSShare            []string
-	NFSSharesRoot       string
-	UUID                string // Only used by hyperkit to restore the mac address
-	NoVTXCheck          bool   // Only used by virtualbox
-	DNSProxy            bool   // Only used by virtualbox
-	HostDNSResolver     bool   // Only used by virtualbox
-	KubernetesConfig    KubernetesConfig
-	HostOnlyNicType     string // Only used by virtualbox
-	NatNicType          string // Only used by virtualbox
+	Name                    string
+	KeepContext             bool // used by start and profile command to or not to switch kubectl's current context
+	EmbedCerts              bool // used by kubeconfig.Setup
+	MinikubeISO             string
+	Memory                  int
+	CPUs                    int
+	DiskSize                int
+	VMDriver                string
+	HyperkitVpnKitSock      string   // Only used by the Hyperkit driver
+	HyperkitVSockPorts      []string // Only used by the Hyperkit driver
+	DockerEnv               []string // Each entry is formatted as KEY=VALUE.
+	InsecureRegistry        []string
+	RegistryMirror          []string
+	HostOnlyCIDR            string // Only used by the virtualbox driver
+	HypervVirtualSwitch     string
+	HypervUseExternalSwitch bool
+	HypervExternalAdapter   string
+	KVMNetwork              string             // Only used by the KVM driver
+	KVMQemuURI              string             // Only used by kvm2
+	KVMGPU                  bool               // Only used by kvm2
+	KVMHidden               bool               // Only used by kvm2
+	Downloader              util.ISODownloader `json:"-"`
+	DockerOpt               []string           // Each entry is formatted as KEY=VALUE.
+	DisableDriverMounts     bool               // Only used by virtualbox
+	NFSShare                []string
+	NFSSharesRoot           string
+	UUID                    string // Only used by hyperkit to restore the mac address
+	NoVTXCheck              bool   // Only used by virtualbox
+	DNSProxy                bool   // Only used by virtualbox
+	HostDNSResolver         bool   // Only used by virtualbox
+	HostOnlyNicType         string // Only used by virtualbox
+	NatNicType              string // Only used by virtualbox
+	KubernetesConfig        KubernetesConfig
+	Nodes                   []Node
+	Addons                  map[string]bool
 }
 
 // KubernetesConfig contains the parameters used to configure the VM Kubernetes.
 type KubernetesConfig struct {
 	KubernetesVersion string
-	NodeIP            string
-	NodePort          int
-	NodeName          string
+	ClusterName       string
 	APIServerName     string
 	APIServerNames    []string
 	APIServerIPs      []net.IP
@@ -79,13 +80,23 @@ type KubernetesConfig struct {
 	ContainerRuntime  string
 	CRISocket         string
 	NetworkPlugin     string
-	FeatureGates      string
-	ServiceCIDR       string
+	FeatureGates      string // https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/
+	ServiceCIDR       string // the subnet which kubernetes services will be deployed to
 	ImageRepository   string
 	ExtraOptions      ExtraOptionSlice
 
 	ShouldLoadCachedImages bool
 	EnableDefaultCNI       bool
+}
+
+// Node contains information about specific nodes in a cluster
+type Node struct {
+	Name              string
+	IP                string
+	Port              int
+	KubernetesVersion string
+	ControlPlane      bool
+	Worker            bool
 }
 
 // VersionedExtraOption holds information on flags to apply to a specific range

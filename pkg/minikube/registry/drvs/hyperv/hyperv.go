@@ -19,12 +19,15 @@ limitations under the License.
 package hyperv
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/docker/machine/drivers/hyperv"
 	"github.com/docker/machine/libmachine/drivers"
+	"github.com/pkg/errors"
 
 	cfg "k8s.io/minikube/pkg/minikube/config"
 	"k8s.io/minikube/pkg/minikube/driver"
@@ -33,7 +36,8 @@ import (
 )
 
 const (
-	docURL = "https://minikube.sigs.k8s.io/docs/reference/drivers/hyperv/"
+	docURL                    = "https://minikube.sigs.k8s.io/docs/reference/drivers/hyperv/"
+	defaultExternalSwitchName = "minikube"
 )
 
 func init() {
@@ -48,16 +52,31 @@ func init() {
 	}
 }
 
-func configure(config cfg.MachineConfig) interface{} {
+func configure(config cfg.MachineConfig) (interface{}, error) {
 	d := hyperv.NewDriver(config.Name, localpath.MiniPath())
 	d.Boot2DockerURL = config.Downloader.GetISOFileURI(config.MinikubeISO)
 	d.VSwitch = config.HypervVirtualSwitch
+	if d.VSwitch == "" && config.HypervUseExternalSwitch {
+		switchName, adapter, err := chooseSwitch(config.HypervExternalAdapter)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to choose switch for Hyper-V driver")
+		}
+		if config.HypervExternalAdapter == "" && switchName == "" {
+			// create a switch on the returned adapter
+			switchName = defaultExternalSwitchName
+			err := createVMSwitch(switchName, adapter)
+			if err != nil {
+				return "", err
+			}
+		}
+		d.VSwitch = switchName
+	}
 	d.MemSize = config.Memory
 	d.CPU = config.CPUs
 	d.DiskSize = config.DiskSize
 	d.SSHUser = "docker"
 	d.DisableDynamicMemory = true // default to disable dynamic memory as minikube is unlikely to work properly with dynamic memory
-	return d
+	return d, nil
 }
 
 func status() registry.State {
@@ -66,7 +85,11 @@ func status() registry.State {
 		return registry.State{Error: err}
 	}
 
-	cmd := exec.Command(path, "Get-WindowsOptionalFeature", "-FeatureName", "Microsoft-Hyper-V-All", "-Online")
+	// Allow no more than 2 seconds for querying state
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, path, "Get-WindowsOptionalFeature", "-FeatureName", "Microsoft-Hyper-V-All", "-Online")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return registry.State{Installed: false, Error: fmt.Errorf("%s failed:\n%s", strings.Join(cmd.Args, " "), out), Fix: "Start PowerShell as Administrator, and run: 'Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All'", Doc: docURL}
