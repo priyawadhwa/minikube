@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
   dnsutils \
   openssh-server \
   docker.io \
+  linux-tools-common \
   && apt-get clean -y 
 # disable containerd by default
 RUN systemctl disable containerd
@@ -34,12 +35,14 @@ USER root
 # https://github.com/kubernetes-sigs/kind/blob/master/images/base/files/usr/local/bin/entrypoint
 RUN mkdir -p /kind
 RUN rm -rf \
-    /var/cache/debconf/* \
-    /var/lib/apt/lists/* \
-    /var/log/* \
-    /tmp/* \
-    /var/tmp/* \
-    /usr/share/doc/* \
-    /usr/share/man/* \
-    /usr/share/local/* \
-RUN echo "kic! Build: ${COMMIT_SHA} Time :$(date)" > "/kic.txt"
+  /var/cache/debconf/* \
+  /var/lib/apt/lists/* \
+  /var/log/* \
+  /tmp/* \
+  /var/tmp/* \
+  /usr/share/doc/* \
+  /usr/share/man/* \
+  /usr/share/local/* \
+  RUN echo "kic! Build: ${COMMIT_SHA} Time :$(date)" > "/kic.txt"
+
+RUN apt-get install -y linux-tools-common linux-tools-generic linux-tools-`uname -r`
