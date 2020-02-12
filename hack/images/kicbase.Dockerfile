@@ -4,7 +4,7 @@ ARG COMMIT_SHA
 # could be changed to any debian that can run systemd
 FROM kindest/base:v20200122-2dfe64b2 as base
 USER root
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
   sudo \
   dnsutils \
   openssh-server \
@@ -52,4 +52,3 @@ RUN tar xvf /preloaded-images.tar -C /
 
 FROM base
 COPY --from=1 /var/lib/docker /var/lib/docker
-COPY --from=1 /var/lib/minikube/binaries /var/lib/minikube/binaries

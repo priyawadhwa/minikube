@@ -25,12 +25,6 @@ const (
 	GuestEphemeralDir = "/var/tmp/minikube"
 	// GuestPersistentDir is the path where persistent data should be stored within the VM (not tmpfs)
 	GuestPersistentDir = "/var/lib/minikube"
-	// GuestKubernetesCertsDir are where Kubernetes certificates are stored
-	GuestKubernetesCertsDir = GuestPersistentDir + "/certs"
-	// GuestCertAuthDir is where system CA certificates are installed to
-	GuestCertAuthDir = "/usr/share/ca-certificates"
-	// GuestCertStoreDir is where system SSL certificates are installed
-	GuestCertStoreDir = "/etc/ssl/certs"
-	// Where gvisor bootstraps from
-	GuestGvisorDir = "/tmp/gvisor"
+	// GuestCertsDir are where Kubernetes certificates are kept on the guest
+	GuestCertsDir = GuestPersistentDir + "/certs"
 )

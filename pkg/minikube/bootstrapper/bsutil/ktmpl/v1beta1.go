@@ -41,12 +41,9 @@ nodeRegistration:
 apiVersion: kubeadm.k8s.io/v1beta1
 kind: ClusterConfiguration
 {{ if .ImageRepository}}imageRepository: {{.ImageRepository}}
-{{end}}{{range .ComponentOptions}}{{.Component}}:
-{{- range $k, $v := .Pairs }}
-  {{$k}}: {{$v}}
-{{- end}}
+{{end}}{{range .ExtraArgs}}{{.Component}}:
   extraArgs:
-{{- range $i, $val := printMapInOrder .ExtraArgs ": " }}
+{{- range $i, $val := printMapInOrder .Options ": " }}
     {{$val}}
 {{- end}}
 {{end -}}
@@ -55,6 +52,8 @@ kind: ClusterConfiguration
 {{end -}}{{end -}}
 certificatesDir: {{.CertDir}}
 clusterName: {{.ClusterName}}
+apiServer:
+  certSANs: ["127.0.0.1", "localhost", "{{.AdvertiseAddress}}"]
 controlPlaneEndpoint: localhost:{{.APIServerPort}}
 dns:
   type: CoreDNS

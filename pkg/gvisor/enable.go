@@ -32,7 +32,6 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/minikube/pkg/minikube/assets"
 	"k8s.io/minikube/pkg/minikube/constants"
-	"k8s.io/minikube/pkg/minikube/vmpath"
 )
 
 const (
@@ -177,7 +176,7 @@ func copyAssetToDest(targetName, dest string) error {
 	}
 
 	// Now, copy the data from this asset to dest
-	src := filepath.Join(vmpath.GuestGvisorDir, asset.GetTargetName())
+	src := filepath.Join(constants.GvisorFilesPath, asset.GetTargetName())
 	log.Printf("%s asset path: %s", targetName, src)
 	contents, err := ioutil.ReadFile(src)
 	if err != nil {

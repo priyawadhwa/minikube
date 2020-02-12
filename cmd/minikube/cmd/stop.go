@@ -26,6 +26,7 @@ import (
 	"github.com/spf13/viper"
 	"k8s.io/minikube/pkg/minikube/cluster"
 	pkg_config "k8s.io/minikube/pkg/minikube/config"
+	"k8s.io/minikube/pkg/minikube/constants"
 	"k8s.io/minikube/pkg/minikube/exit"
 	"k8s.io/minikube/pkg/minikube/kubeconfig"
 	"k8s.io/minikube/pkg/minikube/machine"
@@ -81,7 +82,7 @@ func runStop(cmd *cobra.Command, args []string) {
 		out.T(out.WarningType, "Unable to kill mount process: {{.error}}", out.V{"error": err})
 	}
 
-	err = kubeconfig.UnsetCurrentContext(profile, kubeconfig.PathFromEnv())
+	err = kubeconfig.UnsetCurrentContext(profile, constants.KubeconfigPath)
 	if err != nil {
 		exit.WithError("update config", err)
 	}

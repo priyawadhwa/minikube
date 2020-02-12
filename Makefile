@@ -15,18 +15,17 @@
 # Bump these on release - and please check ISO_VERSION for correctness.
 VERSION_MAJOR ?= 1
 VERSION_MINOR ?= 7
-VERSION_BUILD ?= 2
+VERSION_BUILD ?= 1
 RAW_VERSION=$(VERSION_MAJOR).$(VERSION_MINOR).${VERSION_BUILD}
 VERSION ?= v$(RAW_VERSION)
 
-KUBERNETES_VERSION ?= $(shell egrep "^var DefaultKubernetesVersion" pkg/minikube/constants/constants.go | cut -d \" -f2)
+KUBERNETES_VERSION ?= $(shell cat pkg/minikube/constants/constants.go | grep "DefaultKubernetesVersion =" | cut -d ' ' -f4 | sed 's/"//g')
 
 # Default to .0 for higher cache hit rates, as build increments typically don't require new ISO versions
 ISO_VERSION ?= v$(VERSION_MAJOR).$(VERSION_MINOR).0
 # Dashes are valid in semver, but not Linux packaging. Use ~ to delimit alpha/beta
 DEB_VERSION ?= $(subst -,~,$(RAW_VERSION))
 RPM_VERSION ?= $(DEB_VERSION)
-KIC_VERSION ?= 0.0.5
 
 # used by hack/jenkins/release_build_and_upload.sh and KVM_BUILD_IMAGE, see also BUILD_IMAGE below
 GO_VERSION ?= 1.13.4
@@ -66,6 +65,9 @@ GOLINT_OPTIONS = --timeout 4m \
 	  --exclude 'variable on range scope.*in function literal|ifElseChain' \
 	  --skip-files "pkg/minikube/translate/translations.go|pkg/minikube/assets/assets.go"
 
+# Major version of gvisor image. Increment when there are breaking changes.
+GVISOR_IMAGE_VERSION ?= 2
+
 export GO111MODULE := on
 
 GOOS ?= $(shell go env GOOS)
@@ -81,14 +83,7 @@ BUILD_OS := $(shell uname -s)
 
 SHA512SUM=$(shell command -v sha512sum || echo "shasum -a 512")
 
-# gvisor tag to automatically push changes to
-# to update minikubes default, update deploy/addons/gvisor
-GVISOR_TAG ?= latest
-
-# storage provisioner tag to push changes to
-# to update minikubes default, update pkg/minikube/bootstrapper/images
-STORAGE_PROVISIONER_TAG ?= latest
-
+STORAGE_PROVISIONER_TAG := v1.8.1
 # TODO: multi-arch manifest
 ifeq ($(GOARCH),amd64)
 STORAGE_PROVISIONER_IMAGE ?= $(REGISTRY)/storage-provisioner:$(STORAGE_PROVISIONER_TAG)
@@ -508,18 +503,18 @@ storage-provisioner-image: out/storage-provisioner-$(GOARCH) ## Build storage-pr
 
 .PHONY: kic-base-image
 kic-base-image: ## builds the base image used for kic.
-	docker rmi -f $(REGISTRY)/kicbase:v$(KIC_VERSION)-snapshot || true
-	docker build -f ./hack/images/kicbase.Dockerfile -t $(REGISTRY)/kicbase:v$(KIC_VERSION)-snapshot  --build-arg COMMIT_SHA=${VERSION}-$(COMMIT) --target base .
+	docker rmi -f $(REGISTRY)/kicbase:v0.0.5-snapshot || true
+	docker build -f ./hack/images/kicbase.Dockerfile -t $(REGISTRY)/kicbase:v0.0.5-snapshot  --build-arg COMMIT_SHA=${VERSION}-$(COMMIT) --target base .
 
 
 .PHONY: kic-preloaded-base-image
-kic-preloaded-base-image: generate-preloaded-images-tar ## builds the base image used for kic.
-	docker rmi -f $(REGISTRY)/kicbase:v$(KIC_VERSION)-k8s-${KUBERNETES_VERSION} || true
-	docker build -f ./hack/images/kicbase.Dockerfile -t $(REGISTRY)/kicbase:v$(KIC_VERSION)-k8s-${KUBERNETES_VERSION}  --build-arg COMMIT_SHA=${VERSION}-$(COMMIT) --build-arg KUBERNETES_VERSION=${KUBERNETES_VERSION} .
+kic-preloaded-base-image:  ## builds the base image used for kic.
+	docker rmi -f $(REGISTRY)/kicbase:v0.0.5-k8s-${KUBERNETES_VERSION} || true
+	docker build -f ./hack/images/kicbase.Dockerfile -t $(REGISTRY)/kicbase:v0.0.5-k8s-${KUBERNETES_VERSION}  --build-arg COMMIT_SHA=${VERSION}-$(COMMIT) --build-arg KUBERNETES_VERSION=${KUBERNETES_VERSION} .
 
 .PHONY: generate-preloaded-images-tar
 generate-preloaded-images-tar: out/minikube
-	go run ./hack/preload-images/preload_images.go -kubernetes-version ${KUBERNETES_VERSION} 
+	KUBERNETES_VERSION=${KUBERNETES_VERSION} go run ./hack/preload-images/preload_images.go
 
 
 .PHONY: push-storage-provisioner-image
@@ -532,11 +527,11 @@ out/gvisor-addon: pkg/minikube/assets/assets.go pkg/minikube/translate/translati
 
 .PHONY: gvisor-addon-image
 gvisor-addon-image: out/gvisor-addon  ## Build docker image for gvisor
-	docker build -t $(REGISTRY)/gvisor-addon:$(GVISOR_TAG) -f deploy/gvisor/Dockerfile .
+	docker build -t $(REGISTRY)/gvisor-addon:$(GVISOR_IMAGE_VERSION) -f deploy/gvisor/Dockerfile .
 
 .PHONY: push-gvisor-addon-image
 push-gvisor-addon-image: gvisor-addon-image
-	gcloud docker -- push $(REGISTRY)/gvisor-addon:$(GVISOR_TAG)
+	gcloud docker -- push $(REGISTRY)/gvisor-addon:$(GVISOR_IMAGE_VERSION)
 
 .PHONY: release-iso
 release-iso: minikube_iso checksum  ## Build and release .iso file

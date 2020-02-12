@@ -49,7 +49,7 @@ func init() {
 	}
 }
 
-func configure(mc config.MachineConfig) (interface{}, error) {
+func configure(mc config.MachineConfig) interface{} {
 	d := virtualbox.NewDriver(mc.Name, localpath.MiniPath())
 	d.Boot2DockerURL = mc.Downloader.GetISOFileURI(mc.MinikubeISO)
 	d.Memory = mc.Memory
@@ -62,7 +62,7 @@ func configure(mc config.MachineConfig) (interface{}, error) {
 	d.HostOnlyNicType = mc.HostOnlyNicType
 	d.DNSProxy = mc.DNSProxy
 	d.HostDNSResolver = mc.HostDNSResolver
-	return d, nil
+	return d
 }
 
 func status() registry.State {

@@ -23,7 +23,6 @@ import (
 	"path"
 
 	"github.com/blang/semver"
-	"github.com/golang/glog"
 	"github.com/pkg/errors"
 	"k8s.io/minikube/pkg/minikube/bootstrapper/bsutil/ktmpl"
 	"k8s.io/minikube/pkg/minikube/config"
@@ -49,6 +48,11 @@ func GenerateKubeadmYAML(mc config.MachineConfig, r cruntime.Manager) ([]byte, e
 		return nil, errors.Wrap(err, "parses feature gate config for kubeadm and component")
 	}
 
+	extraComponentConfig, err := createExtraComponentConfig(k8s.ExtraOptions, version, componentFeatureArgs)
+	if err != nil {
+		return nil, errors.Wrap(err, "generating extra component config for kubeadm")
+	}
+
 	// In case of no port assigned, use default
 	cp, err := config.PrimaryControlPlane(mc)
 	if err != nil {
@@ -57,11 +61,6 @@ func GenerateKubeadmYAML(mc config.MachineConfig, r cruntime.Manager) ([]byte, e
 	nodePort := cp.Port
 	if nodePort <= 0 {
 		nodePort = constants.APIServerPort
-	}
-
-	componentOpts, err := createExtraComponentConfig(k8s.ExtraOptions, version, componentFeatureArgs, cp)
-	if err != nil {
-		return nil, errors.Wrap(err, "generating extra component config for kubeadm")
 	}
 
 	opts := struct {
@@ -77,11 +76,11 @@ func GenerateKubeadmYAML(mc config.MachineConfig, r cruntime.Manager) ([]byte, e
 		DNSDomain         string
 		CRISocket         string
 		ImageRepository   string
-		ComponentOptions  []componentOptions
+		ExtraArgs         []componentExtraArgs
 		FeatureArgs       map[string]bool
 		NoTaintMaster     bool
 	}{
-		CertDir:           vmpath.GuestKubernetesCertsDir,
+		CertDir:           vmpath.GuestCertsDir,
 		ServiceCIDR:       constants.DefaultServiceCIDR,
 		PodSubnet:         k8s.ExtraOptions.Get("pod-network-cidr", Kubeadm),
 		AdvertiseAddress:  cp.IP,
@@ -92,7 +91,7 @@ func GenerateKubeadmYAML(mc config.MachineConfig, r cruntime.Manager) ([]byte, e
 		NodeName:          cp.Name,
 		CRISocket:         r.SocketPath(),
 		ImageRepository:   k8s.ImageRepository,
-		ComponentOptions:  componentOpts,
+		ExtraArgs:         extraComponentConfig,
 		FeatureArgs:       kubeadmFeatureArgs,
 		NoTaintMaster:     false, // That does not work with k8s 1.12+
 		DNSDomain:         k8s.DNSDomain,
@@ -116,11 +115,10 @@ func GenerateKubeadmYAML(mc config.MachineConfig, r cruntime.Manager) ([]byte, e
 	if version.GTE(semver.MustParse("1.17.0")) {
 		configTmpl = ktmpl.V1Beta2
 	}
-	glog.Infof("kubeadm options: %+v", opts)
 	if err := configTmpl.Execute(&b, opts); err != nil {
 		return nil, err
 	}
-	glog.Infof("kubeadm config:\n%s\n", b.String())
+
 	return b.Bytes(), nil
 }
 

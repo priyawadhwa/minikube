@@ -51,12 +51,10 @@ var (
 		vmpath.GuestManifestsDir,
 		vmpath.GuestEphemeralDir,
 		vmpath.GuestPersistentDir,
-		vmpath.GuestKubernetesCertsDir,
+		vmpath.GuestCertsDir,
 		path.Join(vmpath.GuestPersistentDir, "images"),
 		path.Join(vmpath.GuestPersistentDir, "binaries"),
-		vmpath.GuestGvisorDir,
-		vmpath.GuestCertAuthDir,
-		vmpath.GuestCertStoreDir,
+		"/tmp/gvisor",
 	}
 )
 
@@ -114,10 +112,7 @@ func createHost(api libmachine.API, cfg config.MachineConfig) (*host.Host, error
 	if def.Empty() {
 		return nil, fmt.Errorf("unsupported/missing driver: %s", cfg.VMDriver)
 	}
-	dd, err := def.Config(cfg)
-	if err != nil {
-		return nil, errors.Wrap(err, "config")
-	}
+	dd := def.Config(cfg)
 	data, err := json.Marshal(dd)
 	if err != nil {
 		return nil, errors.Wrap(err, "marshal")

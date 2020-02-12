@@ -44,7 +44,7 @@ func init() {
 	}
 }
 
-func configure(config cfg.MachineConfig) (interface{}, error) {
+func configure(config cfg.MachineConfig) interface{} {
 	d := vmwarefusion.NewDriver(config.Name, localpath.MiniPath()).(*vmwarefusion.Driver)
 	d.Boot2DockerURL = config.Downloader.GetISOFileURI(config.MinikubeISO)
 	d.Memory = config.Memory
@@ -54,7 +54,7 @@ func configure(config cfg.MachineConfig) (interface{}, error) {
 	// TODO(philips): push these defaults upstream to fixup this driver
 	d.SSHPort = 22
 	d.ISO = d.ResolveStorePath("boot2docker.iso")
-	return d, nil
+	return d
 }
 
 func status() registry.State {

@@ -1,3 +1,12 @@
+# to run slowjam:
+
+run `minikube start`
+this will create stack.log
+`cd pkg/slowjam/cmd/timeline`
+`go run main.go ~/minikube/stack.log`
+
+
+
 # minikube
 
 [![BuildStatus Widget]][BuildStatus Result]

@@ -33,11 +33,10 @@ const (
 	KubeadmConfigParam = iota
 )
 
-// componentOptions holds extra args for a component
-type componentOptions struct {
+// componentExtraArgs holds extra args for a component
+type componentExtraArgs struct {
 	Component string
-	ExtraArgs map[string]string
-	Pairs     map[string]string
+	Options   map[string]string
 }
 
 // mapping of component to the section name in kubeadm.
@@ -123,9 +122,9 @@ func defaultOptionsForComponentAndVersion(component string, version semver.Versi
 	return versionedOpts, nil
 }
 
-// newComponentOptions creates a new componentOptions
-func newComponentOptions(opts config.ExtraOptionSlice, version semver.Version, featureGates string, cp config.Node) ([]componentOptions, error) {
-	var kubeadmExtraArgs []componentOptions
+// newComponentExtraArgs creates a new ComponentExtraArgs
+func newComponentExtraArgs(opts config.ExtraOptionSlice, version semver.Version, featureGates string) ([]componentExtraArgs, error) {
+	var kubeadmExtraArgs []componentExtraArgs
 	for _, extraOpt := range opts {
 		if _, ok := componentToKubeadmConfigKey[extraOpt.Component]; !ok {
 			return nil, fmt.Errorf("unknown component %q. valid components are: %v", componentToKubeadmConfigKey, componentToKubeadmConfigKey)
@@ -151,10 +150,9 @@ func newComponentOptions(opts config.ExtraOptionSlice, version semver.Version, f
 			extraConfig["feature-gates"] = featureGates
 		}
 		if len(extraConfig) > 0 {
-			kubeadmExtraArgs = append(kubeadmExtraArgs, componentOptions{
+			kubeadmExtraArgs = append(kubeadmExtraArgs, componentExtraArgs{
 				Component: kubeadmComponentKey,
-				ExtraArgs: extraConfig,
-				Pairs:     optionPairsForComponent(component, version, cp),
+				Options:   extraConfig,
 			})
 		}
 	}
@@ -162,20 +160,9 @@ func newComponentOptions(opts config.ExtraOptionSlice, version semver.Version, f
 	return kubeadmExtraArgs, nil
 }
 
-// optionPairsForComponent generates a map of value pairs for a k8s component
-func optionPairsForComponent(component string, version semver.Version, cp config.Node) map[string]string {
-	// For the ktmpl.V1Beta1 users
-	if component == Apiserver && version.GTE(semver.MustParse("1.14.0-alpha.0")) {
-		return map[string]string{
-			"certSANs": fmt.Sprintf(`["127.0.0.1", "localhost", "%s"]`, cp.IP),
-		}
-	}
-	return nil
-}
-
 // createExtraComponentConfig generates a map of component to extra args for all of the components except kubeadm
-func createExtraComponentConfig(extraOptions config.ExtraOptionSlice, version semver.Version, componentFeatureArgs string, cp config.Node) ([]componentOptions, error) {
-	extraArgsSlice, err := newComponentOptions(extraOptions, version, componentFeatureArgs, cp)
+func createExtraComponentConfig(extraOptions config.ExtraOptionSlice, version semver.Version, componentFeatureArgs string) ([]componentExtraArgs, error) {
+	extraArgsSlice, err := newComponentExtraArgs(extraOptions, version, componentFeatureArgs)
 	if err != nil {
 		return nil, err
 	}
