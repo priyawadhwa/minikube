@@ -37,9 +37,9 @@ import (
 	pkgutil "k8s.io/minikube/pkg/util"
 )
 
-// TestVersionUpgrade downloads latest version of minikube and runs with
-// the odlest supported k8s version and then runs the current head minikube
-// and it tries to upgrade from the older supported k8s to news supported k8s
+// TestVersionUpgrade downloads the latest version of minikube and runs with
+// the oldest supported k8s version and then runs the current head minikube
+// and tries to upgrade from the oldest supported k8s to newest supported k8s
 func TestVersionUpgrade(t *testing.T) {
 	MaybeParallel(t)
 	profile := UniqueProfileName("vupgrade")
@@ -125,5 +125,11 @@ func TestVersionUpgrade(t *testing.T) {
 
 	if err := retry.Expo(r, 1*time.Second, 30*time.Minute, 3); err == nil {
 		t.Fatalf("downgrading kubernetes should not be allowed: %v", err)
+	}
+
+	args = append([]string{"start", "-p", profile, fmt.Sprintf("--kubernetes-version=%s", constants.NewestKubernetesVersion), "--alsologtostderr", "-v=1"}, StartArgs()...)
+	rr, err = Run(t, exec.CommandContext(ctx, Target(), args...))
+	if err != nil {
+		t.Errorf("%s failed: %v", rr.Args, err)
 	}
 }
