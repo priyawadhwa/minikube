@@ -25,7 +25,7 @@ const (
 	DefaultPodCIDR = "10.244.0.0/16"
 
 	// BaseImage is the base image is used to spin up kic containers. it uses same base-image as kind.
-	BaseImage = "gcr.io/k8s-minikube/kicbase:v0.0.5-snapshot"
+	BaseImage = "gcr.io/k8s-minikube/kicbase:v0.0.6"
 	// OverlayImage is the cni plugin used for overlay image, created by kind.
 	// CNI plugin image used for kic drivers created by kind.
 	OverlayImage = "kindest/kindnetd:0.5.3"
