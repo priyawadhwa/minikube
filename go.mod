@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go v0.45.1
 	github.com/Parallels/docker-machine-parallels v1.3.0
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
+	github.com/alecthomas/chroma v0.7.1
 	github.com/blang/semver v3.5.0+incompatible
 	github.com/c4milo/gotoolkit v0.0.0-20170318115440-bcc06269efa9 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible
