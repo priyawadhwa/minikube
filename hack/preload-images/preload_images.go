@@ -61,11 +61,11 @@ func main() {
 }
 
 func executePreloadImages() error {
-	// defer func() {
-	// 	if err := deleteMinikube(); err != nil {
-	// 		fmt.Println(err)
-	// 	}
-	// }()
+	defer func() {
+		if err := deleteMinikube(); err != nil {
+			fmt.Println(err)
+		}
+	}()
 
 	driver := kic.NewDriver(kic.Config{
 		KubernetesVersion: kubernetesVersion,
