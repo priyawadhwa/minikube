@@ -103,10 +103,6 @@ func (d *Driver) Create() error {
 	if err != nil {
 		return errors.Wrap(err, "create kic node")
 	}
-	fmt.Println("done creating container node, skipping other steps")
-	if true {
-		return nil
-	}
 
 	if err := d.prepareSSH(); err != nil {
 		return errors.Wrap(err, "prepare kic ssh")

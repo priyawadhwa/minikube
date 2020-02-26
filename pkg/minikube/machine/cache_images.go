@@ -19,6 +19,7 @@ package machine
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"sync"
@@ -62,6 +63,14 @@ func CacheImagesForBootstrapper(imageRepository string, version string, clusterB
 
 // LoadImages loads previously cached images into the container runtime
 func LoadImages(cc *config.ClusterConfig, runner command.Runner, images []string, cacheDir string) error {
+	fmt.Println("Images:")
+	rr, _ := runner.RunCmd(exec.Command("docker", "images"))
+	fmt.Println(rr.Output())
+
+	fmt.Println("Skipping load imagse...")
+	if true {
+		return nil
+	}
 	glog.Infof("LoadImages start: %s", images)
 	start := time.Now()
 
