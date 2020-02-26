@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"net"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -98,15 +97,15 @@ func (d *Driver) Create() error {
 	if err != nil {
 		glog.Infof("Unable to create preloaded images volume: %v", err)
 	}
-	glog.Infof("Finished creating preloaded images volume in %f seconds", time.Since(t).Seconds())
+	fmt.Println("Finished creating preloaded images volume in %f seconds", time.Since(t).Seconds())
 	params.PreloadedVolume = volumeName
 	err = oci.CreateContainerNode(params)
 	if err != nil {
 		return errors.Wrap(err, "create kic node")
 	}
-
-	if err := d.createPreloadedSymlinks(params.PreloadedVolume); err != nil {
-		return errors.Wrap(err, "creating preloaded symlinks")
+	fmt.Println("done creating container node, skipping other steps")
+	if true {
+		return nil
 	}
 
 	if err := d.prepareSSH(); err != nil {
@@ -115,30 +114,30 @@ func (d *Driver) Create() error {
 	return nil
 }
 
-func (d *Driver) createPreloadedSymlinks(preloadedVolume string) error {
-	if preloadedVolume == "" {
-		return nil
-	}
+// func (d *Driver) createPreloadedSymlinks(preloadedVolume string) error {
+// 	if preloadedVolume == "" {
+// 		return nil
+// 	}
 
-	symlinks := map[string]string{
-		"/preloaded/lib/minikube/binaries": "/var/lib/minikube/binaries",
-		"/preloaded/lib/docker":            "/var/lib/docker",
-	}
+// 	symlinks := map[string]string{
+// 		"/preloaded/lib/minikube/binaries": "/var/lib/minikube/binaries",
+// 		"/preloaded/lib/docker":            "/var/lib/docker",
+// 	}
 
-	cmder := command.NewKICRunner(d.NodeConfig.MachineName, d.NodeConfig.OCIBinary)
-	for source, linkName := range symlinks {
-		// Create linkname directories
-		rr, err := cmder.RunCmd((exec.Command("mkdir", "-p", filepath.Dir(linkName))))
-		if err != nil {
-			return errors.Wrapf(err, "creating directory: %s", rr.Output())
-		}
-		rr, err = cmder.RunCmd(exec.Command("ln", "-s", source, linkName))
-		if err != nil {
-			return errors.Wrapf(err, "linking %s to %s: %s", source, linkName, rr.Output())
-		}
-	}
-	return nil
-}
+// 	cmder := command.NewKICRunner(d.NodeConfig.MachineName, d.NodeConfig.OCIBinary)
+// 	for source, linkName := range symlinks {
+// 		// Create linkname directories
+// 		rr, err := cmder.RunCmd((exec.Command("mkdir", "-p", filepath.Dir(linkName))))
+// 		if err != nil {
+// 			return errors.Wrapf(err, "creating directory: %s", rr.Output())
+// 		}
+// 		rr, err = cmder.RunCmd(exec.Command("ln", "-s", source, linkName))
+// 		if err != nil {
+// 			return errors.Wrapf(err, "linking %s to %s: %s", source, linkName, rr.Output())
+// 		}
+// 	}
+// 	return nil
+// }
 
 // prepareSSH will generate keys and copy to the container so minikube ssh works
 func (d *Driver) prepareSSH() error {

@@ -148,7 +148,7 @@ func startMinikube() error {
 }
 
 func createImageTarball() error {
-	cmd := exec.Command("docker", "exec", profile, "sudo", "tar", "-I", "lz4", "-C", "/var", "-cvf", tarballFilename, "./lib/docker", "./lib/minikube/binaries")
+	cmd := exec.Command("docker", "exec", profile, "sudo", "tar", "-I", "lz4", "-C", "/var/lib/docker", "-cvf", tarballFilename, "./")
 	cmd.Stdout = os.Stdout
 	if err := cmd.Run(); err != nil {
 		return errors.Wrap(err, "creating image tarball")
