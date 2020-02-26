@@ -97,7 +97,9 @@ func runDelete(cmd *cobra.Command, args []string) {
 	profileFlag := viper.GetString(config.MachineProfile)
 
 	validProfiles, invalidProfiles, err := pkg_config.ListProfiles()
-	glog.Warningf("Couldn't find any profiles in minikube home %q: %v", localpath.MiniPath(), err)
+	if err != nil {
+		glog.Warningf("'error loading profiles in minikube home %q: %v", localpath.MiniPath(), err)
+	}
 	profilesToDelete := append(validProfiles, invalidProfiles...)
 	// in the case user has more than 1 profile and runs --purge
 	// to prevent abandoned VMs/containers, force user to run with delete --all
@@ -114,7 +116,7 @@ func runDelete(cmd *cobra.Command, args []string) {
 			exit.UsageT("usage: minikube delete --all")
 		}
 		delLabel := fmt.Sprintf("%s=%s", oci.CreatedByLabelKey, "true")
-		errs := oci.DeleteAllContainersByLabel(oci.Docker, delLabel)
+		errs := oci.DeleteContainersByLabel(oci.Docker, delLabel)
 		if len(errs) > 0 { // it will error if there is no container to delete
 			glog.Infof("error delete containers by label %q (might be okay): %+v", delLabel, err)
 		}
@@ -192,7 +194,7 @@ func deleteProfile(profile *pkg_config.Profile) error {
 	viper.Set(pkg_config.MachineProfile, profile.Name)
 
 	delLabel := fmt.Sprintf("%s=%s", oci.ProfileLabelKey, profile.Name)
-	errs := oci.DeleteAllContainersByLabel(oci.Docker, delLabel)
+	errs := oci.DeleteContainersByLabel(oci.Docker, delLabel)
 	if errs != nil { // it will error if there is no container to delete
 		glog.Infof("error deleting containers for %s (might be okay):\n%v", profile.Name, errs)
 	}
@@ -205,7 +207,6 @@ func deleteProfile(profile *pkg_config.Profile) error {
 	if len(errs) > 0 { // it will not error if there is nothing to delete
 		glog.Warningf("error pruning volume (might be okay):\n%v", errs)
 	}
-
 	api, err := machine.NewAPIClient()
 	if err != nil {
 		delErr := profileDeletionErr(profile.Name, fmt.Sprintf("error getting client %v", err))
