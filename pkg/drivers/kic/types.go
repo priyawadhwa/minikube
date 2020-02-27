@@ -29,7 +29,7 @@ const (
 	// DefaultPodCIDR is The CIDR to be used for pods inside the node.
 	DefaultPodCIDR = "10.244.0.0/16"
 
-
+	// Version is the current version of kic
 	Version = "v0.0.7"
 	// SHA of the kic base image
 	baseImageSHA = "a6f288de0e5863cdeab711fa6bafa38ee7d8d285ca14216ecf84fcfb07c7d176"
