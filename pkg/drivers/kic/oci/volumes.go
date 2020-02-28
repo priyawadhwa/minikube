@@ -108,7 +108,7 @@ func CreatePreloadedImagesVolume(k8sVersion, cRuntime, baseImage, profile string
 	}
 	tarballPath := preload.TarballFilepath(k8sVersion)
 
-	if err := extractTarballToVolume(tarballPath, volumeName, baseImage); err != nil {
+	if err := ExtractTarballToVolume(tarballPath, volumeName, baseImage); err != nil {
 		// If the extraction didn't work, delete the corrupt docker volume
 		if err := deleteDockerVolume(volumeName); err != nil {
 			glog.Warningf("Corrupt docker volume %s was not deleted successfully. You may need to delete it manually via `docker volume rm %s` for minikube to continue to work.", volumeName, volumeName)
@@ -137,13 +137,15 @@ func dockerVolumeExists(name string) bool {
 	return false
 }
 
-// extractTarballToVolume runs a docker image imageName which extracts the tarball at tarballPath
+// ExtractTarballToVolume runs a docker image imageName which extracts the tarball at tarballPath
 // to the volume named volumeName
-func extractTarballToVolume(tarballPath, volumeName, imageName string) error {
+func ExtractTarballToVolume(tarballPath, volumeName, imageName string) error {
 	if err := PointToHostDockerDaemon(); err != nil {
 		return errors.Wrap(err, "point host docker-daemon")
 	}
-	cmd := exec.Command(Docker, "run", "--rm", "--entrypoint", "/usr/bin/tar", "-v", fmt.Sprintf("%s:/preloaded.tar:ro", tarballPath), "-v", fmt.Sprintf("%s:/extractDir", volumeName), imageName, "-I", "lz4", "-xvf", "/preloaded.tar", "-C", "/extractDir")
+	extractionDir := "/var/lib/docker"
+	cmd := exec.Command(Docker, "run", "--rm", "--workdir", extractionDir, "--entrypoint", "/usr/bin/tar", "-v", fmt.Sprintf("%s:/preloaded.tar:ro", tarballPath), "-v", fmt.Sprintf("%s:/var", volumeName), imageName, "-I", "lz4", "-xvf", "/preloaded.tar")
+	fmt.Println("Running", cmd.Args)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return errors.Wrapf(err, "output %s", string(out))
 	}
