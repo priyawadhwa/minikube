@@ -61,11 +61,11 @@ func main() {
 }
 
 func executePreloadImages() error {
-	// defer func() {
-	// 	if err := deleteMinikube(); err != nil {
-	// 		fmt.Println(err)
-	// 	}
-	// }()
+	defer func() {
+		if err := deleteMinikube(); err != nil {
+			fmt.Println(err)
+		}
+	}()
 
 	driver := kic.NewDriver(kic.Config{
 		KubernetesVersion: kubernetesVersion,
@@ -134,6 +134,12 @@ func executePreloadImages() error {
 	if err := g.Wait(); err != nil {
 		return errors.Wrap(err, "pulling binaries")
 	}
+
+	// Delete /var/lib/docker/network
+	if err := deleteDirInMinikube("/var/lib/docker/network"); err != nil {
+		return errors.Wrap(err, "deleting dir")
+	}
+
 	// Create image tarball
 	if err := createImageTarball(); err != nil {
 		return err
@@ -152,6 +158,15 @@ func createImageTarball() error {
 	cmd.Stdout = os.Stdout
 	if err := cmd.Run(); err != nil {
 		return errors.Wrap(err, "creating image tarball")
+	}
+	return nil
+}
+
+func deleteDirInMinikube(dir string) error {
+	cmd := exec.Command("docker", "exec", profile, "sudo", "rm", "-rf", dir)
+	cmd.Stdout = os.Stdout
+	if err := cmd.Run(); err != nil {
+		return errors.Wrapf(err, "deleting %s", dir)
 	}
 	return nil
 }
