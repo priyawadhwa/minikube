@@ -148,6 +148,7 @@ func Preload(k8sVersion, containerRuntime string) error {
 	return os.Rename(tmpDst, targetPath)
 }
 
+// saveChecksumFile saves the checksum file for the preloaded tarball to the host
 func saveChecksumFile(k8sVersion string) error {
 	glog.Infof("saving checksum for %s ...", TarballName(k8sVersion))
 	ctx := context.Background()
