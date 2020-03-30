@@ -41,7 +41,7 @@ func TestOffline(t *testing.T) {
 				ctx, cancel := context.WithTimeout(context.Background(), Minutes(15))
 				defer CleanupWithLogs(t, profile, cancel)
 
-				startArgs := []string{"start", "-p", profile, "--alsologtostderr", "-v=1", "--wait=true", "--container-runtime", runtime}
+				startArgs := []string{"start", "-p", profile, "--alsologtostderr", "-v=1", "--memory=2000", "--wait=true", "--container-runtime", runtime}
 				startArgs = append(startArgs, StartArgs()...)
 				c := exec.CommandContext(ctx, Target(), startArgs...)
 				env := os.Environ()
@@ -53,7 +53,7 @@ func TestOffline(t *testing.T) {
 				rr, err := Run(t, c)
 				if err != nil {
 					// Fatal so that we may collect logs before stop/delete steps
-					t.Fatalf("%s failed: %v", rr.Args, err)
+					t.Fatalf("%s failed: %v", rr.Command(), err)
 				}
 			})
 		}

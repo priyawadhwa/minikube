@@ -24,6 +24,7 @@ import (
 
 	"github.com/golang/glog"
 	"k8s.io/minikube/pkg/drivers/kic"
+	"k8s.io/minikube/pkg/minikube/config"
 	"k8s.io/minikube/pkg/minikube/registry"
 )
 
@@ -85,7 +86,21 @@ func Supported(name string) bool {
 	return false
 }
 
-// IsKIC checks if the driver is a kubernetes in continer
+// MachineType returns appropriate machine name for the driver
+func MachineType(name string) string {
+	if IsKIC(name) {
+		return "container"
+	}
+
+	if IsVM(name) {
+		return "VM"
+	}
+
+	// none or mock
+	return "bare metal machine"
+}
+
+// IsKIC checks if the driver is a kubernetes in container
 func IsKIC(name string) bool {
 	return name == Docker || name == Podman
 }
@@ -97,7 +112,7 @@ func IsMock(name string) bool {
 
 // IsVM checks if the driver is a VM
 func IsVM(name string) bool {
-	if IsKIC(name) || IsMock(name) || BareMetal(name) {
+	if IsKIC(name) || BareMetal(name) {
 		return false
 	}
 	return true
@@ -149,8 +164,8 @@ func FlagDefaults(name string) FlagHints {
 }
 
 // Choices returns a list of drivers which are possible on this system
-func Choices() []registry.DriverState {
-	options := registry.Available()
+func Choices(vm bool) []registry.DriverState {
+	options := registry.Available(vm)
 
 	// Descending priority for predictability and appearance
 	sort.Slice(options, func(i, j int) bool {
@@ -211,4 +226,13 @@ func SetLibvirtURI(v string) {
 	glog.Infof("Setting default libvirt URI to %s", v)
 	os.Setenv("LIBVIRT_DEFAULT_URI", v)
 
+}
+
+// MachineName returns the name of the machine, as seen by the hypervisor given the cluster and node names
+func MachineName(cc config.ClusterConfig, n config.Node) string {
+	// For single node cluster, default to back to old naming
+	if len(cc.Nodes) == 1 || n.ControlPlane {
+		return cc.Name
+	}
+	return fmt.Sprintf("%s-%s", cc.Name, n.Name)
 }

@@ -17,27 +17,23 @@ limitations under the License.
 package constants
 
 import (
-	"fmt"
+	"errors"
 	"path/filepath"
 
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 	"k8s.io/minikube/pkg/minikube/localpath"
-	minikubeVersion "k8s.io/minikube/pkg/version"
 )
 
 const (
 	// DefaultKubernetesVersion is the default kubernetes version
-	DefaultKubernetesVersion = "v1.17.3"
+	DefaultKubernetesVersion = "v1.18.0"
 	// NewestKubernetesVersion is the newest Kubernetes version to test against
-	NewestKubernetesVersion = "v1.17.3"
+	NewestKubernetesVersion = "v1.18.0"
 	// OldestKubernetesVersion is the oldest Kubernetes version to test against
 	OldestKubernetesVersion = "v1.11.10"
-	// DefaultMachineName is the default name for the VM
-	DefaultMachineName = "minikube"
-	// DefaultNodeName is the default name for the kubeadm node within the VM
-	DefaultNodeName = "minikube"
-
+	// DefaultClusterName is the default nane for the k8s cluster
+	DefaultClusterName = "minikube"
 	// DockerDaemonPort is the port Docker daemon listening inside a minikube node (vm or container).
 	DockerDaemonPort = 2376
 	// APIServerPort is the default API server port
@@ -75,10 +71,6 @@ var (
 
 	// SHASuffix is the suffix of a SHA-256 checksum file
 	SHASuffix = ".sha256"
-	// DefaultISOURL is the default location of the minikube.iso file
-	DefaultISOURL = fmt.Sprintf("https://storage.googleapis.com/%s/minikube-%s.iso", minikubeVersion.GetISOPath(), minikubeVersion.GetISOVersion())
-	// DefaultISOSHAURL is the default location of the minikube.iso.sha256 file
-	DefaultISOSHAURL = DefaultISOURL + SHASuffix
 
 	// DockerDaemonEnvs is list of docker-daemon related environment variables.
 	DockerDaemonEnvs = [3]string{DockerHostEnv, DockerTLSVerifyEnv, DockerCertPathEnv}
@@ -101,4 +93,15 @@ var (
 	KubernetesReleaseBinaries = []string{"kubelet", "kubeadm", "kubectl"}
 	// ImageCacheDir is the path to the image cache directory
 	ImageCacheDir = localpath.MakeMiniPath("cache", "images")
+
+	// DefaultNamespaces are kubernetes namespaces used by minikube, including addons
+	DefaultNamespaces = []string{
+		"kube-system",
+		"kubernetes-dashboard",
+		"storage-gluster",
+		"istio-operator",
+	}
+
+	// ErrMachineMissing is returned when virtual machine does not exist due to user interrupt cancel(i.e. Ctrl + C)
+	ErrMachineMissing = errors.New("machine does not exist")
 )

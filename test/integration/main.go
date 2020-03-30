@@ -27,7 +27,6 @@ import (
 
 // General configuration: used to set the VM Driver
 var startArgs = flag.String("minikube-start-args", "", "Arguments to pass to minikube start")
-var defaultDriver = flag.String("expected-default-driver", "", "Expected default driver")
 
 // Flags for faster local integration testing
 var forceProfile = flag.String("profile", "", "force tests to run against a particular profile")
@@ -61,17 +60,17 @@ func Target() string {
 
 // NoneDriver returns whether or not this test is using the none driver
 func NoneDriver() bool {
-	return strings.Contains(*startArgs, "--vm-driver=none")
+	return strings.Contains(*startArgs, "--driver=none") || strings.Contains(*startArgs, "--vm-driver=none")
 }
 
 // HyperVDriver returns whether or not this test is using the Hyper-V driver
 func HyperVDriver() bool {
-	return strings.Contains(*startArgs, "--vm-driver=hyperv")
+	return strings.Contains(*startArgs, "--driver=hyperv") || strings.Contains(*startArgs, "--vm-driver=hyperv")
 }
 
-// ExpectedDefaultDriver returns the expected default driver, if any
-func ExpectedDefaultDriver() string {
-	return *defaultDriver
+// KicDriver returns whether or not this test is using the docker or podman driver
+func KicDriver() bool {
+	return strings.Contains(*startArgs, "--driver=docker") || strings.Contains(*startArgs, "--vm-driver=docker") || strings.Contains(*startArgs, "--vm-driver=podman") || strings.Contains(*startArgs, "driver=podman")
 }
 
 // CanCleanup returns if cleanup is allowed

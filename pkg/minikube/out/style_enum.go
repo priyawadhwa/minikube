@@ -32,10 +32,9 @@ const (
 	Running
 	Provisioning
 	Restarting
-	Reconfiguring
 	Stopping
 	Stopped
-	WarningType
+	Warning
 	Waiting
 	WaitingPods
 	Usage
@@ -61,6 +60,7 @@ const (
 	DeletingHost
 	Copying
 	Connectivity
+	Confused
 	Internet
 	Mounting
 	Celebrate
@@ -89,4 +89,5 @@ const (
 	DryRun
 	AddonEnable
 	AddonDisable
+	Shrug
 )

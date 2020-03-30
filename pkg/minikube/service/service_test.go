@@ -134,13 +134,17 @@ var defaultNamespaceServiceInterface = &MockServiceInterface{
 				Spec: core.ServiceSpec{
 					Ports: []core.ServicePort{
 						{
+							Name:     "port1",
 							NodePort: int32(1111),
+							Port:     int32(11111),
 							TargetPort: intstr.IntOrString{
 								IntVal: int32(11111),
 							},
 						},
 						{
+							Name:     "port2",
 							NodePort: int32(2222),
+							Port:     int32(22222),
 							TargetPort: intstr.IntOrString{
 								IntVal: int32(22222),
 							},
@@ -324,7 +328,7 @@ func TestPrintURLsForService(t *testing.T) {
 			serviceName:    "mock-dashboard",
 			namespace:      "default",
 			tmpl:           template.Must(template.New("svc-arbitrary-template").Parse("{{.Name}}={{.IP}}:{{.Port}}")),
-			expectedOutput: []string{"port1=127.0.0.1:1111", "port2=127.0.0.1:2222"},
+			expectedOutput: []string{"port1/11111=127.0.0.1:1111", "port2/22222=127.0.0.1:2222"},
 		},
 		{
 			description:    "empty slice for no node ports",
@@ -417,15 +421,15 @@ func TestGetServiceURLs(t *testing.T) {
 	defaultAPI := &tests.MockAPI{
 		FakeStore: tests.FakeStore{
 			Hosts: map[string]*host.Host{
-				constants.DefaultMachineName: {
-					Name:   constants.DefaultMachineName,
+				constants.DefaultClusterName: {
+					Name:   constants.DefaultClusterName,
 					Driver: &tests.MockDriver{},
 				},
 			},
 		},
 	}
 	defaultTemplate := template.Must(template.New("svc-template").Parse("http://{{.IP}}:{{.Port}}"))
-	viper.Set(config.MachineProfile, constants.DefaultMachineName)
+	viper.Set(config.ProfileName, constants.DefaultClusterName)
 
 	var tests = []struct {
 		description string
@@ -452,7 +456,7 @@ func TestGetServiceURLs(t *testing.T) {
 					Namespace: "default",
 					Name:      "mock-dashboard",
 					URLs:      []string{"http://127.0.0.1:1111", "http://127.0.0.1:2222"},
-					PortNames: []string{"port1", "port2"},
+					PortNames: []string{"port1/11111", "port2/22222"},
 				},
 				{
 					Namespace: "default",
@@ -490,15 +494,15 @@ func TestGetServiceURLsForService(t *testing.T) {
 	defaultAPI := &tests.MockAPI{
 		FakeStore: tests.FakeStore{
 			Hosts: map[string]*host.Host{
-				constants.DefaultMachineName: {
-					Name:   constants.DefaultMachineName,
+				constants.DefaultClusterName: {
+					Name:   constants.DefaultClusterName,
 					Driver: &tests.MockDriver{},
 				},
 			},
 		},
 	}
 	defaultTemplate := template.Must(template.New("svc-template").Parse("http://{{.IP}}:{{.Port}}"))
-	viper.Set(config.MachineProfile, constants.DefaultMachineName)
+	viper.Set(config.ProfileName, constants.DefaultClusterName)
 
 	var tests = []struct {
 		description string
@@ -830,8 +834,8 @@ func TestWaitAndMaybeOpenService(t *testing.T) {
 	defaultAPI := &tests.MockAPI{
 		FakeStore: tests.FakeStore{
 			Hosts: map[string]*host.Host{
-				constants.DefaultMachineName: {
-					Name:   constants.DefaultMachineName,
+				constants.DefaultClusterName: {
+					Name:   constants.DefaultClusterName,
 					Driver: &tests.MockDriver{},
 				},
 			},
@@ -947,8 +951,8 @@ func TestWaitAndMaybeOpenServiceForNotDefaultNamspace(t *testing.T) {
 	defaultAPI := &tests.MockAPI{
 		FakeStore: tests.FakeStore{
 			Hosts: map[string]*host.Host{
-				constants.DefaultMachineName: {
-					Name:   constants.DefaultMachineName,
+				constants.DefaultClusterName: {
+					Name:   constants.DefaultClusterName,
 					Driver: &tests.MockDriver{},
 				},
 			},

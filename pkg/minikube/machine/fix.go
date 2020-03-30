@@ -19,22 +19,21 @@ package machine
 import (
 	"fmt"
 	"math"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/docker/machine/drivers/virtualbox"
-
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/host"
-	"github.com/docker/machine/libmachine/provision"
 	"github.com/docker/machine/libmachine/state"
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
 	"k8s.io/minikube/pkg/minikube/config"
+	"k8s.io/minikube/pkg/minikube/constants"
 	"k8s.io/minikube/pkg/minikube/driver"
 	"k8s.io/minikube/pkg/minikube/out"
-	"k8s.io/minikube/pkg/util/retry"
 )
 
 // hostRunner is a minimal host.Host based interface for running commands
@@ -48,79 +47,35 @@ const (
 	maxClockDesyncSeconds = 2.1
 )
 
-var (
-	// ErrorMachineNotExist is returned when virtual machine does not exist due to user interrupt cancel(i.e. Ctrl + C)
-	ErrorMachineNotExist = errors.New("machine does not exist")
-)
-
 // fixHost fixes up a previously configured VM so that it is ready to run Kubernetes
-func fixHost(api libmachine.API, mc config.ClusterConfig) (*host.Host, error) {
-	out.T(out.Waiting, "Reconfiguring existing host ...")
-
+func fixHost(api libmachine.API, cc config.ClusterConfig, n config.Node) (*host.Host, error) {
 	start := time.Now()
-	glog.Infof("fixHost starting: %s", mc.Name)
+	glog.Infof("fixHost starting: %s", n.Name)
 	defer func() {
 		glog.Infof("fixHost completed within %s", time.Since(start))
 	}()
 
-	h, err := api.Load(mc.Name)
+	h, err := api.Load(driver.MachineName(cc, n))
 	if err != nil {
 		return h, errors.Wrap(err, "Error loading existing host. Please try running [minikube delete], then run [minikube start] again.")
 	}
 
-	s, err := h.Driver.GetState()
-	if err != nil || s == state.Stopped || s == state.None {
-		// If virtual machine does not exist due to user interrupt cancel(i.e. Ctrl + C), recreate virtual machine
-		me, err := machineExists(h.Driver.DriverName(), s, err)
-		if !me {
-			// If the error is that virtual machine does not exist error, handle error(recreate virtual machine)
-			if err == ErrorMachineNotExist {
-				// remove virtual machine
-				if err := h.Driver.Remove(); err != nil {
-					// skip returning error since it may be before docker image pulling(so, no host exist)
-					if h.Driver.DriverName() != driver.Docker {
-						return nil, errors.Wrap(err, "host remove")
-					}
-				}
-				// remove machine config directory
-				if err := api.Remove(mc.Name); err != nil {
-					return nil, errors.Wrap(err, "api remove")
-				}
-				// recreate virtual machine
-				out.T(out.Meh, "machine '{{.name}}' does not exist. Proceeding ahead with recreating VM.", out.V{"name": mc.Name})
-				h, err = createHost(api, mc)
-				if err != nil {
-					return nil, errors.Wrap(err, "Error recreating VM")
-				}
-				// return ErrMachineNotExist err to initialize preExists flag
-				return h, ErrorMachineNotExist
-			}
-			// If the error is not that virtual machine does not exist error, return error
-			return nil, errors.Wrap(err, "Error getting state for host")
-		}
+	driverName := h.Driver.DriverName()
+
+	// check if need to re-run docker-env
+	maybeWarnAboutEvalEnv(driverName, cc.Name)
+
+	h, err = recreateIfNeeded(api, cc, n, h)
+	if err != nil {
+		return h, err
 	}
 
-	if s == state.Running {
-		out.T(out.Running, `Using the running {{.driver_name}} "{{.profile_name}}" VM ...`, out.V{"driver_name": mc.Driver, "profile_name": mc.Name})
-	} else {
-		out.T(out.Restarting, `Starting existing {{.driver_name}} VM for "{{.profile_name}}" ...`, out.V{"driver_name": mc.Driver, "profile_name": mc.Name})
-		if err := h.Driver.Start(); err != nil {
-			return h, errors.Wrap(err, "driver start")
-		}
-		if err := api.Save(h); err != nil {
-			return h, errors.Wrap(err, "save")
-		}
-	}
-
-	e := engineOptions(mc)
-	if len(e.Env) > 0 {
+	// Avoid reprovisioning "none" driver because provision.Detect requires SSH
+	if !driver.BareMetal(h.Driver.DriverName()) {
+		e := engineOptions(cc)
 		h.HostOptions.EngineOptions.Env = e.Env
-		glog.Infof("Detecting provisioner ...")
-		provisioner, err := provision.DetectProvisioner(h.Driver)
+		err = provisionDockerMachine(h)
 		if err != nil {
-			return h, errors.Wrap(err, "detecting provisioner")
-		}
-		if err := provisioner.Provision(*h.HostOptions.SwarmOptions, *h.HostOptions.AuthOptions, *h.HostOptions.EngineOptions); err != nil {
 			return h, errors.Wrap(err, "provision")
 		}
 	}
@@ -129,20 +84,89 @@ func fixHost(api libmachine.API, mc config.ClusterConfig) (*host.Host, error) {
 		return h, nil
 	}
 
-	if err := postStartSetup(h, mc); err != nil {
+	if err := postStartSetup(h, cc); err != nil {
 		return h, errors.Wrap(err, "post-start")
 	}
 
 	if driver.BareMetal(h.Driver.DriverName()) {
-		glog.Infof("%s is local, skipping auth/time setup (requires ssh)", h.Driver.DriverName())
+		glog.Infof("%s is local, skipping auth/time setup (requires ssh)", driverName)
 		return h, nil
 	}
 
-	glog.Infof("Configuring auth for driver %s ...", h.Driver.DriverName())
-	if err := h.ConfigureAuth(); err != nil {
-		return h, &retry.RetriableError{Err: errors.Wrap(err, "Error configuring auth on host")}
+	return h, ensureSyncedGuestClock(h, driverName)
+}
+
+func recreateIfNeeded(api libmachine.API, cc config.ClusterConfig, n config.Node, h *host.Host) (*host.Host, error) {
+	machineName := driver.MachineName(cc, n)
+	machineType := driver.MachineType(cc.Driver)
+	recreated := false
+	s, serr := h.Driver.GetState()
+
+	glog.Infof("recreateIfNeeded on %s: state=%s err=%v", machineName, s, serr)
+	if serr != nil || s == state.Stopped || s == state.None {
+		// If virtual machine does not exist due to user interrupt cancel(i.e. Ctrl + C), recreate virtual machine
+		me, err := machineExists(h.Driver.DriverName(), s, serr)
+		glog.Infof("exists: %v err=%v", me, err)
+		glog.Infof("%q vs %q", err, constants.ErrMachineMissing)
+
+		if !me || err == constants.ErrMachineMissing {
+			out.T(out.Shrug, `{{.driver_name}} "{{.cluster}}" {{.machine_type}} is missing, will recreate.`, out.V{"driver_name": cc.Driver, "cluster": cc.Name, "machine_type": machineType})
+			demolish(api, cc, n, h)
+
+			glog.Infof("Sleeping 1 second for extra luck!")
+			time.Sleep(1 * time.Second)
+
+			h, err = createHost(api, cc, n)
+			if err != nil {
+				return nil, errors.Wrap(err, "recreate")
+			}
+
+			recreated = true
+			s, serr = h.Driver.GetState()
+		}
 	}
-	return h, ensureSyncedGuestClock(h, mc.Driver)
+
+	if serr != constants.ErrMachineMissing {
+		glog.Warningf("unexpected machine state, will restart: %v", serr)
+	}
+
+	if s == state.Running {
+		if !recreated {
+			out.T(out.Running, `Updating the running {{.driver_name}} "{{.cluster}}" {{.machine_type}} ...`, out.V{"driver_name": cc.Driver, "cluster": cc.Name, "machine_type": machineType})
+		}
+		return h, nil
+	}
+
+	if !recreated {
+		out.T(out.Restarting, `Restarting existing {{.driver_name}} {{.machine_type}} for "{{.cluster}}" ...`, out.V{"driver_name": cc.Driver, "cluster": cc.Name, "machine_type": machineType})
+	}
+	if err := h.Driver.Start(); err != nil {
+		return h, errors.Wrap(err, "driver start")
+	}
+	if err := api.Save(h); err != nil {
+		return h, errors.Wrap(err, "save")
+	}
+	return h, nil
+}
+
+// maybeWarnAboutEvalEnv wil warn user if they need to re-eval their docker-env, podman-env
+// because docker changes the allocated bind ports after restart https://github.com/kubernetes/minikube/issues/6824
+func maybeWarnAboutEvalEnv(drver string, name string) {
+	if !driver.IsKIC(drver) {
+		return
+	}
+	p := os.Getenv(constants.MinikubeActiveDockerdEnv)
+	if p == "" {
+		return
+	}
+	out.T(out.Notice, "Noticed you have an activated docker-env on {{.driver_name}} driver in this terminal:", out.V{"driver_name": drver})
+	// TODO: refactor docker-env package to generate only eval command per shell. https://github.com/kubernetes/minikube/issues/6887
+	out.T(out.Warning, `Please re-eval your docker-env, To ensure your environment variables have updated ports: 
+
+	'minikube -p {{.profile_name}} docker-env'
+
+	`, out.V{"profile_name": name})
+
 }
 
 // ensureGuestClockSync ensures that the guest system clock is relatively in-sync
@@ -196,6 +220,41 @@ func adjustGuestClock(h hostRunner, t time.Time) error {
 	return err
 }
 
+func machineExistsState(s state.State, err error) (bool, error) {
+	if s == state.None {
+		return false, constants.ErrMachineMissing
+	}
+	return true, err
+}
+
+func machineExistsError(s state.State, err error, drverr error) (bool, error) {
+	_ = s // not used
+	if err == drverr {
+		// if the error matches driver error
+		return false, constants.ErrMachineMissing
+	}
+	return true, err
+}
+
+func machineExistsMessage(s state.State, err error, msg string) (bool, error) {
+	if s == state.None || (err != nil && err.Error() == msg) {
+		// if the error contains the message
+		return false, constants.ErrMachineMissing
+	}
+	return true, err
+}
+
+func machineExistsDocker(s state.State, err error) (bool, error) {
+	if s == state.Error {
+		// if the kic image is not present on the host machine, when user cancel `minikube start`, state.Error will be return
+		return false, constants.ErrMachineMissing
+	} else if s == state.None {
+		// if the kic image is present on the host machine, when user cancel `minikube start`, state.None will be return
+		return false, constants.ErrMachineMissing
+	}
+	return true, err
+}
+
 // machineExists checks if virtual machine does not exist
 // if the virtual machine exists, return true
 func machineExists(d string, s state.State, err error) (bool, error) {
@@ -204,57 +263,26 @@ func machineExists(d string, s state.State, err error) (bool, error) {
 	}
 	switch d {
 	case driver.HyperKit:
-		if s == state.None || (err != nil && err.Error() == "connection is shut down") {
-			return false, ErrorMachineNotExist
-		}
-		return true, err
+		return machineExistsMessage(s, err, "connection is shut down")
 	case driver.HyperV:
-		if s == state.None {
-			return false, ErrorMachineNotExist
-		}
-		return true, err
+		return machineExistsState(s, err)
 	case driver.KVM2:
-		if s == state.None {
-			return false, ErrorMachineNotExist
-		}
-		return true, err
+		return machineExistsState(s, err)
 	case driver.None:
-		if s == state.None {
-			return false, ErrorMachineNotExist
-		}
-		return true, err
+		return machineExistsState(s, err)
 	case driver.Parallels:
-		if err != nil && err.Error() == "machine does not exist" {
-			return false, ErrorMachineNotExist
-		}
-		return true, err
+		return machineExistsMessage(s, err, "connection is shut down")
 	case driver.VirtualBox:
-		if err == virtualbox.ErrMachineNotExist {
-			return false, ErrorMachineNotExist
-		}
-		return true, err
+		return machineExistsError(s, err, virtualbox.ErrMachineNotExist)
 	case driver.VMware:
-		if s == state.None {
-			return false, ErrorMachineNotExist
-		}
-		return true, err
+		return machineExistsState(s, err)
 	case driver.VMwareFusion:
-		if s == state.None {
-			return false, ErrorMachineNotExist
-		}
-		return true, err
+		return machineExistsState(s, err)
 	case driver.Docker:
-		if s == state.Error {
-			// if the kic image is not present on the host machine, when user cancel `minikube start`, state.Error will be return
-			return false, ErrorMachineNotExist
-		} else if s == state.None {
-			// if the kic image is present on the host machine, when user cancel `minikube start`, state.None will be return
-			return false, ErrorMachineNotExist
-		}
-		return true, err
+		return machineExistsDocker(s, err)
 	case driver.Mock:
 		if s == state.Error {
-			return false, ErrorMachineNotExist
+			return false, constants.ErrMachineMissing
 		}
 		return true, err
 	default:

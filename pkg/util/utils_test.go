@@ -18,6 +18,8 @@ package util
 
 import (
 	"testing"
+
+	"github.com/blang/semver"
 )
 
 func TestGetBinaryDownloadURL(t *testing.T) {
@@ -49,12 +51,26 @@ func TestCalculateSizeInMB(t *testing.T) {
 		{"1024KB", 1},
 		{"1024mb", 1024},
 		{"1024b", 0},
+		{"1g", 1024},
 	}
 
 	for _, tt := range testData {
-		number := CalculateSizeInMB(tt.size)
-		if number != tt.expectedNumber {
-			t.Fatalf("Expected '%d'' but got '%d'", tt.expectedNumber, number)
+		number, err := CalculateSizeInMB(tt.size)
+		if err != nil {
+			t.Fatalf("unexpected err: %v", err)
 		}
+		if number != tt.expectedNumber {
+			t.Fatalf("Expected '%d' but got '%d' from size '%s'", tt.expectedNumber, number, tt.size)
+		}
+	}
+}
+
+func TestParseKubernetesVersion(t *testing.T) {
+	version, err := ParseKubernetesVersion("v1.8.0-alpha.5")
+	if err != nil {
+		t.Fatalf("Error parsing version: %v", err)
+	}
+	if version.NE(semver.MustParse("1.8.0-alpha.5")) {
+		t.Errorf("Expected: %s, Actual:%s", "1.8.0-alpha.5", version)
 	}
 }

@@ -14,23 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package config
+package driver
 
-// AddNode adds a new node config to an existing cluster.
-func AddNode(cc *ClusterConfig, name string, controlPlane bool, k8sVersion string, profileName string) error {
-	node := Node{
-		Name:   name,
-		Worker: true,
+import "os/exec"
+
+// supportedDrivers is a list of supported drivers on Darwin.
+var supportedDrivers = []string{
+	VirtualBox,
+}
+
+func VBoxManagePath() string {
+	cmd := "VBoxManage"
+	if path, err := exec.LookPath(cmd); err == nil {
+		return path
 	}
-
-	if controlPlane {
-		node.ControlPlane = true
-	}
-
-	if k8sVersion != "" {
-		node.KubernetesVersion = k8sVersion
-	}
-
-	cc.Nodes = append(cc.Nodes, node)
-	return SaveProfile(profileName, cc)
+	return cmd
 }

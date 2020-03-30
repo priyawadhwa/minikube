@@ -68,6 +68,9 @@ func T(style StyleEnum, format string, a ...V) {
 
 // String writes a basic formatted string to stdout
 func String(format string, a ...interface{}) {
+	// Flush log buffer so that output order makes sense
+	glog.Flush()
+
 	if outFile == nil {
 		glog.Warningf("[unset outFile]: %s", fmt.Sprintf(format, a...))
 		return
@@ -118,7 +121,7 @@ func FatalT(format string, a ...V) {
 
 // WarningT is a shortcut for writing a templated warning message to stderr
 func WarningT(format string, a ...V) {
-	ErrT(WarningType, format, a...)
+	ErrT(Warning, format, a...)
 }
 
 // FailureT is a shortcut for writing a templated failure message to stderr
