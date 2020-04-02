@@ -5,7 +5,14 @@ this will create stack.log
 `cd pkg/slowjam/cmd/timeline`
 `go run main.go ~/minikube/stack.log`
 
-
+# To deploy slowjam
+export IMAGE=gcr.io/priya-wadhwa/slowjam:
+cp stack.log pkg/slowjam/cmd/timeline/stack.log
+docker build -t $IMAGE -f pkg/slowjam/cmd/timeline/Dockerfile .
+docker push $IMAGE
+export POD_NAME=
+kubectl run $POD_NAME --image $IMAGE --port 8000
+kubectl expose pod/$POD_NAME --port 8000 --target-port 8000 --name $POD_NAME --type LoadBalancer
 
 # minikube
 
