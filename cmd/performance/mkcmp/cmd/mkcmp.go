@@ -19,22 +19,12 @@ package cmd
 import (
 	"context"
 	"errors"
-	"flag"
 	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 	"k8s.io/minikube/pkg/minikube/perf"
 )
-
-var (
-	logsFile string
-)
-
-func init() {
-	rootCmd.Flags().StringVar(&logsFile, "logs-file", "", "Path to a file with logs that need to be tracked.")
-	flag.Parse()
-}
 
 var rootCmd = &cobra.Command{
 	Use:           "mkcmp [path to first binary] [path to second binary]",
@@ -45,19 +35,13 @@ var rootCmd = &cobra.Command{
 		return validateArgs(args)
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return perf.CompareMinikubeStart(context.Background(), os.Stdout, args, logsFile)
+		return perf.CompareMinikubeStart(context.Background(), os.Stdout, args)
 	},
 }
 
 func validateArgs(args []string) error {
 	if len(args) != 2 {
 		return errors.New("mkcmp requires two minikube binaries to compare: mkcmp [path to first binary] [path to second binary]")
-	}
-	if logsFile == "" {
-		return errors.New("Please pass in a path to a file containing logs to time via --logs-file")
-	}
-	if _, err := os.Stat(logsFile); err != nil {
-		return fmt.Errorf("Please pass in a valid path via --logs-file: %v", err)
 	}
 	return nil
 }

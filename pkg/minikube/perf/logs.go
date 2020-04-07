@@ -35,10 +35,10 @@ func readLogs(logFile string) ([]string, error) {
 	return strings.Split(string(contents), "\n"), nil
 }
 
-// TimeCommandLogs runs command and watches stdout to time how long each provided log takes
-func TimeCommandLogs(cmd *exec.Cmd, logsFile string) (map[string]float64, error) {
+// timeCommandLogs runs command and watches stdout to time how long each new log takes
+func timeCommandLogs(cmd *exec.Cmd) (*result, error) {
 	// matches each log with the amount of time spent on that log
-	var result map[string]float64
+	r := newResult()
 
 	stdout, _ := cmd.StdoutPipe()
 	scanner := bufio.NewScanner(stdout)
@@ -70,7 +70,7 @@ func TimeCommandLogs(cmd *exec.Cmd, logsFile string) (map[string]float64, error)
 
 		timeTaken := time.Since(logTimes).Seconds()
 		logTimes = time.Now()
-		result[strings.Trim(lastLog, "\n")] = timeTaken
+		r.timedLogs[strings.Trim(lastLog, "\n")] = timeTaken
 		log.Printf("%f: %s", timeTaken, lastLog)
 		lastLog = ""
 	}
@@ -78,5 +78,5 @@ func TimeCommandLogs(cmd *exec.Cmd, logsFile string) (map[string]float64, error)
 	if err := cmd.Wait(); err != nil {
 		return nil, errors.Wrap(err, "waiting for minikube")
 	}
-	return result, nil
+	return r, nil
 }

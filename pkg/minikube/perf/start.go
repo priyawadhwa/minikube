@@ -38,8 +38,8 @@ var (
 )
 
 // CompareMinikubeStart compares the time to run `minikube start` between two minikube binaries
-func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []string, logFile string) error {
-	err := collectTimes(ctx, binaries, logFile)
+func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []string) error {
+	err := collectTimes(ctx, binaries)
 	if err != nil {
 		return err
 	}
@@ -47,12 +47,12 @@ func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []string,
 	return nil
 }
 
-func collectTimes(ctx context.Context, binaries []string, logFile string) error {
+func collectTimes(ctx context.Context, binaries []string) error {
 
 	for r := 0; r < runs; r++ {
 		log.Printf("Executing run %d...", r)
 		for _, binary := range binaries {
-			duration, err := collectTimeMinikubeStart(ctx, binary, logFile)
+			duration, err := collectTimeMinikubeStart(ctx, binary)
 			if err != nil {
 				return errors.Wrapf(err, "timing run %d with %s", r, binary)
 			}
@@ -73,7 +73,7 @@ func average(nums []float64) float64 {
 
 // timeMinikubeStart returns the time it takes to execute `minikube start`
 // It deletes the VM after `minikube start`.
-func timeMinikubeStart(ctx context.Context, binary string, logsFile string) (map[string]float64, error) {
+func timeMinikubeStart(ctx context.Context, binary string) (*result, error) {
 	startCmd := exec.CommandContext(ctx, binary, "start")
 	startCmd.Stdout = os.Stdout
 	startCmd.Stderr = os.Stderr
@@ -86,5 +86,5 @@ func timeMinikubeStart(ctx context.Context, binary string, logsFile string) (map
 	}()
 
 	log.Printf("Running: %v...", startCmd.Args)
-	return TimeCommandLogs(startCmd, logsFile)
+	return timeCommandLogs(startCmd)
 }
