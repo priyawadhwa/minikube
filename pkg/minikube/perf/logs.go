@@ -61,7 +61,7 @@ func timeCommandLogs(cmd *exec.Cmd) (*result, error) {
 		log := scanner.Text()
 		// this is the time it took to complete the previous log
 		timeTaken := time.Since(timer).Seconds()
-		fmt.Println(timeTaken, logs)
+		fmt.Println(timeTaken, log)
 
 		timer = time.Now()
 		logs = append(logs, log)
