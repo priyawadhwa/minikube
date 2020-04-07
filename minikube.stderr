@@ -1,0 +1,661 @@
+I0406 15:35:18.185115   59526 start.go:259] hostinfo: {"hostname":"priyawadhwa-macbookpro2.roam.corp.google.com","uptime":263318,"bootTime":1585949200,"procs":458,"os":"darwin","platform":"darwin","platformFamily":"","platformVersion":"10.14.6","kernelVersion":"18.7.0","virtualizationSystem":"","virtualizationRole":"","hostid":"bc166f11-dd33-32af-af67-de0b2c985aa8"}
+W0406 15:35:18.185241   59526 start.go:267] gopshost.Virtualization returned error: not implemented yet
+* minikube v1.9.0 on Darwin 10.14.6
+I0406 15:35:18.199602   59526 main.go:110] libmachine: Found binary path at /Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit
+I0406 15:35:18.199681   59526 main.go:110] libmachine: Launching plugin server for driver hyperkit
+I0406 15:35:18.219491   59526 main.go:110] libmachine: Plugin server listening at address 127.0.0.1:49652
+I0406 15:35:18.220438   59526 main.go:110] libmachine: () Calling .GetVersion
+I0406 15:35:18.221202   59526 main.go:110] libmachine: Using API Version  1
+I0406 15:35:18.221221   59526 main.go:110] libmachine: () Calling .SetConfigRaw
+I0406 15:35:18.221686   59526 main.go:110] libmachine: () Calling .GetMachineName
+I0406 15:35:18.221875   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:18.222070   59526 driver.go:226] Setting default libvirt URI to qemu:///system
+I0406 15:35:18.222566   59526 main.go:110] libmachine: Found binary path at /Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit
+I0406 15:35:18.222605   59526 main.go:110] libmachine: Launching plugin server for driver hyperkit
+I0406 15:35:18.241170   59526 main.go:110] libmachine: Plugin server listening at address 127.0.0.1:49658
+I0406 15:35:18.241906   59526 main.go:110] libmachine: () Calling .GetVersion
+I0406 15:35:18.242565   59526 main.go:110] libmachine: Using API Version  1
+I0406 15:35:18.242592   59526 main.go:110] libmachine: () Calling .SetConfigRaw
+I0406 15:35:18.242956   59526 main.go:110] libmachine: () Calling .GetMachineName
+I0406 15:35:18.243149   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+* Using the hyperkit driver based on existing profile
+I0406 15:35:18.273162   59526 start.go:307] selected driver: hyperkit
+I0406 15:35:18.273180   59526 start.go:596] validating driver "hyperkit" against &{Name:minikube KeepContext:false EmbedCerts:false MinikubeISO:file:///Users/priyawadhwa/minikube/out/minikube.iso Memory:6000 CPUs:2 DiskSize:20000 Driver:hyperkit HyperkitVpnKitSock: HyperkitVSockPorts:[] DockerEnv:[] InsecureRegistry:[] RegistryMirror:[] HostOnlyCIDR:192.168.99.1/24 HypervVirtualSwitch: HypervUseExternalSwitch:false HypervExternalAdapter: KVMNetwork:default KVMQemuURI:qemu:///system KVMGPU:false KVMHidden:false DockerOpt:[] DisableDriverMounts:false NFSShare:[] NFSSharesRoot:/nfsshares UUID: NoVTXCheck:false DNSProxy:false HostDNSResolver:true HostOnlyNicType:virtio NatNicType:virtio KubernetesConfig:{KubernetesVersion:v1.18.0 ClusterName:minikube APIServerName:minikubeCA APIServerNames:[] APIServerIPs:[] DNSDomain:cluster.local ContainerRuntime:docker CRISocket: NetworkPlugin: FeatureGates: ServiceCIDR:10.96.0.0/12 ImageRepository: ExtraOptions:[] ShouldLoadCachedImages:true EnableDefaultCNI:false NodeIP: NodePort:0 NodeName:} Nodes:[{Name:m01 IP:192.168.64.177 Port:8443 KubernetesVersion:v1.18.0 ControlPlane:true Worker:true}] Addons:map[default-storageclass:true storage-provisioner:true]}
+I0406 15:35:18.273270   59526 start.go:602] status for hyperkit: {Installed:true Healthy:true Error:<nil> Fix: Doc:}
+I0406 15:35:18.273340   59526 install.go:49] acquiring lock: {Name:mk4023283b30b374c3f04c8805d539e68824c0b8 Clock:{} Delay:500ms Timeout:10m0s Cancel:<nil>}
+I0406 15:35:18.273544   59526 install.go:115] Validating docker-machine-driver-hyperkit, PATH=/Users/priyawadhwa/.minikube/bin:/usr/local/bin:/bin:/sbin:/usr/bin:/usr/local/sbin:/Users/priyawadhwa/google-cloud-sdk/bin:/usr/local/git/current/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/local/go/bin:/Users/priyawadhwa/skaffold/out:/Users/priyawadhwa/minikube/out:/Users/priyawadhwa/bin:/Users/priyawadhwa/go/bin:/Users/priyawadhwa/.skaffold/builders
+I0406 15:35:18.304793   59526 install.go:77] stdout: /Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit
+I0406 15:35:18.304846   59526 install.go:79] /Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit looks good
+I0406 15:35:18.305006   59526 start.go:946] Using suggested 6000MB memory alloc based on sys=32768MB, container=0MB
+I0406 15:35:18.305150   59526 preload.go:81] Checking if preload exists for k8s version v1.18.0 and runtime docker
+I0406 15:35:18.305189   59526 preload.go:97] Found local preload: /Users/priyawadhwa/.minikube/cache/preloaded-tarball/preloaded-images-k8s-v2-v1.18.0-docker-overlay2-amd64.tar.lz4
+I0406 15:35:18.305204   59526 cache.go:46] Caching tarball of preloaded images
+I0406 15:35:18.305225   59526 preload.go:123] Found /Users/priyawadhwa/.minikube/cache/preloaded-tarball/preloaded-images-k8s-v2-v1.18.0-docker-overlay2-amd64.tar.lz4 in cache, skipping download
+I0406 15:35:18.305230   59526 cache.go:49] Finished downloading the preloaded tar for v1.18.0 on docker
+I0406 15:35:18.305327   59526 profile.go:138] Saving config to /Users/priyawadhwa/.minikube/profiles/minikube/config.json ...
+I0406 15:35:18.306032   59526 cache.go:117] Successfully downloaded all kic artifacts
+I0406 15:35:18.306071   59526 start.go:260] acquiring machines lock for minikube: {Name:mkebca633b724643a1b85154f459ac1b2beb3874 Clock:{} Delay:500ms Timeout:15m0s Cancel:<nil>}
+I0406 15:35:18.306172   59526 start.go:264] acquired machines lock for "minikube" in 83.013µs
+I0406 15:35:18.306196   59526 start.go:90] Skipping create...Using existing machine configuration
+I0406 15:35:18.306206   59526 fix.go:53] fixHost starting: m01
+I0406 15:35:18.306631   59526 main.go:110] libmachine: Found binary path at /Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit
+I0406 15:35:18.306673   59526 main.go:110] libmachine: Launching plugin server for driver hyperkit
+I0406 15:35:18.327342   59526 main.go:110] libmachine: Plugin server listening at address 127.0.0.1:49662
+I0406 15:35:18.328024   59526 main.go:110] libmachine: () Calling .GetVersion
+I0406 15:35:18.328701   59526 main.go:110] libmachine: Using API Version  1
+I0406 15:35:18.328724   59526 main.go:110] libmachine: () Calling .SetConfigRaw
+I0406 15:35:18.329187   59526 main.go:110] libmachine: () Calling .GetMachineName
+I0406 15:35:18.329406   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:18.329577   59526 main.go:110] libmachine: (minikube) Calling .GetState
+I0406 15:35:18.329730   59526 main.go:110] libmachine: (minikube) DBG | exe=/Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit uid=0
+I0406 15:35:18.330040   59526 main.go:110] libmachine: (minikube) DBG | hyperkit pid from json: 59461
+I0406 15:35:18.331766   59526 main.go:110] libmachine: (minikube) DBG | hyperkit pid 59461 missing from process table
+I0406 15:35:18.331812   59526 fix.go:105] recreateIfNeeded on minikube: state=Stopped err=<nil>
+I0406 15:35:18.331839   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:18.331986   59526 fix.go:109] exists: true err=<nil>
+I0406 15:35:18.331996   59526 fix.go:110] %!q(<nil>) vs "machine does not exist"
+W0406 15:35:18.332013   59526 fix.go:130] unexpected machine state, will restart: <nil>
+* Retarting existing hyperkit VM for "minikube" ...
+I0406 15:35:18.344786   59526 main.go:110] libmachine: (minikube) Calling .Start
+I0406 15:35:18.345045   59526 main.go:110] libmachine: (minikube) DBG | exe=/Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit uid=0
+I0406 15:35:18.345082   59526 main.go:110] libmachine: (minikube) DBG | clean start, hyperkit pid file doesn't exist: /Users/priyawadhwa/.minikube/machines/minikube/hyperkit.pid
+I0406 15:35:18.345119   59526 main.go:110] libmachine: (minikube) DBG | Using UUID b7d70592-7856-11ea-8b8f-acde48001122
+I0406 15:35:18.477326   59526 main.go:110] libmachine: (minikube) DBG | Generated MAC 62:aa:6d:f9:13:c1
+I0406 15:35:18.477372   59526 main.go:110] libmachine: (minikube) DBG | Starting with cmdline: loglevel=3 console=ttyS0 console=tty0 noembed nomodeset norestore waitusb=10 systemd.legacy_systemd_cgroup_controller=yes random.trust_cpu=on hw_rng_model=virtio base host=minikube
+I0406 15:35:18.480003   59526 main.go:110] libmachine: (minikube) DBG | Attempt 0
+I0406 15:35:18.480072   59526 main.go:110] libmachine: (minikube) DBG | exe=/Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit uid=0
+I0406 15:35:18.481078   59526 main.go:110] libmachine: (minikube) DBG | hyperkit pid from json: 59542
+I0406 15:35:18.483843   59526 main.go:110] libmachine: (minikube) DBG | Searching for 62:aa:6d:f9:13:c1 in /var/db/dhcpd_leases ...
+I0406 15:35:18.484385   59526 main.go:110] libmachine: (minikube) DBG | Found 176 entries in /var/db/dhcpd_leases!
+I0406 15:35:18.484424   59526 main.go:110] libmachine: (minikube) DBG | dhcp entry: {Name:minikube IPAddress:192.168.64.177 HWAddress:62:aa:6d:f9:13:c1 ID:1,62:aa:6d:f9:13:c1 Lease:0x5e8cffe9}
+I0406 15:35:18.484448   59526 main.go:110] libmachine: (minikube) DBG | Found match: 62:aa:6d:f9:13:c1
+I0406 15:35:18.484469   59526 main.go:110] libmachine: (minikube) DBG | IP: 192.168.64.177
+I0406 15:35:18.484559   59526 main.go:110] libmachine: (minikube) Calling .GetConfigRaw
+I0406 15:35:18.485826   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:18.486100   59526 machine.go:86] provisioning docker machine ...
+I0406 15:35:18.486123   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:18.486363   59526 main.go:110] libmachine: (minikube) Calling .GetMachineName
+I0406 15:35:18.486561   59526 buildroot.go:163] provisioning hostname "minikube"
+I0406 15:35:18.486578   59526 main.go:110] libmachine: (minikube) Calling .GetMachineName
+I0406 15:35:18.486772   59526 main.go:110] libmachine: (minikube) Calling .GetSSHHostname
+I0406 15:35:18.486958   59526 main.go:110] libmachine: (minikube) Calling .GetSSHPort
+I0406 15:35:18.487139   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:18.487295   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:18.487459   59526 main.go:110] libmachine: (minikube) Calling .GetSSHUsername
+I0406 15:35:18.487745   59526 main.go:110] libmachine: Using SSH client type: native
+I0406 15:35:18.488122   59526 main.go:110] libmachine: &{{{<nil> 0 [] [] []} docker [0x43bec70] 0x43bec40 <nil>  [] 0s} 192.168.64.177 22 <nil> <nil>}
+I0406 15:35:18.488148   59526 main.go:110] libmachine: About to run SSH command:
+sudo hostname minikube && echo "minikube" | sudo tee /etc/hostname
+I0406 15:35:18.564459   59526 main.go:110] libmachine: (minikube) DBG | 2020/04/06 15:35:18 fcntl(F_PUNCHHOLE) failed: host filesystem does not support sparse files: Operation not permitted
+I0406 15:35:19.263938   59526 main.go:110] libmachine: (minikube) DBG | 2020/04/06 15:35:19 rdmsr to register 0x140 on vcpu 0
+I0406 15:35:19.370565   59526 main.go:110] libmachine: (minikube) DBG | 2020/04/06 15:35:19 rdmsr to register 0x140 on vcpu 1
+I0406 15:35:25.051020   59526 main.go:110] libmachine: (minikube) DBG | 2020/04/06 15:35:25 rdmsr to register 0x64e on vcpu 0
+I0406 15:35:25.051041   59526 main.go:110] libmachine: (minikube) DBG | 2020/04/06 15:35:25 rdmsr to register 0x34 on vcpu 0
+I0406 15:35:37.689725   59526 main.go:110] libmachine: SSH cmd err, output: <nil>: minikube
+
+I0406 15:35:37.689759   59526 main.go:110] libmachine: (minikube) Calling .GetSSHHostname
+I0406 15:35:37.689987   59526 main.go:110] libmachine: (minikube) Calling .GetSSHPort
+I0406 15:35:37.690211   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:37.690391   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:37.690569   59526 main.go:110] libmachine: (minikube) Calling .GetSSHUsername
+I0406 15:35:37.690820   59526 main.go:110] libmachine: Using SSH client type: native
+I0406 15:35:37.691080   59526 main.go:110] libmachine: &{{{<nil> 0 [] [] []} docker [0x43bec70] 0x43bec40 <nil>  [] 0s} 192.168.64.177 22 <nil> <nil>}
+I0406 15:35:37.691102   59526 main.go:110] libmachine: About to run SSH command:
+
+		if ! grep -xq '.*\sminikube' /etc/hosts; then
+			if grep -xq '127.0.1.1\s.*' /etc/hosts; then
+				sudo sed -i 's/^127.0.1.1\s.*/127.0.1.1 minikube/g' /etc/hosts;
+			else 
+				echo '127.0.1.1 minikube' | sudo tee -a /etc/hosts; 
+			fi
+		fi
+I0406 15:35:37.760262   59526 main.go:110] libmachine: SSH cmd err, output: <nil>: 
+I0406 15:35:37.760291   59526 buildroot.go:169] set auth options {CertDir:/Users/priyawadhwa/.minikube CaCertPath:/Users/priyawadhwa/.minikube/certs/ca.pem CaPrivateKeyPath:/Users/priyawadhwa/.minikube/certs/ca-key.pem CaCertRemotePath:/etc/docker/ca.pem ServerCertPath:/Users/priyawadhwa/.minikube/machines/server.pem ServerKeyPath:/Users/priyawadhwa/.minikube/machines/server-key.pem ClientKeyPath:/Users/priyawadhwa/.minikube/certs/key.pem ServerCertRemotePath:/etc/docker/server.pem ServerKeyRemotePath:/etc/docker/server-key.pem ClientCertPath:/Users/priyawadhwa/.minikube/certs/cert.pem ServerCertSANs:[] StorePath:/Users/priyawadhwa/.minikube}
+I0406 15:35:37.760317   59526 buildroot.go:171] setting up certificates
+I0406 15:35:37.760331   59526 provision.go:83] configureAuth start
+I0406 15:35:37.760341   59526 main.go:110] libmachine: (minikube) Calling .GetMachineName
+I0406 15:35:37.760556   59526 main.go:110] libmachine: (minikube) Calling .GetIP
+I0406 15:35:37.760745   59526 provision.go:132] copyHostCerts
+I0406 15:35:37.762186   59526 provision.go:106] generating server cert: /Users/priyawadhwa/.minikube/machines/server.pem ca-key=/Users/priyawadhwa/.minikube/certs/ca.pem private-key=/Users/priyawadhwa/.minikube/certs/ca-key.pem org=priyawadhwa.minikube san=[192.168.64.177 localhost 127.0.0.1]
+I0406 15:35:37.891553   59526 provision.go:160] copyRemoteCerts
+I0406 15:35:37.891584   59526 main.go:110] libmachine: (minikube) Calling .GetSSHHostname
+I0406 15:35:37.891808   59526 main.go:110] libmachine: (minikube) Calling .GetSSHPort
+I0406 15:35:37.891975   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:37.892149   59526 main.go:110] libmachine: (minikube) Calling .GetSSHUsername
+I0406 15:35:37.923418   59526 ssh_runner.go:101] Run: sudo mkdir -p /etc/docker /etc/docker /etc/docker
+I0406 15:35:37.934940   59526 ssh_runner.go:155] Checked if /etc/docker/server-key.pem exists, but got error: Process exited with status 1
+I0406 15:35:37.935295   59526 ssh_runner.go:174] Transferring 1675 bytes to /etc/docker/server-key.pem
+I0406 15:35:37.935944   59526 ssh_runner.go:193] server-key.pem: copied 1675 bytes
+I0406 15:35:37.954221   59526 ssh_runner.go:155] Checked if /etc/docker/ca.pem exists, but got error: Process exited with status 1
+I0406 15:35:37.954495   59526 ssh_runner.go:174] Transferring 1050 bytes to /etc/docker/ca.pem
+I0406 15:35:37.955088   59526 ssh_runner.go:193] ca.pem: copied 1050 bytes
+I0406 15:35:37.972653   59526 ssh_runner.go:155] Checked if /etc/docker/server.pem exists, but got error: Process exited with status 1
+I0406 15:35:37.972959   59526 ssh_runner.go:174] Transferring 1131 bytes to /etc/docker/server.pem
+I0406 15:35:37.973587   59526 ssh_runner.go:193] server.pem: copied 1131 bytes
+I0406 15:35:37.985752   59526 provision.go:86] configureAuth took 225.40328ms
+I0406 15:35:37.985769   59526 buildroot.go:186] setting minikube options for container-runtime
+I0406 15:35:37.985976   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:37.986178   59526 main.go:110] libmachine: (minikube) Calling .GetSSHHostname
+I0406 15:35:37.986339   59526 main.go:110] libmachine: (minikube) Calling .GetSSHPort
+I0406 15:35:37.986507   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:37.986666   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:37.986810   59526 main.go:110] libmachine: (minikube) Calling .GetSSHUsername
+I0406 15:35:37.986988   59526 main.go:110] libmachine: Using SSH client type: native
+I0406 15:35:37.987167   59526 main.go:110] libmachine: &{{{<nil> 0 [] [] []} docker [0x43bec70] 0x43bec40 <nil>  [] 0s} 192.168.64.177 22 <nil> <nil>}
+I0406 15:35:37.987179   59526 main.go:110] libmachine: About to run SSH command:
+df --output=fstype / | tail -n 1
+I0406 15:35:38.055843   59526 main.go:110] libmachine: SSH cmd err, output: <nil>: tmpfs
+
+I0406 15:35:38.055864   59526 buildroot.go:70] root file system type: tmpfs
+I0406 15:35:38.056029   59526 provision.go:295] Updating docker unit: /lib/systemd/system/docker.service ...
+I0406 15:35:38.056056   59526 main.go:110] libmachine: (minikube) Calling .GetSSHHostname
+I0406 15:35:38.056305   59526 main.go:110] libmachine: (minikube) Calling .GetSSHPort
+I0406 15:35:38.056489   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:38.056663   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:38.056871   59526 main.go:110] libmachine: (minikube) Calling .GetSSHUsername
+I0406 15:35:38.057068   59526 main.go:110] libmachine: Using SSH client type: native
+I0406 15:35:38.057283   59526 main.go:110] libmachine: &{{{<nil> 0 [] [] []} docker [0x43bec70] 0x43bec40 <nil>  [] 0s} 192.168.64.177 22 <nil> <nil>}
+I0406 15:35:38.057376   59526 main.go:110] libmachine: About to run SSH command:
+sudo mkdir -p /lib/systemd/system && printf %s "[Unit]
+Description=Docker Application Container Engine
+Documentation=https://docs.docker.com
+After=network.target  minikube-automount.service docker.socket
+Requires= minikube-automount.service docker.socket 
+
+[Service]
+Type=notify
+
+
+
+# This file is a systemd drop-in unit that inherits from the base dockerd configuration.
+# The base configuration already specifies an 'ExecStart=...' command. The first directive
+# here is to clear out that command inherited from the base configuration. Without this,
+# the command from the base configuration and the command specified here are treated as
+# a sequence of commands, which is not the desired behavior, nor is it valid -- systemd
+# will catch this invalid input and refuse to start the service with an error like:
+#  Service has more than one ExecStart= setting, which is only allowed for Type=oneshot services.
+
+# NOTE: default-ulimit=nofile is set to an arbitrary number for consistency with other
+# container runtimes. If left unlimited, it may result in OOM issues with MySQL.
+ExecStart=
+ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2376 -H unix:///var/run/docker.sock --default-ulimit=nofile=1048576:1048576 --tlsverify --tlscacert /etc/docker/ca.pem --tlscert /etc/docker/server.pem --tlskey /etc/docker/server-key.pem --label provider=hyperkit --insecure-registry 10.96.0.0/12 
+ExecReload=/bin/kill -s HUP $MAINPID
+
+# Having non-zero Limit*s causes performance problems due to accounting overhead
+# in the kernel. We recommend using cgroups to do container-local accounting.
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+
+# Uncomment TasksMax if your systemd version supports it.
+# Only systemd 226 and above support this version.
+TasksMax=infinity
+TimeoutStartSec=0
+
+# set delegate yes so that systemd does not reset the cgroups of docker containers
+Delegate=yes
+
+# kill only the docker process, not all processes in the cgroup
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+" | sudo tee /lib/systemd/system/docker.service.new
+I0406 15:35:38.135086   59526 main.go:110] libmachine: SSH cmd err, output: <nil>: [Unit]
+Description=Docker Application Container Engine
+Documentation=https://docs.docker.com
+After=network.target  minikube-automount.service docker.socket
+Requires= minikube-automount.service docker.socket 
+
+[Service]
+Type=notify
+
+
+
+# This file is a systemd drop-in unit that inherits from the base dockerd configuration.
+# The base configuration already specifies an 'ExecStart=...' command. The first directive
+# here is to clear out that command inherited from the base configuration. Without this,
+# the command from the base configuration and the command specified here are treated as
+# a sequence of commands, which is not the desired behavior, nor is it valid -- systemd
+# will catch this invalid input and refuse to start the service with an error like:
+#  Service has more than one ExecStart= setting, which is only allowed for Type=oneshot services.
+
+# NOTE: default-ulimit=nofile is set to an arbitrary number for consistency with other
+# container runtimes. If left unlimited, it may result in OOM issues with MySQL.
+ExecStart=
+ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2376 -H unix:///var/run/docker.sock --default-ulimit=nofile=1048576:1048576 --tlsverify --tlscacert /etc/docker/ca.pem --tlscert /etc/docker/server.pem --tlskey /etc/docker/server-key.pem --label provider=hyperkit --insecure-registry 10.96.0.0/12 
+ExecReload=/bin/kill -s HUP 
+
+# Having non-zero Limit*s causes performance problems due to accounting overhead
+# in the kernel. We recommend using cgroups to do container-local accounting.
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+
+# Uncomment TasksMax if your systemd version supports it.
+# Only systemd 226 and above support this version.
+TasksMax=infinity
+TimeoutStartSec=0
+
+# set delegate yes so that systemd does not reset the cgroups of docker containers
+Delegate=yes
+
+# kill only the docker process, not all processes in the cgroup
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+
+I0406 15:35:38.135132   59526 main.go:110] libmachine: (minikube) Calling .GetSSHHostname
+I0406 15:35:38.135379   59526 main.go:110] libmachine: (minikube) Calling .GetSSHPort
+I0406 15:35:38.135631   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:38.135816   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:38.135989   59526 main.go:110] libmachine: (minikube) Calling .GetSSHUsername
+I0406 15:35:38.136202   59526 main.go:110] libmachine: Using SSH client type: native
+I0406 15:35:38.136442   59526 main.go:110] libmachine: &{{{<nil> 0 [] [] []} docker [0x43bec70] 0x43bec40 <nil>  [] 0s} 192.168.64.177 22 <nil> <nil>}
+I0406 15:35:38.136464   59526 main.go:110] libmachine: About to run SSH command:
+sudo diff -u /lib/systemd/system/docker.service /lib/systemd/system/docker.service.new || { sudo mv /lib/systemd/system/docker.service.new /lib/systemd/system/docker.service; sudo systemctl -f daemon-reload && sudo sudo systemctl -f restart docker; }
+I0406 15:35:38.719286   59526 main.go:110] libmachine: SSH cmd err, output: <nil>: diff: can't stat '/lib/systemd/system/docker.service': No such file or directory
+
+I0406 15:35:38.719316   59526 machine.go:89] provisioned docker machine in 20.232836759s
+I0406 15:35:38.719349   59526 start.go:189] post-start starting for "minikube" (driver="hyperkit")
+I0406 15:35:38.719365   59526 start.go:199] creating required directories: [/etc/kubernetes/addons /etc/kubernetes/manifests /var/tmp/minikube /var/lib/minikube /var/lib/minikube/certs /var/lib/minikube/images /var/lib/minikube/binaries /tmp/gvisor /usr/share/ca-certificates /etc/ssl/certs]
+I0406 15:35:38.719383   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:38.719572   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:38.719693   59526 start.go:238] Creating SSH client and returning SSHRunner for "hyperkit" driver
+I0406 15:35:38.719714   59526 main.go:110] libmachine: (minikube) Calling .GetSSHHostname
+I0406 15:35:38.719876   59526 main.go:110] libmachine: (minikube) Calling .GetSSHPort
+I0406 15:35:38.720028   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:38.720205   59526 main.go:110] libmachine: (minikube) Calling .GetSSHUsername
+I0406 15:35:38.751265   59526 ssh_runner.go:101] Run: sudo mkdir -p /etc/kubernetes/addons /etc/kubernetes/manifests /var/tmp/minikube /var/lib/minikube /var/lib/minikube/certs /var/lib/minikube/images /var/lib/minikube/binaries /tmp/gvisor /usr/share/ca-certificates /etc/ssl/certs
+I0406 15:35:38.759577   59526 ssh_runner.go:101] Run: cat /etc/os-release
+I0406 15:35:38.764168   59526 info.go:96] Remote host: Buildroot 2019.02.9
+I0406 15:35:38.764187   59526 filesync.go:118] Scanning /Users/priyawadhwa/.minikube/addons for local assets ...
+I0406 15:35:38.764359   59526 filesync.go:118] Scanning /Users/priyawadhwa/.minikube/files for local assets ...
+I0406 15:35:38.764419   59526 start.go:192] post-start completed in 45.054661ms
+I0406 15:35:38.764448   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:38.764663   59526 main.go:110] libmachine: (minikube) Calling .GetSSHHostname
+I0406 15:35:38.764845   59526 main.go:110] libmachine: (minikube) Calling .GetSSHPort
+I0406 15:35:38.765014   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:38.765196   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:38.765361   59526 main.go:110] libmachine: (minikube) Calling .GetSSHUsername
+I0406 15:35:38.765555   59526 main.go:110] libmachine: Using SSH client type: native
+I0406 15:35:38.765754   59526 main.go:110] libmachine: &{{{<nil> 0 [] [] []} docker [0x43bec70] 0x43bec40 <nil>  [] 0s} 192.168.64.177 22 <nil> <nil>}
+I0406 15:35:38.765766   59526 main.go:110] libmachine: About to run SSH command:
+date +%s.%N
+I0406 15:35:38.832689   59526 main.go:110] libmachine: SSH cmd err, output: <nil>: 1586212538.748563189
+
+I0406 15:35:38.832705   59526 fix.go:199] guest clock: 1586212538.748563189
+I0406 15:35:38.832720   59526 fix.go:212] Guest: 2020-04-06 15:35:38.748563189 -0700 PDT Remote: 2020-04-06 15:35:38.764646 -0700 PDT m=+20.679132987 (delta=-16.082811ms)
+I0406 15:35:38.832747   59526 fix.go:183] guest clock delta is within tolerance: -16.082811ms
+I0406 15:35:38.832753   59526 fix.go:55] fixHost completed within 20.526181406s
+I0406 15:35:38.832757   59526 start.go:77] releasing machines lock for "minikube", held for 20.526208068s
+I0406 15:35:38.832806   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:38.833028   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:38.833200   59526 main.go:110] libmachine: (minikube) Calling .GetSSHHostname
+I0406 15:35:38.833349   59526 main.go:110] libmachine: (minikube) Calling .GetSSHPort
+I0406 15:35:38.833488   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:38.833633   59526 main.go:110] libmachine: (minikube) Calling .GetSSHUsername
+I0406 15:35:38.864970   59526 main.go:110] libmachine: (minikube) Calling .GetIP
+I0406 15:35:38.865277   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:38.865428   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:38.866010   59526 ssh_runner.go:101] Run: nslookup kubernetes.io -type=ns
+I0406 15:35:38.869760   59526 start.go:429] [nslookup kubernetes.io -type=ns] failed: nslookup kubernetes.io -type=ns: Process exited with status 1
+stdout:
+
+stderr:
+nslookup: bad address '-type=ns'
+ which might be okay will retry nslookup without query type
+I0406 15:35:38.869829   59526 ssh_runner.go:101] Run: nslookup kubernetes.io
+I0406 15:35:38.873652   59526 ssh_runner.go:101] Run: curl -sS https://k8s.gcr.io/
+I0406 15:35:39.063666   59526 profile.go:138] Saving config to /Users/priyawadhwa/.minikube/profiles/minikube/config.json ...
+I0406 15:35:39.064529   59526 preload.go:81] Checking if preload exists for k8s version v1.18.0 and runtime docker
+I0406 15:35:39.064567   59526 preload.go:97] Found local preload: /Users/priyawadhwa/.minikube/cache/preloaded-tarball/preloaded-images-k8s-v2-v1.18.0-docker-overlay2-amd64.tar.lz4
+I0406 15:35:39.064659   59526 ssh_runner.go:101] Run: docker images --format {{.Repository}}:{{.Tag}}
+I0406 15:35:39.104701   59526 docker.go:367] Got preloaded images: -- stdout --
+k8s.gcr.io/kube-proxy:v1.18.0
+k8s.gcr.io/kube-controller-manager:v1.18.0
+k8s.gcr.io/kube-scheduler:v1.18.0
+k8s.gcr.io/kube-apiserver:v1.18.0
+kubernetesui/dashboard:v2.0.0-rc6
+k8s.gcr.io/pause:3.2
+k8s.gcr.io/coredns:1.6.7
+kindest/kindnetd:0.5.3
+k8s.gcr.io/etcd:3.4.3-0
+kubernetesui/metrics-scraper:v1.0.2
+gcr.io/k8s-minikube/storage-provisioner:v1.8.1
+
+-- /stdout --
+I0406 15:35:39.104726   59526 docker.go:305] Images already preloaded, skipping extraction
+I0406 15:35:39.104789   59526 ssh_runner.go:101] Run: sudo systemctl is-active --quiet service containerd
+I0406 15:35:39.117104   59526 ssh_runner.go:101] Run: sudo systemctl is-active --quiet service crio
+I0406 15:35:39.129367   59526 ssh_runner.go:101] Run: sudo systemctl start docker
+I0406 15:35:39.138255   59526 ssh_runner.go:101] Run: docker version --format {{.Server.Version}}
+* Preparing Kubernetes v1.18.0 on Docker 19.03.8 ...
+I0406 15:35:39.193509   59526 main.go:110] libmachine: (minikube) Calling .GetIP
+I0406 15:35:39.193797   59526 settings.go:123] acquiring lock: {Name:mk08b640e5210e49e03676d45db439487960f8cf Clock:{} Delay:500ms Timeout:1m0s Cancel:<nil>}
+I0406 15:35:39.193916   59526 settings.go:131] Updating kubeconfig:  /Users/priyawadhwa/.kube/config
+I0406 15:35:39.197935   59526 lock.go:35] WriteFile acquiring /Users/priyawadhwa/.kube/config: {Name:mk9e17d05877010c3868e9fdf2409e58ffec1b81 Clock:{} Delay:500ms Timeout:1m0s Cancel:<nil>}
+I0406 15:35:39.198674   59526 main.go:110] libmachine: Found binary path at /Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit
+I0406 15:35:39.198709   59526 main.go:110] libmachine: Launching plugin server for driver hyperkit
+I0406 15:35:39.217623   59526 main.go:110] libmachine: Plugin server listening at address 127.0.0.1:49685
+I0406 15:35:39.218313   59526 main.go:110] libmachine: () Calling .GetVersion
+I0406 15:35:39.218921   59526 main.go:110] libmachine: Using API Version  1
+I0406 15:35:39.218939   59526 main.go:110] libmachine: () Calling .SetConfigRaw
+I0406 15:35:39.219299   59526 main.go:110] libmachine: () Calling .GetMachineName
+I0406 15:35:39.219464   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:39.219629   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:39.219778   59526 main.go:110] libmachine: (minikube) Calling .GetSSHHostname
+I0406 15:35:39.219895   59526 main.go:110] libmachine: (minikube) Calling .GetSSHPort
+I0406 15:35:39.220021   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:39.220153   59526 main.go:110] libmachine: (minikube) Calling .GetSSHUsername
+I0406 15:35:39.250838   59526 preload.go:81] Checking if preload exists for k8s version v1.18.0 and runtime docker
+I0406 15:35:39.250911   59526 preload.go:97] Found local preload: /Users/priyawadhwa/.minikube/cache/preloaded-tarball/preloaded-images-k8s-v2-v1.18.0-docker-overlay2-amd64.tar.lz4
+I0406 15:35:39.250958   59526 ssh_runner.go:101] Run: docker images --format {{.Repository}}:{{.Tag}}
+I0406 15:35:39.281984   59526 docker.go:367] Got preloaded images: -- stdout --
+k8s.gcr.io/kube-proxy:v1.18.0
+k8s.gcr.io/kube-apiserver:v1.18.0
+k8s.gcr.io/kube-scheduler:v1.18.0
+k8s.gcr.io/kube-controller-manager:v1.18.0
+kubernetesui/dashboard:v2.0.0-rc6
+k8s.gcr.io/pause:3.2
+k8s.gcr.io/coredns:1.6.7
+kindest/kindnetd:0.5.3
+k8s.gcr.io/etcd:3.4.3-0
+kubernetesui/metrics-scraper:v1.0.2
+gcr.io/k8s-minikube/storage-provisioner:v1.8.1
+
+-- /stdout --
+I0406 15:35:39.282007   59526 docker.go:305] Images already preloaded, skipping extraction
+I0406 15:35:39.282074   59526 ssh_runner.go:101] Run: docker images --format {{.Repository}}:{{.Tag}}
+I0406 15:35:39.312542   59526 docker.go:367] Got preloaded images: -- stdout --
+k8s.gcr.io/kube-proxy:v1.18.0
+k8s.gcr.io/kube-controller-manager:v1.18.0
+k8s.gcr.io/kube-apiserver:v1.18.0
+k8s.gcr.io/kube-scheduler:v1.18.0
+kubernetesui/dashboard:v2.0.0-rc6
+k8s.gcr.io/pause:3.2
+k8s.gcr.io/coredns:1.6.7
+kindest/kindnetd:0.5.3
+k8s.gcr.io/etcd:3.4.3-0
+kubernetesui/metrics-scraper:v1.0.2
+gcr.io/k8s-minikube/storage-provisioner:v1.8.1
+
+-- /stdout --
+I0406 15:35:39.312562   59526 cache_images.go:68] Images are preloaded, skipping loading
+I0406 15:35:39.312606   59526 kubeadm.go:125] kubeadm options: {CertDir:/var/lib/minikube/certs ServiceCIDR:10.96.0.0/12 PodSubnet: AdvertiseAddress:192.168.64.177 APIServerPort:8443 KubernetesVersion:v1.18.0 EtcdDataDir:/var/lib/minikube/etcd ClusterName:minikube NodeName:minikube DNSDomain:cluster.local CRISocket: ImageRepository: ComponentOptions:[{Component:apiServer ExtraArgs:map[enable-admission-plugins:NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,NodeRestriction,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota] Pairs:map[certSANs:["127.0.0.1", "localhost", "192.168.64.177"]]}] FeatureArgs:map[] NoTaintMaster:true NodeIP:192.168.64.177 ControlPlaneAddress:192.168.64.177}
+I0406 15:35:39.312717   59526 kubeadm.go:129] kubeadm config:
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: 192.168.64.177
+  bindPort: 8443
+bootstrapTokens:
+  - groups:
+      - system:bootstrappers:kubeadm:default-node-token
+    ttl: 24h0m0s
+    usages:
+      - signing
+      - authentication
+nodeRegistration:
+  criSocket: /var/run/dockershim.sock
+  name: "minikube"
+  kubeletExtraArgs:
+    node-ip: 192.168.64.177
+  taints: []
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+apiServer:
+  certSANs: ["127.0.0.1", "localhost", "192.168.64.177"]
+  extraArgs:
+    enable-admission-plugins: "NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,NodeRestriction,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota"
+certificatesDir: /var/lib/minikube/certs
+clusterName: mk
+controlPlaneEndpoint: 192.168.64.177:8443
+dns:
+  type: CoreDNS
+etcd:
+  local:
+    dataDir: /var/lib/minikube/etcd
+kubernetesVersion: v1.18.0
+networking:
+  dnsDomain: cluster.local
+  podSubnet: ""
+  serviceSubnet: 10.96.0.0/12
+
+I0406 15:35:39.312785   59526 ssh_runner.go:101] Run: docker info --format {{.CgroupDriver}}
+I0406 15:35:39.351332   59526 kubeadm.go:659] kubelet [Unit]
+Wants=docker.socket
+
+[Service]
+ExecStart=
+ExecStart=/var/lib/minikube/binaries/v1.18.0/kubelet --authorization-mode=Webhook --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --cgroup-driver=systemd --client-ca-file=/var/lib/minikube/certs/ca.crt --cluster-domain=cluster.local --config=/var/lib/kubelet/config.yaml --container-runtime=docker --fail-swap-on=false --hostname-override=minikube --kubeconfig=/etc/kubernetes/kubelet.conf --node-ip=192.168.64.177 --pod-manifest-path=/etc/kubernetes/manifests
+
+[Install]
+ config:
+{KubernetesVersion:v1.18.0 ClusterName:minikube APIServerName:minikubeCA APIServerNames:[] APIServerIPs:[] DNSDomain:cluster.local ContainerRuntime:docker CRISocket: NetworkPlugin: FeatureGates: ServiceCIDR:10.96.0.0/12 ImageRepository: ExtraOptions:[] ShouldLoadCachedImages:true EnableDefaultCNI:false NodeIP: NodePort:0 NodeName:}
+I0406 15:35:39.351424   59526 ssh_runner.go:101] Run: sudo ls /var/lib/minikube/binaries/v1.18.0
+I0406 15:35:39.357196   59526 binaries.go:42] Found k8s binaries, skipping transfer
+I0406 15:35:39.357271   59526 ssh_runner.go:101] Run: sudo mkdir -p /var/tmp/minikube /etc/systemd/system/kubelet.service.d /lib/systemd/system
+I0406 15:35:39.363563   59526 ssh_runner.go:174] Transferring 1053 bytes to /var/tmp/minikube/kubeadm.yaml.new
+I0406 15:35:39.364533   59526 ssh_runner.go:193] kubeadm.yaml.new: copied 1053 bytes
+I0406 15:35:39.376561   59526 ssh_runner.go:174] Transferring 535 bytes to /etc/systemd/system/kubelet.service.d/10-kubeadm.conf.new
+I0406 15:35:39.377158   59526 ssh_runner.go:193] 10-kubeadm.conf.new: copied 535 bytes
+I0406 15:35:39.390473   59526 ssh_runner.go:174] Transferring 349 bytes to /lib/systemd/system/kubelet.service.new
+I0406 15:35:39.391001   59526 ssh_runner.go:193] kubelet.service.new: copied 349 bytes
+I0406 15:35:39.403385   59526 ssh_runner.go:101] Run: /bin/bash -c "pgrep kubelet && diff -u /lib/systemd/system/kubelet.service /lib/systemd/system/kubelet.service.new && diff -u /etc/systemd/system/kubelet.service.d/10-kubeadm.conf /etc/systemd/system/kubelet.service.d/10-kubeadm.conf.new"
+I0406 15:35:39.411615   59526 ssh_runner.go:101] Run: /bin/bash -c "sudo cp /lib/systemd/system/kubelet.service.new /lib/systemd/system/kubelet.service && sudo cp /etc/systemd/system/kubelet.service.d/10-kubeadm.conf.new /etc/systemd/system/kubelet.service.d/10-kubeadm.conf && sudo systemctl daemon-reload && sudo systemctl restart kubelet"
+I0406 15:35:39.508563   59526 certs.go:51] Setting up /Users/priyawadhwa/.minikube/profiles/minikube for IP: 192.168.64.177
+I0406 15:35:39.508755   59526 certs.go:167] skipping minikubeCA CA generation: /Users/priyawadhwa/.minikube/ca.key
+I0406 15:35:39.508949   59526 certs.go:167] skipping proxyClientCA CA generation: /Users/priyawadhwa/.minikube/proxy-client-ca.key
+I0406 15:35:39.509133   59526 certs.go:261] skipping minikube-user signed cert generation: /Users/priyawadhwa/.minikube/profiles/minikube/client.key
+I0406 15:35:39.509279   59526 certs.go:261] skipping minikube signed cert generation: /Users/priyawadhwa/.minikube/profiles/minikube/apiserver.key.71a19ed2
+I0406 15:35:39.509455   59526 certs.go:261] skipping aggregator signed cert generation: /Users/priyawadhwa/.minikube/profiles/minikube/proxy-client.key
+I0406 15:35:39.515941   59526 ssh_runner.go:244] found /var/lib/minikube/certs/apiserver.crt: 1306 bytes, modified at 2020-04-06 22:34:33.269936146 +0000 +0000
+I0406 15:35:39.515962   59526 ssh_runner.go:158] Skipping copying /var/lib/minikube/certs/apiserver.crt as it already exists
+I0406 15:35:39.522576   59526 ssh_runner.go:244] found /var/lib/minikube/certs/apiserver.key: 1679 bytes, modified at 2020-04-06 22:34:33.271219295 +0000 +0000
+I0406 15:35:39.522599   59526 ssh_runner.go:158] Skipping copying /var/lib/minikube/certs/apiserver.key as it already exists
+I0406 15:35:39.530024   59526 ssh_runner.go:244] found /var/lib/minikube/certs/proxy-client.crt: 1103 bytes, modified at 2020-04-06 22:34:33.667077887 +0000 +0000
+I0406 15:35:39.530044   59526 ssh_runner.go:158] Skipping copying /var/lib/minikube/certs/proxy-client.crt as it already exists
+I0406 15:35:39.533811   59526 ssh_runner.go:244] found /var/lib/minikube/certs/proxy-client.key: 1675 bytes, modified at 2020-04-06 22:34:33.66734486 +0000 +0000
+I0406 15:35:39.533829   59526 ssh_runner.go:158] Skipping copying /var/lib/minikube/certs/proxy-client.key as it already exists
+I0406 15:35:39.537609   59526 ssh_runner.go:244] found /var/lib/minikube/certs/ca.crt: 1066 bytes, modified at 2020-03-12 22:58:51.25524494 +0000 +0000
+I0406 15:35:39.537627   59526 ssh_runner.go:158] Skipping copying /var/lib/minikube/certs/ca.crt as it already exists
+I0406 15:35:39.541198   59526 ssh_runner.go:244] found /var/lib/minikube/certs/ca.key: 1675 bytes, modified at 2020-03-12 22:58:51.255561666 +0000 +0000
+I0406 15:35:39.541214   59526 ssh_runner.go:158] Skipping copying /var/lib/minikube/certs/ca.key as it already exists
+I0406 15:35:39.544732   59526 ssh_runner.go:244] found /var/lib/minikube/certs/proxy-client-ca.crt: 1074 bytes, modified at 2020-03-12 22:58:51.315264397 +0000 +0000
+I0406 15:35:39.544755   59526 ssh_runner.go:158] Skipping copying /var/lib/minikube/certs/proxy-client-ca.crt as it already exists
+I0406 15:35:39.548604   59526 ssh_runner.go:244] found /var/lib/minikube/certs/proxy-client-ca.key: 1675 bytes, modified at 2020-03-12 22:58:51.315564729 +0000 +0000
+I0406 15:35:39.548622   59526 ssh_runner.go:158] Skipping copying /var/lib/minikube/certs/proxy-client-ca.key as it already exists
+I0406 15:35:39.552042   59526 ssh_runner.go:155] Checked if /usr/share/ca-certificates/minikubeCA.pem exists, but got error: Process exited with status 1
+I0406 15:35:39.552252   59526 ssh_runner.go:174] Transferring 1066 bytes to /usr/share/ca-certificates/minikubeCA.pem
+I0406 15:35:39.552846   59526 ssh_runner.go:193] minikubeCA.pem: copied 1066 bytes
+I0406 15:35:39.565673   59526 ssh_runner.go:174] Transferring 398 bytes to /var/lib/minikube/kubeconfig
+I0406 15:35:39.566186   59526 ssh_runner.go:193] kubeconfig: copied 398 bytes
+I0406 15:35:39.577740   59526 ssh_runner.go:101] Run: openssl version
+I0406 15:35:39.582021   59526 ssh_runner.go:101] Run: sudo /bin/bash -c "test -f /usr/share/ca-certificates/minikubeCA.pem && ln -fs /usr/share/ca-certificates/minikubeCA.pem /etc/ssl/certs/minikubeCA.pem"
+I0406 15:35:39.590043   59526 ssh_runner.go:101] Run: openssl x509 -hash -noout -in /usr/share/ca-certificates/minikubeCA.pem
+I0406 15:35:39.601074   59526 ssh_runner.go:101] Run: sudo /bin/bash -c "test -L /etc/ssl/certs/b5213941.0 || ln -fs /etc/ssl/certs/minikubeCA.pem /etc/ssl/certs/b5213941.0"
+I0406 15:35:39.607905   59526 kubeadm.go:279] StartCluster: {Name:minikube KeepContext:false EmbedCerts:false MinikubeISO:file:///Users/priyawadhwa/minikube/out/minikube.iso Memory:6000 CPUs:2 DiskSize:20000 Driver:hyperkit HyperkitVpnKitSock: HyperkitVSockPorts:[] DockerEnv:[] InsecureRegistry:[] RegistryMirror:[] HostOnlyCIDR:192.168.99.1/24 HypervVirtualSwitch: HypervUseExternalSwitch:false HypervExternalAdapter: KVMNetwork:default KVMQemuURI:qemu:///system KVMGPU:false KVMHidden:false DockerOpt:[] DisableDriverMounts:false NFSShare:[] NFSSharesRoot:/nfsshares UUID: NoVTXCheck:false DNSProxy:false HostDNSResolver:true HostOnlyNicType:virtio NatNicType:virtio KubernetesConfig:{KubernetesVersion:v1.18.0 ClusterName:minikube APIServerName:minikubeCA APIServerNames:[] APIServerIPs:[] DNSDomain:cluster.local ContainerRuntime:docker CRISocket: NetworkPlugin: FeatureGates: ServiceCIDR:10.96.0.0/12 ImageRepository: ExtraOptions:[] ShouldLoadCachedImages:true EnableDefaultCNI:false NodeIP: NodePort:0 NodeName:} Nodes:[{Name:m01 IP:192.168.64.177 Port:8443 KubernetesVersion:v1.18.0 ControlPlane:true Worker:true}] Addons:map[]}
+I0406 15:35:39.608010   59526 ssh_runner.go:101] Run: docker ps --filter status=paused --filter=name=k8s_.*_(kube-system)_ --format={{.ID}}
+I0406 15:35:39.640231   59526 ssh_runner.go:101] Run: sudo ls /var/lib/kubelet/kubeadm-flags.env /var/lib/kubelet/config.yaml /var/lib/minikube/etcd
+I0406 15:35:39.647562   59526 kubeadm.go:290] found existing configuration files, will attempt cluster restart
+I0406 15:35:39.647579   59526 kubeadm.go:427] restartCluster start
+I0406 15:35:39.647631   59526 ssh_runner.go:101] Run: sudo test -d /data/minikube
+I0406 15:35:39.654474   59526 kubeadm.go:150] /data/minikube skipping compat symlinks: sudo test -d /data/minikube: Process exited with status 1
+stdout:
+
+stderr:
+I0406 15:35:39.661925   59526 ssh_runner.go:101] Run: sudo diff -u /var/tmp/minikube/kubeadm.yaml /var/tmp/minikube/kubeadm.yaml.new
+I0406 15:35:39.668410   59526 kubeadm.go:397] needs reset: configs differ:
+
+** stderr ** 
+diff: can't stat '/var/tmp/minikube/kubeadm.yaml': No such file or directory
+
+** /stderr **
+I0406 15:35:39.668496   59526 ssh_runner.go:101] Run: sudo /bin/bash -c "grep https://192.168.64.177:8443 /etc/kubernetes/admin.conf || sudo rm -f /etc/kubernetes/admin.conf"
+I0406 15:35:39.682290   59526 ssh_runner.go:101] Run: sudo /bin/bash -c "grep https://192.168.64.177:8443 /etc/kubernetes/kubelet.conf || sudo rm -f /etc/kubernetes/kubelet.conf"
+I0406 15:35:39.695037   59526 ssh_runner.go:101] Run: sudo /bin/bash -c "grep https://192.168.64.177:8443 /etc/kubernetes/controller-manager.conf || sudo rm -f /etc/kubernetes/controller-manager.conf"
+I0406 15:35:39.706087   59526 ssh_runner.go:101] Run: sudo /bin/bash -c "grep https://192.168.64.177:8443 /etc/kubernetes/scheduler.conf || sudo rm -f /etc/kubernetes/scheduler.conf"
+I0406 15:35:39.717224   59526 ssh_runner.go:101] Run: sudo cp /var/tmp/minikube/kubeadm.yaml.new /var/tmp/minikube/kubeadm.yaml
+I0406 15:35:39.724872   59526 kubeadm.go:483] resetting cluster from /var/tmp/minikube/kubeadm.yaml
+I0406 15:35:39.724887   59526 ssh_runner.go:101] Run: /bin/bash -c "sudo env PATH=/var/lib/minikube/binaries/v1.18.0:$PATH kubeadm init phase certs all --config /var/tmp/minikube/kubeadm.yaml"
+I0406 15:35:39.821146   59526 ssh_runner.go:101] Run: /bin/bash -c "sudo env PATH=/var/lib/minikube/binaries/v1.18.0:$PATH kubeadm init phase kubeconfig all --config /var/tmp/minikube/kubeadm.yaml"
+I0406 15:35:41.221029   59526 ssh_runner.go:141] Completed: /bin/bash -c "sudo env PATH=/var/lib/minikube/binaries/v1.18.0:$PATH kubeadm init phase kubeconfig all --config /var/tmp/minikube/kubeadm.yaml": (1.399837874s)
+I0406 15:35:41.221051   59526 ssh_runner.go:101] Run: /bin/bash -c "sudo env PATH=/var/lib/minikube/binaries/v1.18.0:$PATH kubeadm init phase control-plane all --config /var/tmp/minikube/kubeadm.yaml"
+I0406 15:35:41.291627   59526 ssh_runner.go:101] Run: /bin/bash -c "sudo env PATH=/var/lib/minikube/binaries/v1.18.0:$PATH kubeadm init phase etcd local --config /var/tmp/minikube/kubeadm.yaml"
+I0406 15:35:41.371197   59526 kverify.go:52] waiting for apiserver process to appear ...
+I0406 15:35:41.371283   59526 ssh_runner.go:101] Run: sudo pgrep -xnf kube-apiserver.*minikube.*
+I0406 15:35:41.885176   59526 ssh_runner.go:101] Run: sudo pgrep -xnf kube-apiserver.*minikube.*
+I0406 15:35:42.385778   59526 ssh_runner.go:101] Run: sudo pgrep -xnf kube-apiserver.*minikube.*
+I0406 15:35:42.886280   59526 ssh_runner.go:101] Run: sudo pgrep -xnf kube-apiserver.*minikube.*
+I0406 15:35:43.386870   59526 ssh_runner.go:101] Run: sudo pgrep -xnf kube-apiserver.*minikube.*
+I0406 15:35:43.888304   59526 ssh_runner.go:101] Run: sudo pgrep -xnf kube-apiserver.*minikube.*
+I0406 15:35:44.385895   59526 ssh_runner.go:101] Run: sudo pgrep -xnf kube-apiserver.*minikube.*
+I0406 15:35:44.887749   59526 ssh_runner.go:101] Run: sudo pgrep -xnf kube-apiserver.*minikube.*
+I0406 15:35:45.386384   59526 ssh_runner.go:101] Run: sudo pgrep -xnf kube-apiserver.*minikube.*
+I0406 15:35:45.887092   59526 ssh_runner.go:101] Run: sudo pgrep -xnf kube-apiserver.*minikube.*
+I0406 15:35:46.388650   59526 ssh_runner.go:101] Run: sudo pgrep -xnf kube-apiserver.*minikube.*
+I0406 15:35:46.886320   59526 ssh_runner.go:101] Run: sudo pgrep -xnf kube-apiserver.*minikube.*
+I0406 15:35:47.387962   59526 ssh_runner.go:101] Run: sudo pgrep -xnf kube-apiserver.*minikube.*
+I0406 15:35:47.886373   59526 ssh_runner.go:101] Run: sudo pgrep -xnf kube-apiserver.*minikube.*
+I0406 15:35:48.386883   59526 ssh_runner.go:101] Run: sudo pgrep -xnf kube-apiserver.*minikube.*
+I0406 15:35:48.399434   59526 kverify.go:72] duration metric: took 7.028117539s to wait for apiserver process to appear ...
+I0406 15:35:48.399454   59526 kverify.go:187] waiting for apiserver healthz status ...
+I0406 15:35:48.399465   59526 kverify.go:297] Checking apiserver healthz at https://192.168.64.177:8443/healthz ...
+W0406 15:35:53.397522   59526 kverify.go:315] https://192.168.64.177:8443/healthz response: <nil> &{Status:403 Forbidden StatusCode:403 Proto:HTTP/1.1 ProtoMajor:1 ProtoMinor:1 Header:map[Content-Length:[192] Content-Type:[application/json] Date:[Mon, 06 Apr 2020 22:35:53 GMT] X-Content-Type-Options:[nosniff]] Body:0xc0000bd4c0 ContentLength:192 TransferEncoding:[] Close:false Uncompressed:false Trailer:map[] Request:0xc0004cc300 TLS:0xc0001ce000}
+I0406 15:35:53.901636   59526 kverify.go:297] Checking apiserver healthz at https://192.168.64.177:8443/healthz ...
+W0406 15:35:53.909615   59526 kverify.go:315] https://192.168.64.177:8443/healthz response: <nil> &{Status:500 Internal Server Error StatusCode:500 Proto:HTTP/1.1 ProtoMajor:1 ProtoMinor:1 Header:map[Content-Length:[864] Content-Type:[text/plain; charset=utf-8] Date:[Mon, 06 Apr 2020 22:35:53 GMT] X-Content-Type-Options:[nosniff]] Body:0xc00062ebc0 ContentLength:864 TransferEncoding:[] Close:false Uncompressed:false Trailer:map[] Request:0xc000362600 TLS:0xc0001ce370}
+I0406 15:35:54.401262   59526 kverify.go:297] Checking apiserver healthz at https://192.168.64.177:8443/healthz ...
+W0406 15:35:54.406627   59526 kverify.go:315] https://192.168.64.177:8443/healthz response: <nil> &{Status:500 Internal Server Error StatusCode:500 Proto:HTTP/1.1 ProtoMajor:1 ProtoMinor:1 Header:map[Content-Length:[843] Content-Type:[text/plain; charset=utf-8] Date:[Mon, 06 Apr 2020 22:35:54 GMT] X-Content-Type-Options:[nosniff]] Body:0xc0000bd700 ContentLength:843 TransferEncoding:[] Close:false Uncompressed:false Trailer:map[] Request:0xc0004cc400 TLS:0xc000578160}
+I0406 15:35:54.898338   59526 kverify.go:297] Checking apiserver healthz at https://192.168.64.177:8443/healthz ...
+I0406 15:35:54.915987   59526 kverify.go:239] control plane version: v1.18.0
+I0406 15:35:54.916004   59526 kverify.go:230] duration metric: took 6.516428349s to wait for apiserver health ...
+I0406 15:35:54.916014   59526 kverify.go:150] waiting for kube-system pods to appear ...
+I0406 15:35:54.927994   59526 kverify.go:168] 5 kube-system pods found
+I0406 15:35:54.928016   59526 kverify.go:170] "etcd-minikube" [f67442fc-b41e-4893-956d-b83049a0508d] Pending
+I0406 15:35:54.928022   59526 kverify.go:170] "kube-apiserver-minikube" [b825e1ed-bd4d-4355-84fd-fb1a9cae9fdb] Pending
+I0406 15:35:54.928027   59526 kverify.go:170] "kube-controller-manager-minikube" [06ea313d-06fa-471a-b175-b89e862cbc82] Running
+I0406 15:35:54.928032   59526 kverify.go:170] "kube-scheduler-minikube" [169e0902-9d6f-498a-be2b-ec8d506ca7e0] Running
+I0406 15:35:54.928039   59526 kverify.go:170] "storage-provisioner" [6cf74575-b8c1-4ffa-8729-1a77f77f0096] Pending: PodScheduled:Unschedulable (0/1 nodes are available: 1 node(s) had taint {node.kubernetes.io/not-ready: }, that the pod didn't tolerate.)
+I0406 15:35:54.928046   59526 kverify.go:181] duration metric: took 12.026823ms to wait for pod list to return data ...
+I0406 15:35:54.928060   59526 ssh_runner.go:101] Run: /bin/bash -c "sudo env PATH=/var/lib/minikube/binaries/v1.18.0:$PATH kubeadm init phase addon all --config /var/tmp/minikube/kubeadm.yaml"
+I0406 15:35:55.179762   59526 ssh_runner.go:101] Run: /bin/bash -c "cat /proc/$(pgrep kube-apiserver)/oom_adj"
+I0406 15:35:55.189013   59526 ops.go:35] apiserver oom_adj: -16
+I0406 15:35:55.189026   59526 kubeadm.go:431] restartCluster took 15.541164167s
+I0406 15:35:55.189034   59526 kubeadm.go:281] StartCluster complete in 15.580856489s
+I0406 15:35:55.189157   59526 addons.go:280] enableAddons start: toEnable=map[default-storageclass:true storage-provisioner:true], additional=[]
+* Enabling addons: default-storageclass, storage-provisioner
+I0406 15:35:55.204952   59526 addons.go:45] Setting default-storageclass=true in profile "minikube"
+I0406 15:35:55.205150   59526 addons.go:230] enableOrDisableStorageClasses default-storageclass=true on "minikube"
+I0406 15:35:55.214205   59526 main.go:110] libmachine: Found binary path at /Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit
+I0406 15:35:55.214248   59526 main.go:110] libmachine: Launching plugin server for driver hyperkit
+I0406 15:35:55.233932   59526 main.go:110] libmachine: Plugin server listening at address 127.0.0.1:49725
+I0406 15:35:55.234610   59526 main.go:110] libmachine: () Calling .GetVersion
+I0406 15:35:55.235185   59526 main.go:110] libmachine: Using API Version  1
+I0406 15:35:55.235201   59526 main.go:110] libmachine: () Calling .SetConfigRaw
+I0406 15:35:55.235657   59526 main.go:110] libmachine: () Calling .GetMachineName
+I0406 15:35:55.235795   59526 main.go:110] libmachine: (minikube) Calling .GetState
+I0406 15:35:55.235939   59526 main.go:110] libmachine: (minikube) DBG | exe=/Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit uid=0
+I0406 15:35:55.236247   59526 main.go:110] libmachine: (minikube) DBG | hyperkit pid from json: 59542
+I0406 15:35:55.246682   59526 addons.go:104] Setting addon default-storageclass=true in "minikube"
+W0406 15:35:55.246874   59526 addons.go:119] addon default-storageclass should already be in state true
+I0406 15:35:55.246891   59526 host.go:65] Checking if "minikube" exists ...
+I0406 15:35:55.247248   59526 main.go:110] libmachine: Found binary path at /Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit
+I0406 15:35:55.247284   59526 main.go:110] libmachine: Launching plugin server for driver hyperkit
+I0406 15:35:55.266011   59526 main.go:110] libmachine: Plugin server listening at address 127.0.0.1:49729
+I0406 15:35:55.266795   59526 main.go:110] libmachine: () Calling .GetVersion
+I0406 15:35:55.267390   59526 main.go:110] libmachine: Using API Version  1
+I0406 15:35:55.267407   59526 main.go:110] libmachine: () Calling .SetConfigRaw
+I0406 15:35:55.267772   59526 main.go:110] libmachine: () Calling .GetMachineName
+I0406 15:35:55.268335   59526 main.go:110] libmachine: Found binary path at /Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit
+I0406 15:35:55.268368   59526 main.go:110] libmachine: Launching plugin server for driver hyperkit
+I0406 15:35:55.286785   59526 main.go:110] libmachine: Plugin server listening at address 127.0.0.1:49734
+I0406 15:35:55.287436   59526 main.go:110] libmachine: () Calling .GetVersion
+I0406 15:35:55.288028   59526 main.go:110] libmachine: Using API Version  1
+I0406 15:35:55.288049   59526 main.go:110] libmachine: () Calling .SetConfigRaw
+I0406 15:35:55.288388   59526 main.go:110] libmachine: () Calling .GetMachineName
+I0406 15:35:55.288529   59526 main.go:110] libmachine: (minikube) Calling .GetState
+I0406 15:35:55.288641   59526 main.go:110] libmachine: (minikube) DBG | exe=/Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit uid=0
+I0406 15:35:55.288937   59526 main.go:110] libmachine: (minikube) DBG | hyperkit pid from json: 59542
+I0406 15:35:55.290593   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:55.290799   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:55.290932   59526 main.go:110] libmachine: (minikube) Calling .GetSSHHostname
+I0406 15:35:55.291077   59526 main.go:110] libmachine: (minikube) Calling .GetSSHPort
+I0406 15:35:55.291192   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:55.291324   59526 main.go:110] libmachine: (minikube) Calling .GetSSHUsername
+I0406 15:35:55.322445   59526 addons.go:197] installing /etc/kubernetes/addons/storageclass.yaml
+I0406 15:35:55.323509   59526 ssh_runner.go:174] Transferring 271 bytes to /etc/kubernetes/addons/storageclass.yaml
+I0406 15:35:55.324254   59526 ssh_runner.go:193] storageclass.yaml: copied 271 bytes
+I0406 15:35:55.337457   59526 ssh_runner.go:101] Run: sudo KUBECONFIG=/var/lib/minikube/kubeconfig /var/lib/minikube/binaries/v1.18.0/kubectl apply -f /etc/kubernetes/addons/storageclass.yaml
+I0406 15:35:55.642242   59526 main.go:110] libmachine: Making call to close driver server
+I0406 15:35:55.642262   59526 main.go:110] libmachine: (minikube) Calling .Close
+I0406 15:35:55.642495   59526 main.go:110] libmachine: Successfully made call to close driver server
+I0406 15:35:55.642503   59526 main.go:110] libmachine: (minikube) DBG | Closing plugin on server side
+I0406 15:35:55.642514   59526 main.go:110] libmachine: Making call to close connection to plugin binary
+I0406 15:35:55.642539   59526 main.go:110] libmachine: Making call to close driver server
+I0406 15:35:55.642571   59526 main.go:110] libmachine: (minikube) Calling .Close
+I0406 15:35:55.642809   59526 main.go:110] libmachine: (minikube) DBG | Closing plugin on server side
+I0406 15:35:55.642810   59526 main.go:110] libmachine: Successfully made call to close driver server
+I0406 15:35:55.642826   59526 main.go:110] libmachine: Making call to close connection to plugin binary
+I0406 15:35:55.642843   59526 main.go:110] libmachine: Making call to close driver server
+I0406 15:35:55.642852   59526 main.go:110] libmachine: (minikube) Calling .Close
+I0406 15:35:55.643071   59526 main.go:110] libmachine: Successfully made call to close driver server
+I0406 15:35:55.643075   59526 main.go:110] libmachine: (minikube) DBG | Closing plugin on server side
+I0406 15:35:55.643091   59526 main.go:110] libmachine: Making call to close connection to plugin binary
+I0406 15:35:55.643105   59526 addons.go:70] Writing out "minikube" config to set default-storageclass=true...
+I0406 15:35:55.643547   59526 addons.go:45] Setting storage-provisioner=true in profile "minikube"
+I0406 15:35:55.644522   59526 addons.go:104] Setting addon storage-provisioner=true in "minikube"
+W0406 15:35:55.644650   59526 addons.go:119] addon storage-provisioner should already be in state true
+I0406 15:35:55.644668   59526 host.go:65] Checking if "minikube" exists ...
+I0406 15:35:55.645011   59526 main.go:110] libmachine: Found binary path at /Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit
+I0406 15:35:55.645049   59526 main.go:110] libmachine: Launching plugin server for driver hyperkit
+I0406 15:35:55.663377   59526 main.go:110] libmachine: Plugin server listening at address 127.0.0.1:49742
+I0406 15:35:55.664025   59526 main.go:110] libmachine: () Calling .GetVersion
+I0406 15:35:55.664639   59526 main.go:110] libmachine: Using API Version  1
+I0406 15:35:55.664656   59526 main.go:110] libmachine: () Calling .SetConfigRaw
+I0406 15:35:55.665029   59526 main.go:110] libmachine: () Calling .GetMachineName
+I0406 15:35:55.665582   59526 main.go:110] libmachine: Found binary path at /Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit
+I0406 15:35:55.665614   59526 main.go:110] libmachine: Launching plugin server for driver hyperkit
+I0406 15:35:55.684374   59526 main.go:110] libmachine: Plugin server listening at address 127.0.0.1:49746
+I0406 15:35:55.685041   59526 main.go:110] libmachine: () Calling .GetVersion
+I0406 15:35:55.685675   59526 main.go:110] libmachine: Using API Version  1
+I0406 15:35:55.685690   59526 main.go:110] libmachine: () Calling .SetConfigRaw
+I0406 15:35:55.686053   59526 main.go:110] libmachine: () Calling .GetMachineName
+I0406 15:35:55.686201   59526 main.go:110] libmachine: (minikube) Calling .GetState
+I0406 15:35:55.686336   59526 main.go:110] libmachine: (minikube) DBG | exe=/Users/priyawadhwa/.minikube/bin/docker-machine-driver-hyperkit uid=0
+I0406 15:35:55.686674   59526 main.go:110] libmachine: (minikube) DBG | hyperkit pid from json: 59542
+I0406 15:35:55.688496   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:55.688676   59526 main.go:110] libmachine: (minikube) Calling .DriverName
+I0406 15:35:55.688815   59526 main.go:110] libmachine: (minikube) Calling .GetSSHHostname
+I0406 15:35:55.688960   59526 main.go:110] libmachine: (minikube) Calling .GetSSHPort
+I0406 15:35:55.689120   59526 main.go:110] libmachine: (minikube) Calling .GetSSHKeyPath
+I0406 15:35:55.689263   59526 main.go:110] libmachine: (minikube) Calling .GetSSHUsername
+I0406 15:35:55.720040   59526 addons.go:197] installing /etc/kubernetes/addons/storage-provisioner.yaml
+I0406 15:35:55.720947   59526 ssh_runner.go:174] Transferring 1709 bytes to /etc/kubernetes/addons/storage-provisioner.yaml
+I0406 15:35:55.721514   59526 ssh_runner.go:193] storage-provisioner.yaml: copied 1709 bytes
+I0406 15:35:55.734233   59526 ssh_runner.go:101] Run: sudo KUBECONFIG=/var/lib/minikube/kubeconfig /var/lib/minikube/binaries/v1.18.0/kubectl apply -f /etc/kubernetes/addons/storage-provisioner.yaml
+I0406 15:35:55.898499   59526 main.go:110] libmachine: Making call to close driver server
+I0406 15:35:55.898515   59526 main.go:110] libmachine: (minikube) Calling .Close
+I0406 15:35:55.898735   59526 main.go:110] libmachine: Successfully made call to close driver server
+I0406 15:35:55.898746   59526 main.go:110] libmachine: Making call to close connection to plugin binary
+I0406 15:35:55.898757   59526 main.go:110] libmachine: Making call to close driver server
+I0406 15:35:55.898765   59526 main.go:110] libmachine: (minikube) Calling .Close
+I0406 15:35:55.898981   59526 main.go:110] libmachine: Successfully made call to close driver server
+I0406 15:35:55.898993   59526 main.go:110] libmachine: (minikube) DBG | Closing plugin on server side
+I0406 15:35:55.899024   59526 main.go:110] libmachine: Making call to close connection to plugin binary
+I0406 15:35:55.899058   59526 addons.go:70] Writing out "minikube" config to set storage-provisioner=true...
+I0406 15:35:55.899496   59526 addons.go:282] enableAddons completed in 710.326727ms
+I0406 15:35:55.899528   59526 main.go:110] libmachine: Making call to close driver server
+I0406 15:35:55.899536   59526 main.go:110] libmachine: (minikube) Calling .Close
+I0406 15:35:55.899712   59526 main.go:110] libmachine: Successfully made call to close driver server
+I0406 15:35:55.899718   59526 main.go:110] libmachine: (minikube) DBG | Closing plugin on server side
+I0406 15:35:55.899725   59526 main.go:110] libmachine: Making call to close connection to plugin binary
+I0406 15:35:55.899750   59526 main.go:110] libmachine: Making call to close driver server
+I0406 15:35:55.899760   59526 main.go:110] libmachine: (minikube) Calling .Close
+I0406 15:35:55.900054   59526 main.go:110] libmachine: (minikube) DBG | Closing plugin on server side
+I0406 15:35:55.900067   59526 main.go:110] libmachine: Successfully made call to close driver server
+I0406 15:35:55.900083   59526 main.go:110] libmachine: Making call to close connection to plugin binary
+* Done! kubectl is now configured to use "minikube"
+I0406 15:35:55.978985   59526 start.go:457] kubectl: 1.18.0, cluster: 1.18.0 (minor skew: 0)
