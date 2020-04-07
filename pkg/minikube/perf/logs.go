@@ -19,6 +19,7 @@ package perf
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os/exec"
@@ -46,41 +47,31 @@ func timeCommandLogs(cmd *exec.Cmd) (*result, error) {
 
 	stdout, _ := cmd.StdoutPipe()
 	scanner := bufio.NewScanner(stdout)
-	scanner.Split(bufio.ScanBytes)
+	scanner.Split(bufio.ScanLines)
 
 	log.Printf("Running: %v...", cmd.Args)
 	if err := cmd.Start(); err != nil {
 		return nil, errors.Wrap(err, "starting cmd")
 	}
 
-	logTimes := time.Now()
-
-	lastLog := ""
-	currentLog := ""
+	timer := time.Now()
+	var logs []string
+	var timings []float64
 
 	for scanner.Scan() {
-		text := scanner.Text()
-		currentLog = currentLog + text
-
-		// reached the end of the current log
-		if strings.Contains(currentLog, "\n") {
-			lastLog = currentLog
-			currentLog = ""
-			continue
-		}
-
-		// we haven't yet reached the end of the log
-		if !strings.Contains(lastLog, "\n") {
-			continue
-		}
-
-		timeTaken := time.Since(logTimes).Seconds()
-		logTimes = time.Now()
-		r.addTimedLog(strings.Trim(lastLog, "\n"), timeTaken)
-		log.Printf("%f: %s", timeTaken, lastLog)
-		lastLog = ""
+		log := scanner.Text()
+		fmt.Println(log)
+		// this is the time it took to complete the previous log
+		timeTaken := time.Since(timer).Seconds()
+		timer = time.Now()
+		logs = append(logs, log)
+		timings = append(timings, timeTaken)
 	}
-	r.addTimedLog(strings.Trim(lastLog, "\n"), time.Since(logTimes).Seconds())
+	// add the time it took to get from the final log to finishing the command
+	timings = append(timings, time.Since(timer).Seconds())
+	for i, log := range logs {
+		r.addTimedLog(strings.Trim(log, "\n"), timings[i+1])
+	}
 
 	if err := cmd.Wait(); err != nil {
 		return nil, errors.Wrapf(err, "waiting for minikube: %s", stderr.String())

@@ -56,7 +56,7 @@ func collectTimes(ctx context.Context, binaries []string) error {
 			if err != nil {
 				return errors.Wrapf(err, "timing run %d with %s", r, binary)
 			}
-			fmt.Println(duration)
+			fmt.Printf("%v\n", duration)
 		}
 	}
 
