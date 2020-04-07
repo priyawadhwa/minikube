@@ -113,7 +113,7 @@ func (d *Driver) Create() error {
 		}
 	}
 
-	var waitForPreload *sync.WaitGroup
+	var waitForPreload sync.WaitGroup
 	waitForPreload.Add(1)
 
 	volumeCreated := make(chan bool)
