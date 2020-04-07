@@ -85,7 +85,7 @@ func DeleteContainer(ociBin string, name string) error {
 }
 
 // CreateContainerNode creates a new container node
-func CreateContainerNode(p CreateParams) error {
+func CreateContainerNode(p CreateParams, waitForVolume chan bool) error {
 	runArgs := []string{
 		"-d", // run the container detached
 		"-t", // allocate a tty for entrypoint logs
@@ -125,6 +125,7 @@ func CreateContainerNode(p CreateParams) error {
 		if err := createDockerVolume(p.Name, p.Name); err != nil {
 			return errors.Wrapf(err, "creating volume for %s container", p.Name)
 		}
+		waitForVolume <- true
 		glog.Infof("Successfully created a docker volume %s", p.Name)
 		runArgs = append(runArgs, "--volume", fmt.Sprintf("%s:/var", p.Name))
 		// setting resource limit in privileged mode is only supported by docker

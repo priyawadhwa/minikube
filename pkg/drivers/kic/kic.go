@@ -22,6 +22,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/docker/machine/libmachine/drivers"
@@ -112,7 +113,29 @@ func (d *Driver) Create() error {
 		}
 	}
 
-	if err := oci.CreateContainerNode(params); err != nil {
+	var waitForPreload *sync.WaitGroup
+	waitForPreload.Add(1)
+
+	volumeCreated := make(chan bool)
+
+	go func() {
+		<-volumeCreated
+		defer waitForPreload.Done()
+		// If preload doesn't exist, don't bother extracting tarball to volume
+		if !download.PreloadExists(d.NodeConfig.KubernetesVersion, d.NodeConfig.ContainerRuntime) {
+			return
+		}
+		t := time.Now()
+		glog.Infof("Starting extracting preloaded images to volume")
+		// Extract preloaded images to container
+		if err := oci.ExtractTarballToVolume(download.TarballPath(d.NodeConfig.KubernetesVersion, d.NodeConfig.ContainerRuntime), params.Name, BaseImage); err != nil {
+			glog.Infof("Unable to extract preloaded tarball to volume: %v", err)
+		} else {
+			glog.Infof("Took %f seconds to extract preloaded images to volume", time.Since(t).Seconds())
+		}
+	}()
+
+	if err := oci.CreateContainerNode(params, volumeCreated); err != nil {
 		return errors.Wrap(err, "create kic node")
 	}
 
@@ -120,19 +143,7 @@ func (d *Driver) Create() error {
 		return errors.Wrap(err, "prepare kic ssh")
 	}
 
-	// If preload doesn't exist, don't bother extracting tarball to volume
-	if !download.PreloadExists(d.NodeConfig.KubernetesVersion, d.NodeConfig.ContainerRuntime) {
-		return nil
-	}
-	t := time.Now()
-	glog.Infof("Starting extracting preloaded images to volume")
-	// Extract preloaded images to container
-	if err := oci.ExtractTarballToVolume(download.TarballPath(d.NodeConfig.KubernetesVersion, d.NodeConfig.ContainerRuntime), params.Name, BaseImage); err != nil {
-		glog.Infof("Unable to extract preloaded tarball to volume: %v", err)
-	} else {
-		glog.Infof("Took %f seconds to extract preloaded images to volume", time.Since(t).Seconds())
-	}
-
+	waitForPreload.Wait()
 	return nil
 }
 
