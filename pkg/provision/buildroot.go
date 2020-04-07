@@ -59,6 +59,9 @@ func (p *BuildrootProvisioner) CompatibleWithHost() bool {
 
 // GenerateDockerOptions generates the *provision.DockerOptions for this provisioner
 func (p *BuildrootProvisioner) GenerateDockerOptions(dockerPort int) (*provision.DockerOptions, error) {
+	if true {
+		return nil, nil
+	}
 	var engineCfg bytes.Buffer
 
 	drvLabel := fmt.Sprintf("provider=%s", p.Driver.DriverName())

@@ -32,6 +32,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/otiai10/copy"
 	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/clientcmd/api"
 	"k8s.io/client-go/tools/clientcmd/api/latest"
@@ -116,15 +117,23 @@ func SetupCerts(cmd command.Runner, k8s config.KubernetesConfig, n config.Node) 
 		copyableFiles = append(copyableFiles, kubeCfgFile)
 	}
 
+	var g errgroup.Group
 	for _, f := range copyableFiles {
-		glog.Infof("copying: %s/%s", f.GetTargetDir(), f.GetTargetName())
-		if err := cmd.Copy(f); err != nil {
-			return nil, errors.Wrapf(err, "Copy %s", f.GetAssetName())
-		}
+		f := f
+		g.Go(func() error {
+			glog.Infof("copying: %s/%s", f.GetTargetDir(), f.GetTargetName())
+			if err := cmd.Copy(f); err != nil {
+				return errors.Wrapf(err, "Copy %s", f.GetAssetName())
+			}
+			return nil
+		})
 	}
 
 	if err := installCertSymlinks(cmd, caCerts); err != nil {
 		return nil, errors.Wrapf(err, "certificate symlinks")
+	}
+	if err := g.Wait(); err != nil {
+		return nil, errors.Wrap(err, "copying files")
 	}
 	return copyableFiles, nil
 }
