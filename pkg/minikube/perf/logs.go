@@ -18,6 +18,7 @@ package perf
 
 import (
 	"bufio"
+	"bytes"
 	"io/ioutil"
 	"log"
 	"os/exec"
@@ -40,13 +41,16 @@ func timeCommandLogs(cmd *exec.Cmd) (*result, error) {
 	// matches each log with the amount of time spent on that log
 	r := newResult()
 
+	stderr := bytes.NewBuffer([]byte{})
+	cmd.Stderr = stderr
+
 	stdout, _ := cmd.StdoutPipe()
 	scanner := bufio.NewScanner(stdout)
 	scanner.Split(bufio.ScanBytes)
 
 	log.Printf("Running: %v...", cmd.Args)
 	if err := cmd.Start(); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "starting cmd")
 	}
 
 	logTimes := time.Now()
@@ -58,25 +62,28 @@ func timeCommandLogs(cmd *exec.Cmd) (*result, error) {
 		text := scanner.Text()
 		currentLog = currentLog + text
 
+		// reached the end of the current log
 		if strings.Contains(currentLog, "\n") {
 			lastLog = currentLog
 			currentLog = ""
 			continue
 		}
 
+		// we haven't yet reached the end of the log
 		if !strings.Contains(lastLog, "\n") {
 			continue
 		}
 
 		timeTaken := time.Since(logTimes).Seconds()
 		logTimes = time.Now()
-		r.timedLogs[strings.Trim(lastLog, "\n")] = timeTaken
+		r.addTimedLog(strings.Trim(lastLog, "\n"), timeTaken)
 		log.Printf("%f: %s", timeTaken, lastLog)
 		lastLog = ""
 	}
+	r.addTimedLog(strings.Trim(lastLog, "\n"), time.Since(logTimes).Seconds())
 
 	if err := cmd.Wait(); err != nil {
-		return nil, errors.Wrap(err, "waiting for minikube")
+		return nil, errors.Wrapf(err, "waiting for minikube: %s", stderr.String())
 	}
 	return r, nil
 }

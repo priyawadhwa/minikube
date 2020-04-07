@@ -17,6 +17,7 @@ limitations under the License.
 package perf
 
 type result struct {
+	logs      []string
 	timedLogs map[string]float64
 }
 
@@ -24,4 +25,9 @@ func newResult() *result {
 	return &result{
 		timedLogs: map[string]float64{},
 	}
+}
+
+func (r *result) addTimedLog(log string, time float64) {
+	r.logs = append(r.logs, log)
+	r.timedLogs[log] = time
 }
