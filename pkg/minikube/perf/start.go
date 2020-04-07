@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"os/exec"
 
 	"github.com/pkg/errors"
@@ -75,8 +74,6 @@ func average(nums []float64) float64 {
 // It deletes the VM after `minikube start`.
 func timeMinikubeStart(ctx context.Context, binary string) (*result, error) {
 	startCmd := exec.CommandContext(ctx, binary, "start")
-	startCmd.Stdout = os.Stdout
-	startCmd.Stderr = os.Stderr
 
 	deleteCmd := exec.CommandContext(ctx, binary, "delete")
 	defer func() {

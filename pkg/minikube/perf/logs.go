@@ -18,7 +18,6 @@ package perf
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -42,10 +41,10 @@ func timeCommandLogs(cmd *exec.Cmd) (*result, error) {
 	// matches each log with the amount of time spent on that log
 	r := newResult()
 
-	stderr := bytes.NewBuffer([]byte{})
-	cmd.Stderr = stderr
-
-	stdout, _ := cmd.StdoutPipe()
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, errors.Wrap(err, "getting stdout pipe")
+	}
 	scanner := bufio.NewScanner(stdout)
 	scanner.Split(bufio.ScanLines)
 
@@ -74,7 +73,7 @@ func timeCommandLogs(cmd *exec.Cmd) (*result, error) {
 	}
 
 	if err := cmd.Wait(); err != nil {
-		return nil, errors.Wrapf(err, "waiting for minikube: %s", stderr.String())
+		return nil, errors.Wrap(err, "waiting for minikube")
 	}
 	return r, nil
 }
