@@ -27,7 +27,7 @@ import (
 
 const (
 	// runs is the number of times each binary will be timed for 'minikube start'
-	runs = 1
+	runs = 3
 )
 
 var (
@@ -48,7 +48,7 @@ func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []string)
 func collectResults(ctx context.Context, binaries []string) (*resultManager, error) {
 	rm := newResultManager()
 	for run := 0; run < runs; run++ {
-		log.Printf("Executing run %d...", run)
+		log.Printf("Executing run %d/%d...", run+1, runs)
 		for _, binary := range binaries {
 			r, err := collectTimeMinikubeStart(ctx, binary)
 			if err != nil {
