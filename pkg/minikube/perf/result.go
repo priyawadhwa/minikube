@@ -16,6 +16,137 @@ limitations under the License.
 
 package perf
 
+import (
+	"fmt"
+	"os"
+	"strings"
+
+	"github.com/olekukonko/tablewriter"
+)
+
+type resultManager struct {
+	results map[string][]*result
+}
+
+func newResultManager() *resultManager {
+	return &resultManager{
+		results: map[string][]*result{},
+	}
+}
+
+func (rm *resultManager) addResult(binary string, r *result) {
+	_, ok := rm.results[binary]
+	if !ok {
+		rm.results[binary] = []*result{r}
+		return
+	}
+	rm.results[binary] = append(rm.results[binary], r)
+}
+
+func (rm *resultManager) totalTimes(binary string) []float64 {
+	var totals []float64
+	results, ok := rm.results[binary]
+	if !ok {
+		return nil
+	}
+	for _, r := range results {
+		total := 0.0
+		for _, t := range r.timedLogs {
+			total += t
+		}
+		totals = append(totals, total)
+	}
+	return totals
+}
+
+func (rm *resultManager) averageTime(binary string) float64 {
+	times := rm.totalTimes(binary)
+	return average(times)
+}
+
+func average(times []float64) float64 {
+	total := 0.0
+	for _, t := range times {
+		total += t
+	}
+	return total / float64(len(times))
+}
+
+func (rm *resultManager) summarizeResults(binaries []string) {
+	// print total and average times
+	for _, b := range binaries {
+		fmt.Printf("Times for %s: %v\n", b, rm.totalTimes(b))
+		fmt.Printf("Average time for %s: %v\n\n", b, rm.averageTime(b))
+	}
+
+	// print out summary per log
+	rm.summarizeTimesPerLog(binaries)
+}
+
+func (rm *resultManager) summarizeTimesPerLog(binaries []string) {
+	results := rm.results[binaries[0]]
+	logs := results[0].logs
+
+	table := make([][]string, len(logs))
+	for i := range table {
+		table[i] = make([]string, len(binaries)+1)
+	}
+
+	for i, l := range logs {
+		table[i][0] = l
+	}
+
+	for i, b := range binaries {
+		results := rm.results[b]
+		averageTimeForLog := averageTimePerLog(results)
+		for log, time := range averageTimeForLog {
+			index := indexForLog(logs, log)
+			if index == -1 {
+				continue
+			}
+			table[index][i+1] = fmt.Sprintf("%f", time)
+		}
+	}
+
+	t := tablewriter.NewWriter(os.Stdout)
+	t.SetHeader([]string{"Log", binaries[0], binaries[1]})
+
+	for _, v := range table {
+		t.Append(v)
+	}
+	fmt.Println("Averages Time Per Log")
+	fmt.Println("```")
+	t.Render() // Send output
+	fmt.Println("```")
+}
+
+func indexForLog(logs []string, log string) int {
+	for i, l := range logs {
+		if strings.Contains(log, l) {
+			return i
+		}
+	}
+	return -1
+}
+
+func averageTimePerLog(results []*result) map[string]float64 {
+	collection := map[string][]float64{}
+	for _, r := range results {
+		for log, time := range r.timedLogs {
+			if _, ok := collection[log]; !ok {
+				collection[log] = []float64{time}
+			} else {
+				collection[log] = append(collection[log], time)
+			}
+		}
+	}
+	avgs := map[string]float64{}
+	for log, times := range collection {
+		avgs[log] = average(times)
+	}
+	return avgs
+}
+
 type result struct {
 	logs      []string
 	timedLogs map[string]float64

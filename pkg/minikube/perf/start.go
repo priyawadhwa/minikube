@@ -18,7 +18,6 @@ package perf
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"os/exec"
@@ -38,36 +37,27 @@ var (
 
 // CompareMinikubeStart compares the time to run `minikube start` between two minikube binaries
 func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []string) error {
-	err := collectTimes(ctx, binaries)
+	rm, err := collectResults(ctx, binaries)
 	if err != nil {
 		return err
 	}
-
+	rm.summarizeResults(binaries)
 	return nil
 }
 
-func collectTimes(ctx context.Context, binaries []string) error {
-
-	for r := 0; r < runs; r++ {
-		log.Printf("Executing run %d...", r)
+func collectResults(ctx context.Context, binaries []string) (*resultManager, error) {
+	rm := newResultManager()
+	for run := 0; run < runs; run++ {
+		log.Printf("Executing run %d...", run)
 		for _, binary := range binaries {
-			duration, err := collectTimeMinikubeStart(ctx, binary)
+			r, err := collectTimeMinikubeStart(ctx, binary)
 			if err != nil {
-				return errors.Wrapf(err, "timing run %d with %s", r, binary)
+				return nil, errors.Wrapf(err, "timing run %d with %s", run, binary)
 			}
-			fmt.Printf("%v\n", duration)
+			rm.addResult(binary, r)
 		}
 	}
-
-	return nil
-}
-
-func average(nums []float64) float64 {
-	total := float64(0)
-	for _, a := range nums {
-		total += a
-	}
-	return total / float64(len(nums))
+	return rm, nil
 }
 
 // timeMinikubeStart returns the time it takes to execute `minikube start`
