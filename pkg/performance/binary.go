@@ -51,6 +51,13 @@ func NewBinary(b string) (*Binary, error) {
 	return newBinaryFromPR(b)
 }
 
+func (b *Binary) Name() string {
+	if b.pr != 0 {
+		return fmt.Sprintf("Minikube (PR %d)", b.pr)
+	}
+	return b.name
+}
+
 func (b *Binary) SetName(name string) {
 	b.name = name
 }

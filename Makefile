@@ -581,7 +581,7 @@ site: site/themes/docsy/assets/vendor/bootstrap/package.js out/hugo/hugo ## Serv
 	  --buildFuture)
 
 .PHONY: out/mkcmp
-out/mkcmp:
+out/mkcmp: ## Build mkcmp
 	GOOS=linux GOARCH=$(GOARCH) go build -o $@ cmd/performance/main.go
 
 .PHONY: out/performance-monitor
