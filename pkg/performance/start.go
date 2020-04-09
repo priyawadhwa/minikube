@@ -34,7 +34,7 @@ var (
 
 // CompareMinikubeStart compares the time to run `minikube start` between two minikube binaries
 func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []*Binary) error {
-	rm, err := collectResults(ctx, binaries)
+	rm, err := collectResults(ctx, out, binaries)
 	if err != nil {
 		return err
 	}
@@ -42,12 +42,12 @@ func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []*Binary
 	return nil
 }
 
-func collectResults(ctx context.Context, binaries []*Binary) (*resultManager, error) {
+func collectResults(ctx context.Context, out io.Writer, binaries []*Binary) (*resultManager, error) {
 	rm := newResultManager()
 	for run := 0; run < runs; run++ {
 		log.Printf("Executing run %d/%d...", run+1, runs)
 		for _, binary := range binaries {
-			r, err := collectTimeMinikubeStart(ctx, binary)
+			r, err := collectTimeMinikubeStart(ctx, out, binary)
 			if err != nil {
 				return nil, errors.Wrapf(err, "timing run %d with %s", run, binary)
 			}
@@ -59,7 +59,7 @@ func collectResults(ctx context.Context, binaries []*Binary) (*resultManager, er
 
 // timeMinikubeStart returns the time it takes to execute `minikube start`
 // It deletes the VM after `minikube start`.
-func timeMinikubeStart(ctx context.Context, binary *Binary) (*result, error) {
+func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (*result, error) {
 	startCmd := exec.CommandContext(ctx, binary.path, "start")
 
 	deleteCmd := exec.CommandContext(ctx, binary.path, "delete")

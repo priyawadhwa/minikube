@@ -16,6 +16,7 @@ package performance
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os/exec"
@@ -34,7 +35,7 @@ func readLogs(logFile string) ([]string, error) {
 }
 
 // timeCommandLogs runs command and watches stdout to time how long each new log takes
-func timeCommandLogs(cmd *exec.Cmd) (*result, error) {
+func timeCommandLogs(cmd *exec.Cmd, out io.Writer) (*result, error) {
 	// matches each log with the amount of time spent on that log
 	r := newResult()
 
@@ -58,7 +59,7 @@ func timeCommandLogs(cmd *exec.Cmd) (*result, error) {
 		log := scanner.Text()
 		// this is the time it took to complete the previous log
 		timeTaken := time.Since(timer).Seconds()
-		fmt.Println(timeTaken, log)
+		fmt.Fprintln(out, timeTaken, log)
 
 		timer = time.Now()
 		logs = append(logs, log)
