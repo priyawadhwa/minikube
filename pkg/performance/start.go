@@ -70,5 +70,5 @@ func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (*res
 	}()
 
 	log.Printf("Running: %v...", startCmd.Args)
-	return timeCommandLogs(startCmd)
+	return timeCommandLogs(startCmd, out)
 }
