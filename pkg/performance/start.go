@@ -15,6 +15,7 @@ package performance
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"os/exec"
@@ -24,7 +25,7 @@ import (
 
 const (
 	// runs is the number of times each binary will be timed for 'minikube start'
-	runs = 3
+	runs = 1
 )
 
 var (
@@ -33,21 +34,27 @@ var (
 )
 
 // CompareMinikubeStart compares the time to run `minikube start` between two minikube binaries
-func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []*Binary) error {
-	rm, err := collectResults(ctx, out, binaries)
-	if err != nil {
-		return err
+func CompareMinikubeStart(ctx context.Context, out io.Writer, binaries []*Binary) {
+	drivers := []string{"kvm2", "docker"}
+	for _, d := range drivers {
+		fmt.Printf("**%s Driver**\n", d)
+		rm, err := collectResults(ctx, out, d, binaries)
+		if err != nil {
+			log.Printf("error collecting results for %s driver: %v", d, err)
+			continue
+		}
+		rm.summarizeResults(binaries)
+		fmt.Println()
 	}
-	rm.summarizeResults(binaries)
-	return nil
+
 }
 
-func collectResults(ctx context.Context, out io.Writer, binaries []*Binary) (*resultManager, error) {
+func collectResults(ctx context.Context, out io.Writer, driver string, binaries []*Binary) (*resultManager, error) {
 	rm := newResultManager()
 	for run := 0; run < runs; run++ {
 		log.Printf("Executing run %d/%d...", run+1, runs)
 		for _, binary := range binaries {
-			r, err := collectTimeMinikubeStart(ctx, out, binary)
+			r, err := collectTimeMinikubeStart(ctx, out, driver, binary)
 			if err != nil {
 				return nil, errors.Wrapf(err, "timing run %d with %s", run, binary)
 			}
@@ -59,8 +66,13 @@ func collectResults(ctx context.Context, out io.Writer, binaries []*Binary) (*re
 
 // timeMinikubeStart returns the time it takes to execute `minikube start`
 // It deletes the VM after `minikube start`.
-func timeMinikubeStart(ctx context.Context, out io.Writer, binary *Binary) (*result, error) {
-	startCmd := exec.CommandContext(ctx, binary.path, "start")
+func timeMinikubeStart(ctx context.Context, out io.Writer, driver string, binary *Binary) (*result, error) {
+	downloadOnlyCmd := exec.CommandContext(ctx, binary.path, "start", fmt.Sprintf("--driver=%s", driver), "--download-only")
+	if output, err := downloadOnlyCmd.CombinedOutput(); err != nil {
+		log.Printf("error running download only, start may not work: %v\n%s\n", err, string(output))
+	}
+
+	startCmd := exec.CommandContext(ctx, binary.path, "start", fmt.Sprintf("--driver=%s", driver))
 
 	deleteCmd := exec.CommandContext(ctx, binary.path, "delete")
 	defer func() {

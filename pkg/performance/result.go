@@ -112,9 +112,11 @@ func (rm *resultManager) summarizeTimesPerLog(binaries []*Binary) {
 		t.Append(v)
 	}
 	fmt.Println("Averages Time Per Log")
+	fmt.Println("<details>\n")
 	fmt.Println("```")
 	t.Render() // Send output
-	fmt.Println("```")
+	fmt.Println("```\n")
+	fmt.Println("</details>")
 }
 
 func indexForLog(logs []string, log string) int {

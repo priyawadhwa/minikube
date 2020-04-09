@@ -49,10 +49,7 @@ var rootCmd = &cobra.Command{
 		if quiet {
 			out = ioutil.Discard
 		}
-		if err := performance.CompareMinikubeStart(context.Background(), out, binaries); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		performance.CompareMinikubeStart(context.Background(), out, binaries)
 	},
 }
 
