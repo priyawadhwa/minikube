@@ -11,6 +11,8 @@ import (
 	"k8s.io/minikube/pkg/performance/monitor"
 )
 
+const ()
+
 func main() {
 
 	for {
@@ -37,7 +39,7 @@ func execute(ctx context.Context) error {
 	// TODO: priyawadhwa@ for each PR we should comment the error if we get one?
 	for _, pr := range prs {
 		log.Printf("~~~ Analyzing PR %d ~~~", pr)
-		newCommitsExist, err := client.NewCommitsExist(pr, "minikube-bot")
+		newCommitsExist, err := client.NewCommitsExist(pr, "minikube-pr-bot")
 		if err != nil {
 			return err
 		}

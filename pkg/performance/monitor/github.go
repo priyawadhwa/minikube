@@ -81,7 +81,7 @@ func prContainsLabel(labels []*github.Label, label string) bool {
 	return false
 }
 
-// NewCommitsExist checks if new commits exist since minikube-bot
+// NewCommitsExist checks if new commits exist since minikube-pr-bot
 // commented on the PR. If so, return true.
 func (g *Client) NewCommitsExist(pr int, login string) (bool, error) {
 	lastCommentTime, err := g.timeOfLastComment(pr, login)
