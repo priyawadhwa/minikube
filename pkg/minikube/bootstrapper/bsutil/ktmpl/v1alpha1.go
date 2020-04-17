@@ -42,4 +42,9 @@ apiServerCertSANs: ["127.0.0.1", "localhost", "{{.AdvertiseAddress}}"]
   {{$val}}{{end}}
 {{end}}{{if .FeatureArgs}}featureGates: {{range $i, $val := .FeatureArgs}}
   {{$i}}: {{$val}}{{end}}
-{{end}}`))
+{{end}}
+imageGCHighThresholdPercent: 100
+evictionHard:
+  nodefs.available: "0%"
+  nodefs.inodesFree: "0%"
+  imagefs.available: "0%"`))
