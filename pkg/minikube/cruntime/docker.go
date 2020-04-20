@@ -110,23 +110,6 @@ func (r *Docker) Enable(disOthers bool) error {
 		}
 	}
 
-	fmt.Println("forcing systemd")
-	// force docker to use systemd as cgroup manager, as recommended in k8s docs:
-	// https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
-	daemonConfig := `{
-"exec-opts": ["native.cgroupdriver=systemd"],
-"log-driver": "json-file",
-"log-opts": {
-	"max-size": "100m"
-},
-"storage-driver": "overlay2"
-}
-`
-	ma := assets.NewMemoryAsset([]byte(daemonConfig), "/etc/docker", "daemon.json", "0644")
-	if err := r.Runner.Copy(ma); err != nil {
-		return errors.Wrap(err, "copying daemon config")
-	}
-
 	return r.Init.Start("docker")
 }
 

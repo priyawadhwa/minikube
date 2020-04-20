@@ -161,6 +161,28 @@ func (k *Bootstrapper) init(cfg config.ClusterConfig) error {
 		return errors.Wrap(err, "parsing kubernetes version")
 	}
 
+	if cfg.KubernetesConfig.ContainerRuntime == "docker" && cfg.Driver == "docker" {
+		fmt.Println("forcing systemd")
+		// force docker to use systemd as cgroup manager, as recommended in k8s docs:
+		// https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
+		daemonConfig := `{
+	"exec-opts": ["native.cgroupdriver=systemd"],
+	"log-driver": "json-file",
+	"log-opts": {
+		"max-size": "100m"
+	},
+	"storage-driver": "overlay2"
+	}
+	`
+		ma := assets.NewMemoryAsset([]byte(daemonConfig), "/etc/docker", "daemon.json", "0644")
+		if err := k.c.Copy(ma); err != nil {
+			return errors.Wrap(err, "copying daemon config")
+		}
+		if _, err := k.c.RunCmd(exec.Command("sudo", "systemctl", "restart", "docker")); err != nil {
+			return errors.Wrap(err, "restarting docker")
+		}
+	}
+
 	extraFlags := bsutil.CreateFlagsFromExtraArgs(cfg.KubernetesConfig.ExtraOptions)
 	r, err := cruntime.New(cruntime.Config{Type: cfg.KubernetesConfig.ContainerRuntime, Runner: k.c})
 	if err != nil {
