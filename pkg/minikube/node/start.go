@@ -91,9 +91,7 @@ func Start(starter Starter, apiServer bool) (*kubeconfig.Settings, error) {
 
 	var bs bootstrapper.Bootstrapper
 	var kcs *kubeconfig.Settings
-	fmt.Println("apiserver is", apiServer)
 	if apiServer {
-
 		if starter.Cfg.KubernetesConfig.ContainerRuntime == "docker" && starter.Cfg.Driver == "docker" {
 			fmt.Println("forcing systemd")
 			// force docker to use systemd as cgroup manager, as recommended in k8s docs:
@@ -116,14 +114,12 @@ func Start(starter Starter, apiServer bool) (*kubeconfig.Settings, error) {
 			}
 		}
 
-		fmt.Println("setting up kubeconfig")
 		// Must be written before bootstrap, otherwise health checks may flake due to stale IP
 		kcs = setupKubeconfig(starter.Host, starter.Cfg, starter.Node, starter.Cfg.Name)
 		if err != nil {
 			return nil, errors.Wrap(err, "Failed to setup kubeconfig")
 		}
 
-		fmt.Println("setting up kubeadm")
 		// setup kubeadm (must come after setupKubeconfig)
 		bs = setupKubeAdm(starter.MachineAPI, *starter.Cfg, *starter.Node, starter.Runner)
 
