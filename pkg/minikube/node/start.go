@@ -36,6 +36,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	cmdcfg "k8s.io/minikube/cmd/minikube/cmd/config"
 	"k8s.io/minikube/pkg/addons"
+	"k8s.io/minikube/pkg/minikube/assets"
 	"k8s.io/minikube/pkg/minikube/bootstrapper"
 	"k8s.io/minikube/pkg/minikube/bootstrapper/images"
 	"k8s.io/minikube/pkg/minikube/cluster"
@@ -91,14 +92,38 @@ func Start(starter Starter, apiServer bool) (*kubeconfig.Settings, error) {
 	var bs bootstrapper.Bootstrapper
 	var kcs *kubeconfig.Settings
 	fmt.Println("apiserver is", apiServer)
-	apiServer = true
 	if apiServer {
+
+		if starter.Cfg.KubernetesConfig.ContainerRuntime == "docker" && starter.Cfg.Driver == "docker" {
+			fmt.Println("forcing systemd")
+			// force docker to use systemd as cgroup manager, as recommended in k8s docs:
+			// https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
+			daemonConfig := `{
+		"exec-opts": ["native.cgroupdriver=systemd"],
+		"log-driver": "json-file",
+		"log-opts": {
+			"max-size": "100m"
+		},
+		"storage-driver": "overlay2"
+		}
+		`
+			ma := assets.NewMemoryAsset([]byte(daemonConfig), "/etc/docker", "daemon.json", "0644")
+			if err := starter.Runner.Copy(ma); err != nil {
+				return nil, errors.Wrap(err, "copying daemon config")
+			}
+			if _, err := starter.Runner.RunCmd(exec.Command("sudo", "systemctl", "restart", "docker")); err != nil {
+				return nil, errors.Wrap(err, "restarting docker")
+			}
+		}
+
+		fmt.Println("setting up kubeconfig")
 		// Must be written before bootstrap, otherwise health checks may flake due to stale IP
 		kcs = setupKubeconfig(starter.Host, starter.Cfg, starter.Node, starter.Cfg.Name)
 		if err != nil {
 			return nil, errors.Wrap(err, "Failed to setup kubeconfig")
 		}
 
+		fmt.Println("setting up kubeadm")
 		// setup kubeadm (must come after setupKubeconfig)
 		bs = setupKubeAdm(starter.MachineAPI, *starter.Cfg, *starter.Node, starter.Runner)
 
