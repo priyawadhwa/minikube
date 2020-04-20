@@ -90,6 +90,8 @@ func Start(starter Starter, apiServer bool) (*kubeconfig.Settings, error) {
 
 	var bs bootstrapper.Bootstrapper
 	var kcs *kubeconfig.Settings
+	fmt.Println("apiserver is", apiServer)
+	apiServer = true
 	if apiServer {
 		// Must be written before bootstrap, otherwise health checks may flake due to stale IP
 		kcs = setupKubeconfig(starter.Host, starter.Cfg, starter.Node, starter.Cfg.Name)
