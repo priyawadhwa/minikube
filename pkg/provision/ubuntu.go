@@ -61,21 +61,6 @@ func (p *UbuntuProvisioner) CompatibleWithHost() bool {
 
 // GenerateDockerOptions generates the *provision.DockerOptions for this provisioner
 func (p *UbuntuProvisioner) GenerateDockerOptions(dockerPort int) (*provision.DockerOptions, error) {
-	// force docker to use systemd as cgroup manager, as recommended in k8s docs:
-	// https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
-	daemonConfig := `{
-		"exec-opts": ["native.cgroupdriver=systemd"],
-		"log-driver": "json-file",
-		"log-opts": {
-			"max-size": "100m"
-		},
-		"storage-driver": "overlay2"
-		}`
-
-	if err := writeFile(p.SSHCommander, daemonConfig, "/etc/docker/daemon.json"); err != nil {
-		return nil, errors.Wrap(err, "updating daemon config")
-	}
-
 	var engineCfg bytes.Buffer
 
 	drvLabel := fmt.Sprintf("provider=%s", p.Driver.DriverName())
@@ -165,7 +150,24 @@ WantedBy=multi-user.target
 		EngineOptions:     engineCfg.String(),
 		EngineOptionsPath: "/lib/systemd/system/docker.service",
 	}
-	return do, updateUnit(p, "docker", do.EngineOptions, do.EngineOptionsPath)
+	if err := updateUnit(p, "docker", do.EngineOptions, do.EngineOptionsPath); err != nil {
+		return nil, err
+	}
+	// force docker to use systemd as cgroup manager, as recommended in k8s docs:
+	// https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
+	daemonConfig := `{
+		"exec-opts": ["native.cgroupdriver=systemd"],
+		"log-driver": "json-file",
+		"log-opts": {
+			"max-size": "100m"
+		},
+		"storage-driver": "overlay2"
+		}`
+
+	if err := writeFile(p.SSHCommander, daemonConfig, "/etc/docker/daemon.json"); err != nil {
+		return nil, errors.Wrap(err, "updating daemon config")
+	}
+	return do, nil
 }
 
 // Package installs a package
