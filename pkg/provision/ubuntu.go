@@ -72,7 +72,7 @@ func (p *UbuntuProvisioner) GenerateDockerOptions(dockerPort int) (*provision.Do
 		"storage-driver": "overlay2"
 		}`
 
-	if err := updateFile(p.SSHCommander, daemonConfig, "/etc/docker/daemon.json"); err != nil {
+	if err := writeFile(p.SSHCommander, daemonConfig, "/etc/docker/daemon.json"); err != nil {
 		return nil, errors.Wrap(err, "updating daemon config")
 	}
 

@@ -285,13 +285,13 @@ func concatStrings(src []string, prefix string, postfix string) []string {
 	return ret
 }
 
-func updateFile(p provision.SSHCommander, contents string, dst string) error {
+func writeFile(p provision.SSHCommander, contents string, dst string) error {
 	glog.Infof("Updating %s ...", dst)
 
 	if _, err := p.SSHCommand(fmt.Sprintf("sudo mkdir -p %s && printf %%s \"%s\" | sudo tee %s.new", path.Dir(dst), contents, dst)); err != nil {
 		return err
 	}
-	if _, err := p.SSHCommand(fmt.Sprintf("sudo diff -u %s %s.new || { sudo mv %s.new %s }", dst, dst, dst, dst)); err != nil {
+	if _, err := p.SSHCommand(fmt.Sprintf("sudo mv %s.new %s", dst, dst)); err != nil {
 		return err
 	}
 	return nil
