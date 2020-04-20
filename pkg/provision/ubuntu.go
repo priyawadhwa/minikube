@@ -29,6 +29,7 @@ import (
 	"github.com/docker/machine/libmachine/provision/pkgaction"
 	"github.com/docker/machine/libmachine/swarm"
 	"github.com/golang/glog"
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"k8s.io/minikube/pkg/minikube/config"
 	"k8s.io/minikube/pkg/util/retry"
@@ -60,6 +61,21 @@ func (p *UbuntuProvisioner) CompatibleWithHost() bool {
 
 // GenerateDockerOptions generates the *provision.DockerOptions for this provisioner
 func (p *UbuntuProvisioner) GenerateDockerOptions(dockerPort int) (*provision.DockerOptions, error) {
+	// force docker to use systemd as cgroup manager, as recommended in k8s docs:
+	// https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
+	daemonConfig := `{
+		"exec-opts": ["native.cgroupdriver=systemd"],
+		"log-driver": "json-file",
+		"log-opts": {
+			"max-size": "100m"
+		},
+		"storage-driver": "overlay2"
+		}`
+
+	if err := updateFile(p.SSHCommander, daemonConfig, "/etc/docker/daemon.json"); err != nil {
+		return nil, errors.Wrap(err, "updating daemon config")
+	}
+
 	var engineCfg bytes.Buffer
 
 	drvLabel := fmt.Sprintf("provider=%s", p.Driver.DriverName())
