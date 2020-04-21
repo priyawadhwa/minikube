@@ -24,6 +24,9 @@ RUN sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/lib
 RUN apt-get install -y --no-install-recommends podman
 # disable non-docker runtimes by default
 RUN systemctl disable containerd && systemctl disable crio && rm /etc/crictl.yaml
+# Copy in docker daemon config
+COPY hack/images/daemon.json /etc/docker/daemon.json
+
 # enable docker which is default
 RUN systemctl enable docker
 # making SSH work for docker container 
@@ -54,4 +57,3 @@ RUN apt-get clean -y && rm -rf \
   /usr/share/man/* \
   /usr/share/local/* \
   RUN echo "kic! Build: ${COMMIT_SHA} Time :$(date)" > "/kic.txt"
-COPY daemon.json /etc/docker/daemon.json
