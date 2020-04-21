@@ -312,3 +312,8 @@ func (r *Containerd) Preload(cfg config.KubernetesConfig) error {
 	}
 	return fmt.Errorf("not yet implemented for %s", r.Name())
 }
+
+// TODO: Enable for containerd
+func (r *Containerd) ForceSystemdCgroupManager() error {
+	return nil
+}
