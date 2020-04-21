@@ -38,7 +38,7 @@ const (
 
 var (
 	// BaseImage is the base image is used to spin up kic containers. it uses same base-image as kind.
-	BaseImage = "gcr.io/k8s-minikube/kicbase:v0.0.9-snapshot"
+	BaseImage = "gcr.io/priya-wadhwa/kicbase:v0.0.9-snapshot"
 )
 
 // Config is configuration for the kic driver used by registry
