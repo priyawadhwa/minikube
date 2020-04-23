@@ -30,7 +30,7 @@ RUN sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/lib
 
 # install podman
 ENV PODMAN_VERSION=1.9.0~2
-RUN apt-get install -y --no-install-recommends podman=${PODMAN_VERSION}
+RUN apt-get install -y --no-install-recommends --configure=N podman=${PODMAN_VERSION}
 
 # disable non-docker runtimes by default
 RUN systemctl disable containerd && systemctl disable crio && rm /etc/crictl.yaml
