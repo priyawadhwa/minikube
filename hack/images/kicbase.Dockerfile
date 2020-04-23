@@ -24,19 +24,13 @@ RUN tar -xzf crio.tar.gz
 RUN make install -C /crio-${CRIO_VERSION}
 RUN rm -rf crio.tar.gz ./crio-{CRIO_VERSION}
 
-ARG PODMAN_VERSION="v1.9.0"
-RUN curl -Lo podman.tar.gz https://github.com/containers/libpod/archive/${PODMAN_VERSION}.tar.gz
-RUN tar -xzf podman.tar.gz
-RUN make install -C /libpod-${PODMAN_VERSION}
-RUN rm -rf podman.tar.gz /libpod-${PODMAN_VERSION}
+RUN sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_19.10/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list" && \    
+    curl -LO https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/xUbuntu_19.10/Release.key && \
+    apt-key add - < Release.key && apt-get update
 
-# RUN sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_19.10/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list" && \    
-#     curl -LO https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/xUbuntu_19.10/Release.key && \
-#     apt-key add - < Release.key && apt-get update
-
-# # install podman
-# ENV PODMAN_VERSION=1.9.0~2
-# RUN apt-get install -y --no-install-recommends podman=${PODMAN_VERSION}
+# install podman
+ENV PODMAN_VERSION=1.9.0~2
+RUN apt-get install -y --no-install-recommends podman=${PODMAN_VERSION}
 
 # disable non-docker runtimes by default
 RUN systemctl disable containerd && systemctl disable crio && rm /etc/crictl.yaml
