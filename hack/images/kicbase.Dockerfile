@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm /etc/crictl.yaml
 
 # install cri-o from GCS bucket, as described in "Downloads" (https://github.com/cri-o/cri-o/releases/tag/v1.18.0)
-ARG CRIO_VERSION="v1.18.0"
+ARG CRIO_VERSION="v1.17.0"
 RUN curl -Lo crio.tar.gz https://storage.googleapis.com/k8s-conform-cri-o/artifacts/crio-${CRIO_VERSION}.tar.gz
 RUN tar -xzf crio.tar.gz
 RUN make install -C /crio-${CRIO_VERSION}
