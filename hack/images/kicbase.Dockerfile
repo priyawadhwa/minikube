@@ -14,14 +14,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     dnsutils=1:9.11.5.P4+dfsg-5.1ubuntu2.1 \
     # libglib2.0-0 is required for conmon, which is required for podman
     libglib2.0-0=2.62.1-1 \
+    make \
     && rm /etc/crictl.yaml
 
-# install cri-o based on https://github.com/cri-o/cri-o/commit/96b0c34b31a9fc181e46d7d8e34fb8ee6c4dc4e1#diff-04c6e90faac2675aa89e2176d2eec7d8R128
-ENV CRIO_VERSION="1.17=1.17.3~2"
+# install cri-o from GCS bucket, as described in "Downloads" (https://github.com/cri-o/cri-o/releases/tag/v1.18.0)
+ARG CRIO_VERSION="v1.18.0"
+RUN curl -Lo crio.tar.gz https://storage.googleapis.com/k8s-conform-cri-o/artifacts/crio-${CRIO_VERSION}.tar.gz
+RUN tar -xzf crio.tar.gz
+RUN make install -C /crio-${CRIO_VERSION}
+RUN rm -rf crio.tar.gz ./crio-{CRIO_VERSION}
+
 RUN sh -c "echo 'deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_19.10/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list" && \    
     curl -LO https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/xUbuntu_19.10/Release.key && \
-    apt-key add - < Release.key && apt-get update && \
-    apt-get install -y --no-install-recommends cri-o-${CRIO_VERSION}
+    apt-key add - < Release.key && apt-get update
 
 # install podman
 ENV PODMAN_VERSION=1.9.0~2
