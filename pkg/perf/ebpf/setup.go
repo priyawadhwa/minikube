@@ -38,6 +38,7 @@ const (
 func Setup() error {
 	if kernelHeadersExist() {
 		fmt.Println("Kernel headers already exist, skipping extraction ...")
+		return nil
 	}
 	// else, download kernel modules to tmpDest
 	if err := downloadKernelModules(); err != nil {
