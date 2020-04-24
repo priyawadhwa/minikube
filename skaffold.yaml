@@ -9,6 +9,12 @@ build:
   - image: gcr.io/priya-wadhwa/ebpf
     custom:
       buildCommand: make ebpf-image
+      dependencies:
+        paths:
+        - out/ebpf
+        - deploy/addons/perf/ebpf/*
+        - pkg/perf/ebpf/*
+        - cmd/perf/ebpf/*
 deploy:
   kubectl:
     manifests:
