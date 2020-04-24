@@ -30,7 +30,7 @@ import (
 const (
 	url         = "https://storage.googleapis.com/minikube-kernel-headers/kernel-headers-linux-4.19.94.tar.lz4"
 	tarballDest = "/tmp/kernel-headers-linux-4.19.94.tar.lz4"
-	dest        = "/lib/modules/4.19.94/build"
+	dest        = "/node/lib/modules/4.19.94/build"
 )
 
 func setup() error {
