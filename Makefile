@@ -673,6 +673,16 @@ help:
 	@printf "\033[1m--------------------------------------\033[21m\n"
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+
+.PHONY: out/ebpf
+out/ebpf: pkg/minikube/assets/assets.go pkg/minikube/translate/translations.go ## Build gvisor addon
+	GOOS=linux CGO_ENABLED=0 go build -o $@ cmd/perf/ebpf/ebpf.go
+
 .PHONY: ebpf-image
-ebpf-image:
-	docker build -t gcr.io/priya-wadhwa/ebpf -f pkg/perf/ebpf/Dockerfile .
+ebpf-image: out/ebpf  ## Build docker image for gvisor
+	docker build -t gcr.io/priya-wadhwa/ebpf -f pkg/perf/ebpf/Dockerfile out
+
+.PHONY: push-ebpf-image
+push-ebpf-image: ebpf-image
+	gcloud docker -- push gcr.io/priya-wadhwa/ebpf
+

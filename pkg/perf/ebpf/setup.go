@@ -33,7 +33,7 @@ const (
 	dest        = "/node/lib/modules/4.19.94/build"
 )
 
-func setup() error {
+func Setup() error {
 	if fi, err := os.Stat(dest); err == nil && fi.IsDir() {
 		glog.Infof("Kernel modules have already been downloaded, skipping...")
 		return nil

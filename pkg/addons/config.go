@@ -129,4 +129,9 @@ var Addons = []*Addon{
 		set:       SetBool,
 		callbacks: []setFn{enableOrDisableStorageClasses},
 	},
+	{
+		name:      "perf",
+		set:       SetBool,
+		callbacks: []setFn{enableOrDisableAddon},
+	},
 }
