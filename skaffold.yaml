@@ -1,0 +1,14 @@
+apiVersion: skaffold/v2beta1
+kind: Config
+metadata:
+  name: minikube
+build:
+  artifacts:
+  - image: gcr.io/priya-wadhwa/bcc
+    context: deploy/addons/perf/bcc
+  - image: gcr.io/priya-wadhwa/ebpf
+    context: deploy/addons/perf/ebpf
+deploy:
+  kubectl:
+    manifests:
+    - deploy/addons/perf/perf-deployment.yaml

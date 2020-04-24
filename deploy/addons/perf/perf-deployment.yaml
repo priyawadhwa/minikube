@@ -42,11 +42,15 @@ spec:
           - mountPath: /tmp
             name: node-tmp
       containers:
-        - name: busybox
-          image: busybox
-          command:
-              - sleep
-              - "1000"
+        - name: perf
+          image: gcr.io/priya-wadhwa/bcc
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /lib/modules
+              name: libmod
+              readOnly: true
       volumes:
       - name: node-root
         hostPath:
@@ -57,4 +61,6 @@ spec:
       - name: node-tmp
         hostPath:
           path: /tmp
-
+      - name: node-lib-modules
+        hostPath:
+          path: /lib/modules
