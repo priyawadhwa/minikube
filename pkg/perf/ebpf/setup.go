@@ -17,13 +17,14 @@ limitations under the License.
 package ebpf
 
 import (
+	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 
 	"github.com/golang/glog"
 	"github.com/hashicorp/go-getter"
 	"github.com/pkg/errors"
-	"k8s.io/minikube/pkg/minikube/download"
 	"k8s.io/minikube/pkg/minikube/out"
 )
 
@@ -34,13 +35,12 @@ const (
 )
 
 func Setup() error {
-	if fi, err := os.Stat(dest); err == nil && fi.IsDir() {
-		glog.Infof("Kernel modules have already been downloaded, skipping...")
-		return nil
-	}
 	// else, download kernel modules to tmpDest
 	if err := downloadKernelModules(); err != nil {
 		return errors.Wrap(err, "downloading kernel modules")
+	}
+	if err := createDir(); err != nil {
+		return errors.Wrap(err, "creating dir")
 	}
 	// extract kernel modules to dest
 	if err := extractKernelModules(); err != nil {
@@ -55,20 +55,22 @@ func downloadKernelModules() error {
 
 	tmpDst := tarballDest + ".download"
 	client := &getter.Client{
-		Src:     url,
-		Dst:     tmpDst,
-		Mode:    getter.ClientModeFile,
-		Options: []getter.ClientOption{getter.WithProgress(download.DefaultProgressBar)},
+		Src:  url,
+		Dst:  tmpDst,
+		Mode: getter.ClientModeFile,
 	}
 	glog.Infof("Downloading: %+v", client)
 	if err := client.Get(); err != nil {
 		return errors.Wrapf(err, "download failed: %s", url)
 	}
+	fmt.Println("renaming", tmpDst, tarballDest)
 	return os.Rename(tmpDst, tarballDest)
 }
 
 func createDir() error {
-	cmd := exec.Command("sudo", "mkdir", "-p", dest)
+	fmt.Println("Creating", dest)
+	cmd := exec.Command("mkdir", "-p", dest)
+	fmt.Println(cmd.Args)
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return errors.Wrapf(err, "creating dir: %v", output)
 	}
@@ -76,15 +78,20 @@ func createDir() error {
 }
 
 func extractKernelModules() error {
-	cmd := exec.Command("sudo", "tar", "-I", "lz4", "-C", dest, "-xvf", tarballDest)
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return errors.Wrapf(err, "extracting kernel modules: %v", output)
+	fmt.Println("Exctracting kernel modules...")
+	cmd := exec.Command("tar", "-I", "lz4", "-C", dest, "-xvf", tarballDest)
+	stderr := bytes.NewBuffer([]byte{})
+	cmd.Stderr = stderr
+	fmt.Println(cmd.Args)
+	if err := cmd.Run(); err != nil {
+		return errors.Wrapf(err, "extracting kernel modules: %s", stderr.String())
 	}
 	return nil
 }
 
 func removeTarball() error {
-	cmd := exec.Command("sudo", "rm", "-rf", tarballDest)
+	cmd := exec.Command("rm", "-rf", tarballDest)
+	fmt.Println(cmd.Args)
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return errors.Wrapf(err, "removing tarball: %v", output)
 	}

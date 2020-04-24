@@ -1,5 +1,5 @@
 # Need an image with chroot
-FROM alpine:3
-RUN apk -U add ca-certificates
+FROM debian
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates lz4
 COPY ebpf /ebpf
 CMD ["/ebpf"]
