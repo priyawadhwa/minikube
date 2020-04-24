@@ -355,6 +355,14 @@ var Addons = map[string]*Addon{
 			"0640",
 			false),
 	}, false, "ingress-dns"),
+	"perf": NewAddon([]*BinAsset{
+		MustBinAsset(
+			"deploy/addons/perf/perf-deployment.yaml",
+			vmpath.GuestAddonsDir,
+			"perf-deployment.yaml",
+			"0640",
+			false),
+	}, false, "perf"),
 }
 
 // GenerateTemplateData generates template data for template assets
