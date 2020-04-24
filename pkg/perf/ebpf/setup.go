@@ -32,9 +32,13 @@ const (
 	url         = "https://storage.googleapis.com/minikube-kernel-headers/kernel-headers-linux-4.19.94.tar.lz4"
 	tarballDest = "/tmp/kernel-headers-linux-4.19.94.tar.lz4"
 	dest        = "/node/lib/modules/4.19.94/build"
+	successFile = "/node/lib/modules/4.19.94/success"
 )
 
 func Setup() error {
+	if kernelHeadersExist() {
+		fmt.Println("Kernel headers already exist, skipping extraction ...")
+	}
 	// else, download kernel modules to tmpDest
 	if err := downloadKernelModules(); err != nil {
 		return errors.Wrap(err, "downloading kernel modules")
@@ -45,6 +49,9 @@ func Setup() error {
 	// extract kernel modules to dest
 	if err := extractKernelModules(); err != nil {
 		return errors.Wrap(err, "extracting kernel modules")
+	}
+	if err := createSuccess(); err != nil {
+		return errors.Wrap(err, "creating success file")
 	}
 	// delete downloaded tarball
 	return removeTarball()
@@ -96,4 +103,14 @@ func removeTarball() error {
 		return errors.Wrapf(err, "removing tarball: %v", output)
 	}
 	return nil
+}
+
+func createSuccess() error {
+	_, err := os.Create(successFile)
+	return errors.Wrap(err, "creating success file")
+}
+
+func kernelHeadersExist() bool {
+	_, err := os.Stat(successFile)
+	return err == nil
 }

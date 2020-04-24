@@ -680,7 +680,7 @@ out/ebpf: pkg/minikube/assets/assets.go pkg/minikube/translate/translations.go #
 
 .PHONY: ebpf-image
 ebpf-image: out/ebpf  ## Build docker image for gvisor
-	docker build -t gcr.io/priya-wadhwa/ebpf -f deploy/addons/perf/ebpf out
+	docker build -t $(IMAGE) -f deploy/addons/perf/ebpf/Dockerfile out
 
 .PHONY: push-ebpf-image
 push-ebpf-image: ebpf-image
