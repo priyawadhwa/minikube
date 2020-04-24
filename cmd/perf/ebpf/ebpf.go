@@ -17,10 +17,8 @@ limitations under the License.
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"k8s.io/minikube/pkg/perf/ebpf"
 )
@@ -28,8 +26,6 @@ import (
 func main() {
 	if err := ebpf.Setup(); err != nil {
 		log.Print(err)
-		fmt.Println("sleeping bc of failure")
-		time.Sleep(550 * time.Second)
 		os.Exit(1)
 	}
 }
