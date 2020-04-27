@@ -14,7 +14,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openssh-server=1:8.0p1-6build1 \
     dnsutils=1:9.11.5.P4+dfsg-5.1ubuntu2.1 \
     && rm /etc/crictl.yaml \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean -y && \
+    rm -rf \
+    /var/cache/debconf/* \
+    /var/lib/apt/lists/* \
+    /var/log/* \
+    /tmp/* \
+    /var/tmp/* \
+    /usr/share/doc/* \
+    /usr/share/man/* \
+    /usr/share/local/*
 
 # disable non-docker runtimes by default
 RUN systemctl disable containerd
@@ -37,14 +46,5 @@ USER root
 # kind base-image entry-point expects a "kind" folder for product_name,product_uuid
 # https://github.com/kubernetes-sigs/kind/blob/master/images/base/files/usr/local/bin/entrypoint
 RUN mkdir -p /kind
-# Deleting leftovers
-RUN apt-get clean -y && rm -rf \
-  /var/cache/debconf/* \
-  /var/lib/apt/lists/* \
-  /var/log/* \
-  /tmp/* \
-  /var/tmp/* \
-  /usr/share/doc/* \
-  /usr/share/man/* \
-  /usr/share/local/* \
-  RUN echo "kic! Build: ${COMMIT_SHA} Time :$(date)" > "/kic.txt"
+
+RUN echo "kic! Build: ${COMMIT_SHA} Time :$(date)" > "/kic.txt"
