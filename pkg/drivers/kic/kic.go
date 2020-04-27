@@ -167,13 +167,11 @@ func (d *Driver) prepareSSH() error {
 	if err := cmder.Copy(f); err != nil {
 		return errors.Wrap(err, "copying pub key")
 	}
-	if rr, err := cmder.RunCmd(exec.Command("chown", "docker:docker", "/home/docker/.ssh/authorized_keys")); err != nil {
-		return errors.Wrapf(err, "apply authorized_keys file ownership, output %s", rr.Output())
-	}
+	fmt.Println("Skipping chown")
 
 	return nil
 }
-
+c
 // DriverName returns the name of the driver
 func (d *Driver) DriverName() string {
 	if d.NodeConfig.OCIBinary == oci.Podman {
