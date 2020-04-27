@@ -531,6 +531,11 @@ kic-base-image: ## builds the base image used for kic.
 	docker rmi -f $(REGISTRY)/kicbase:$(KIC_VERSION)-snapshot || true
 	docker build -f ./hack/images/kicbase.Dockerfile -t $(REGISTRY)/kicbase:$(KIC_VERSION)-snapshot  --build-arg COMMIT_SHA=${VERSION}-$(COMMIT) --target base .
 
+.PHONY: slim-kic-base-image
+slim-kic-base-image: ## builds the base image used for kic.
+	docker rmi -f $(REGISTRY)/kicbase:$(KIC_VERSION)-snapshot || true
+	docker build -f ./hack/images/kicbase-slim.Dockerfile -t gcr.io/priya-wadhwa/slim  --build-arg COMMIT_SHA=${VERSION}-$(COMMIT) --target base .
+
 .PHONY: upload-preloaded-images-tar
 upload-preloaded-images-tar: out/minikube # Upload the preloaded images for oldest supported, newest supported, and default kubernetes versions to GCS.
 	go run ./hack/preload-images/*.go 
