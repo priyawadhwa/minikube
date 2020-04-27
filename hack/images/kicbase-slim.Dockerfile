@@ -12,8 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     docker.io=19.03.2-0ubuntu1 \
     openssh-server=1:8.0p1-6build1 \
     dnsutils=1:9.11.5.P4+dfsg-5.1ubuntu2.1 \
-    # libglib2.0-0 is required for conmon, which is required for podman
-    libglib2.0-0=2.62.1-1 \
     && rm /etc/crictl.yaml
 
 # disable non-docker runtimes by default
