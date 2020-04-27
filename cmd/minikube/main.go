@@ -39,6 +39,8 @@ import (
 	"k8s.io/minikube/pkg/minikube/constants"
 	"k8s.io/minikube/pkg/minikube/machine"
 	"k8s.io/minikube/pkg/minikube/out"
+	"k8s.io/minikube/pkg/slowjam/pkg/stacklog"
+	"time"
 	_ "k8s.io/minikube/pkg/provision"
 )
 
@@ -52,6 +54,14 @@ var (
 )
 
 func main() {
+	p := profile.Start(profile.TraceProfile, profile.ProfilePath("."), profile.NoShutdownHook)
+	defer p.Stop()
+	s, err := stacklog.Start(stacklog.Config{Path: "stack.log", Poll: 50 * time.Millisecond})
+	if err != nil {
+		panic("unable to log stacks")
+	}
+	defer s.Stop()
+
 	bridgeLogMessages()
 	defer glog.Flush()
 
