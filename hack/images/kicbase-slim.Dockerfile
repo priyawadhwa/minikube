@@ -41,7 +41,7 @@ RUN adduser --ingroup docker --disabled-password --gecos '' docker
 RUN adduser docker sudo
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER docker
-RUN mkdir /home/docker/.ssh
+RUN mkdir /home/docker/.ssh && chown docker:docker /home/docker/.ssh
 USER root
 # kind base-image entry-point expects a "kind" folder for product_name,product_uuid
 # https://github.com/kubernetes-sigs/kind/blob/master/images/base/files/usr/local/bin/entrypoint
