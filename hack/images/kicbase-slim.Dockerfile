@@ -5,8 +5,6 @@ ARG COMMIT_SHA
 FROM kindest/base:v20200317-92225082 as base
 USER root
 
-RUN apt-get update && apt-get remove -y --allow-remove-essential perl-base
-
 # specify version of everything explicitly using 'apt-cache policy'
 RUN apt-get update && apt-get install -y --no-install-recommends \
     lz4=1.9.1-1 \
