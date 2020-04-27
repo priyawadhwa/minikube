@@ -171,7 +171,7 @@ func (d *Driver) prepareSSH() error {
 
 	return nil
 }
-c
+
 // DriverName returns the name of the driver
 func (d *Driver) DriverName() string {
 	if d.NodeConfig.OCIBinary == oci.Podman {
