@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     docker.io=19.03.2-0ubuntu1 \
     openssh-server=1:8.0p1-6build1 \
     dnsutils=1:9.11.5.P4+dfsg-5.1ubuntu2.1 \
-    && rm /etc/crictl.yaml
+    && rm /etc/crictl.yaml \
+    && rm -rf /var/lib/apt/lists/*
 
 # disable non-docker runtimes by default
 RUN systemctl disable containerd
