@@ -46,7 +46,7 @@ minikube start --output json
 
 ### Stderr
 Logs can be sent to stderr as usual.
-In addition, we will output error code from [err_map.go](https://github.com/kubernetes/minikube/blob/master/pkg/minikube/problem/err_map.go) as a parsable JSON message.
+In addition, we will output error code from [err_map.go](https://github.com/kubernetes/minikube/blob/master/pkg/minikube/problem/err_map.go) as a parsable JSON message to stderr.
 
 This will be done by adding the following function to the `out` package:
 
@@ -83,7 +83,22 @@ As mentioned above, the requirements for stdout are:
 1. Steps are numbered, and the total number of steps is known
 1. Steps have a helpful name
 
-The most difficult part of this problem is knowing the total number of steps before minikube starts.
+First, we'll need some way of distinguishing between logs.
+Each log has three components:
+1. The message itself 
+1. The emoji associated with the log (StyleEnum)
+1. Whether the log is of type Log, Warning, or Error
+
+```go
+type Log struct {
+	LogType // Will be either Log, Warning or Error
+	style   StyleEnum
+	message string
+}
+```
+
+
+We also need to know the total number of steps before minikube starts.
 For that to be possible, we need to know all of the logs we will print before starting.
 
 I propose creating a registry of logs, which is prefilled with all necessary logs before we start minikube.
@@ -92,13 +107,9 @@ The registry would look like this:
 ```go
 // Registry holds all user-facing logs
 type Registry struct {
-	Logs  map[string]log
+	// maps the name of the log to a Log type
+	Logs  map[string]Log
 	Index int
-}
-
-type Log struct {
-	style   StyleEnum
-	message string
 }
 ```
 
@@ -107,19 +118,20 @@ All logs would be added to the registry at this time via `Register`:
 
 ```go
 // Register registers a log
-func Register(name string, style StyleEnum, message string) {
-	registry[name] = log{
+func Register(name string, style StyleEnum, message string, logType LogType) {
+	registry.Logs[name] = log{
 		style:   style,
 		message: message,
+		LogType: logType,
 	}
 }
 ```
 
-and before starting minikube we would run:
+and before starting minikube we would run `initializeRegistry()`, which will register all logs we expect to output:
 
 ```go
 func initializeRegistry()
-    Register("select_driver", out.Sparkle, `Using the {{.driver}} driver based on existing profile`)
+    Register("select_driver", out.Sparkle, `Using the {{.driver}} driver based on existing profile`, Log)
     // Add all other logs here as well
 
 ```
@@ -145,9 +157,9 @@ out.T("select_driver", out.V{"driver": ds.String()})
 ```
 
 We can use the `Index` field in `Registry` to track which number log we are currently at. 
-Since logs have been pre-registered, we also know what the total number of expected logs is.
+Since logs have been pre-registered, we know what the total number of expected logs is.
 
-Similarly to stderr, if the JSON flag is specified, we will print the JSON encoding of the `Log` struct to stdout instead of the expected log.
+Similarly to stderr, if the JSON flag is specified, we will print the JSON encoding of the `Log` struct to stdout instead of the expected log in `out.T`, `out.Warning` and `out.Err`.
 
 
 #### Testing Plan
@@ -162,4 +174,4 @@ Integration tests will cover:
 
 ## Alternatives Considered
 
-I haven't been able to think of an alternate way to do this just yet.=
+I haven't been able to think of an alternate way to do this just yet.

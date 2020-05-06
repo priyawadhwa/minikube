@@ -21,7 +21,17 @@ const (
 	PreparingKubernetes = "preparing_kubernetes"
 )
 
+type LogType string
+
+// All the Style constants available
+const (
+	Log     LogType = "Log"
+	Warning LogType = "Warning"
+	Error   LogType = "Error"
+)
+
 type log struct {
+	LogType
 	style   StyleEnum
 	message string
 	v       []V
@@ -41,10 +51,10 @@ func Init() {
 }
 
 // Register registers a log
-func Register(name string, style StyleEnum, message string, a ...V) {
-	registry[name] = log{
+func Register(name string, style StyleEnum, message string, logType LogType) {
+	registry.Logs[name] = log{
 		style:   style,
 		message: message,
-		v:       a,
+		LogType: logType,
 	}
 }
