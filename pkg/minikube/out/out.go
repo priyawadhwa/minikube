@@ -65,8 +65,9 @@ type fdWriter interface {
 type V map[string]interface{}
 
 // T writes a stylized and templated message to stdout
-func T(style StyleEnum, format string, a ...V) {
-	outStyled := ApplyTemplateFormatting(style, useColor, format, a...)
+func T(name string) {
+	l := registry[name]
+	outStyled := ApplyTemplateFormatting(l.style, useColor, l.message, l.v...)
 	String(outStyled)
 }
 

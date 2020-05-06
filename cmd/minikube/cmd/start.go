@@ -122,6 +122,8 @@ func platform() string {
 
 // runStart handles the executes the flow of "minikube start"
 func runStart(cmd *cobra.Command, args []string) {
+	initializeLogs()
+
 	displayVersion(version.GetVersion())
 
 	// No need to do the update check if no one is going to see it
@@ -1009,4 +1011,8 @@ func getKubernetesVersion(old *config.ClusterConfig) string {
 		out.T(out.New, "Kubernetes {{.new}} is now available. If you would like to upgrade, specify: --kubernetes-version={{.new}}", out.V{"new": defaultVersion})
 	}
 	return nv
+}
+
+func initializeLogs() {
+
 }

@@ -64,32 +64,102 @@ func WithError(msg string, err error) {
 	...
 	p := problem.FromError(err, runtime.GOOS)
 	if p != nil {
-		WithProblem(msg, err, p)
+        WithProblem(msg, err, p)
+        // Add this function here (this is just pseudocode)
+        if json {
+            out.DisplayErrorJSON(os.Stderr, p)
+        }
 	}
-    // Add this function here (this is just pseudocode)
-    if json {
-        out.DisplayErrorJSON(os.Stderr, p)
-    }
     ...
 }
 ```
 
-If JSON output is speciifed, we can call a function to the `out` package, `out.DisplayErrorJSON()
+#### Testing Plan
+This feature will be covered by unit tests exclusively.
+If a problem is found, and json is specified, then we just want to make sure that the JSON output is parsable.
+
+### Stdout
+As mentioned above, the requirements for stdout are:
+1. Steps are numbered, and the total number of steps is known
+1. Steps have a helpful name
+
+The most difficult part of this problem is knowing the total number of steps before minikube starts.
+For that to be possible, we need to know all of the logs we will print before starting.
+
+I propose creating a registry of logs, which is prefilled with all necessary logs before we start minikube.
+The registry would look like this:
+
+```go
+// Registry holds all user-facing logs
+type Registry struct {
+	Logs  map[string]log
+	Index int
+}
+
+type Log struct {
+	style   StyleEnum
+	message string
+}
+```
+
+at the beginning of `minikube start`, we would initialize a `Registry` type in the `out` package, which would exist as a global variable.
+All logs would be added to the registry at this time via `Register`:
+
+```go
+// Register registers a log
+func Register(name string, style StyleEnum, message string) {
+	registry[name] = log{
+		style:   style,
+		message: message,
+	}
+}
+```
+
+and before starting minikube we would run:
+
+```go
+func initializeRegistry()
+    Register("select_driver", out.Sparkle, `Using the {{.driver}} driver based on existing profile`)
+    // Add all other logs here as well
+
+```
+
+This log would be printed at the correct time later in the code by calling:
+
+```go
+func Print(name string, a ...V)
+```
+
+which would find the correct log in the registry and apply the template to it.
+
+In the code itself, this means that this line, which currently looks like this:
+
+```go
+out.T(out.Sparkle, `Using the {{.driver}} driver based on existing profile`, out.V{"driver": ds.String()})
+```
+
+would now be:
+
+```go
+out.T("select_driver", out.V{"driver": ds.String()})
+```
+
+We can use the `Index` field in `Registry` to track which number log we are currently at. 
+Since logs have been pre-registered, we also know what the total number of expected logs is.
+
+Similarly to stderr, if the JSON flag is specified, we will print the JSON encoding of the `Log` struct to stdout instead of the expected log.
 
 
+#### Testing Plan
+Both unit tests and integration tests will be required to test this feature.
+
+Unit tests will cover:
+1. That the JSON output is correct and parsable
+
+Integration tests will cover:
+1. That all output to stdout is in JSON, ensuring that all user-facing logs have been registered
    
-
-
-
-
-
-
-_(2+ paragraphs) A short overview of your implementation idea, containing only as much detail as required to convey your idea._
-
-_If you have multiple ideas, list them concisely._
-
-_Include a testing plan to ensure that your enhancement is not broken by future changes._
 
 ## Alternatives Considered
 
-_Alternative ideas that you are leaning against._
+I haven't been able to think of an alternate way to do this just yet.=
