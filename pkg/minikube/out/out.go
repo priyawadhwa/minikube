@@ -18,6 +18,7 @@ limitations under the License.
 package out
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -65,10 +66,18 @@ type fdWriter interface {
 type V map[string]interface{}
 
 // T writes a stylized and templated message to stdout
-func T(name string) {
-	l := registry[name]
-	outStyled := ApplyTemplateFormatting(l.style, useColor, l.message, l.v...)
+func T(style StyleEnum, format string, a ...V) {
+	outStyled := ApplyTemplateFormatting(style, useColor, format, a...)
 	String(outStyled)
+}
+
+// TJSON writes a stylized and templated message to stdout
+func TJSON(name string, v ...V) {
+	l := registry.Logs[name]
+	templatedMessage := ApplyTemplateFormatting(l.StyleEnum, useColor, l.Message, v...)
+	l.Message = templatedMessage
+	encoding, _ := json.Marshal(l)
+	fmt.Println(string(encoding))
 }
 
 // String writes a basic formatted string to stdout

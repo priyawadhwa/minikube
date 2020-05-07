@@ -18,23 +18,25 @@ limitations under the License.
 package out
 
 const (
-	PreparingKubernetes = "preparing_kubernetes"
+	SelectDriver         = "Selecting Driver"
+	StartingControlPlane = "Starting Control Plane"
+	PreparingKubernetes  = "preparing_kubernetes"
 )
 
 type LogType string
 
 // All the Style constants available
 const (
-	Log     LogType = "Log"
-	Warning LogType = "Warning"
-	Error   LogType = "Error"
+	Log         LogType = "Log"
+	WarningType LogType = "Warning"
+	Error       LogType = "Error"
 )
 
 type log struct {
 	LogType
-	style   StyleEnum
-	message string
-	v       []V
+	StyleEnum
+	Message string
+	Name    string
 }
 
 // Registry holds all user-facing logs
@@ -47,14 +49,27 @@ var registry Registry
 
 // Init initializes the logs registry
 func Init() {
-	registry = Registry{}
+	registry = Registry{
+		Logs: map[string]log{},
+	}
 }
 
 // Register registers a log
 func Register(name string, style StyleEnum, message string, logType LogType) {
 	registry.Logs[name] = log{
-		style:   style,
-		message: message,
-		LogType: logType,
+		StyleEnum: style,
+		Message:   message,
+		LogType:   logType,
+		Name:      name,
 	}
+}
+
+func (r *Registry) NumLogs() int {
+	numLogs := 0
+	for _, l := range registry.Logs {
+		if l.LogType == Log {
+			numLogs++
+		}
+	}
+	return numLogs
 }

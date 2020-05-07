@@ -459,7 +459,7 @@ func selectDriver(existing *config.ClusterConfig) (registry.DriverState, []regis
 	if existing != nil {
 		old := hostDriver(existing)
 		ds := driver.Status(old)
-		out.T(out.Sparkle, `Using the {{.driver}} driver based on existing profile`, out.V{"driver": ds.String()})
+		out.TJSON(out.SelectDriver, out.V{"driver": ds.String()})
 		return ds, nil, true
 	}
 
@@ -1014,5 +1014,8 @@ func getKubernetesVersion(old *config.ClusterConfig) string {
 }
 
 func initializeLogs() {
+	out.Init()
+	out.Register(out.SelectDriver, out.Sparkle, `Using the {{.driver}} driver based on existing profile`, out.Log)
+	out.Register(out.StartingControlPlane, out.ThumbsUp, "Starting node {{.name}} in cluster {{.cluster}}", out.Log)
 
 }

@@ -18,6 +18,7 @@ package problem
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
@@ -149,6 +150,12 @@ VBoxManage.exe: error: Details: code E_FAIL (0x80004005), component MachineWrap,
 			}
 			if got.ID != tc.want {
 				t.Errorf("FromError(%q)=%s, want %s", tc.err, got.ID, tc.want)
+			}
+
+			encoding, err := json.Marshal(got)
+			if err == nil {
+				fmt.Println(string(encoding))
+				t.Fail()
 			}
 
 			found := false
