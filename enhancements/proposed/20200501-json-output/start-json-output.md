@@ -71,6 +71,10 @@ $ minikube start
 {"Name":"Done","Message":"🏄  Done! kubectl is now configured to use \"minikube\"\n","TotalSteps":8,"CurrentStep":8}
 ```
 
+This way, clients can parse the output as it is logged and know the following:
+1. What step we are currently on
+1. The total number of steps
+1. The specific message related to that step
 
 
 ## Implementation Details

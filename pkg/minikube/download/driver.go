@@ -32,7 +32,7 @@ func driverWithChecksumURL(name string, v semver.Version) string {
 
 // Driver downloads an arbitrary driver
 func Driver(name string, destination string, v semver.Version) error {
-	out.T(out.FileDownload, "Downloading driver {{.driver}}:", out.V{"driver": name})
+	out.TJSON(out.DownloadArtifacts, out.FileDownload, "Downloading driver {{.driver}}:", out.V{"driver": name})
 	if err := download(driverWithChecksumURL(name, v), destination); err != nil {
 		return errors.Wrap(err, "download")
 	}

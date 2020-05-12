@@ -28,6 +28,7 @@ const (
 	MinikubeVersion      = "Minikube Version"
 	SelectDriver         = "Selecting Driver"
 	StartingControlPlane = "Starting Control Plane"
+	DownloadArtifacts    = "Download Necessary Artifacts"
 	CreatingNode         = "Creating Node"
 	PreparingKubernetes  = "Preparing Kubernetes"
 	VerifyingKubernetes  = "Verifying Kubernetes"
@@ -68,6 +69,7 @@ func Init() {
 	Register(MinikubeVersion)
 	Register(SelectDriver)
 	Register(StartingControlPlane)
+	Register(DownloadArtifacts)
 	Register(CreatingNode)
 	Register(PreparingKubernetes)
 	Register(VerifyingKubernetes)
@@ -81,8 +83,9 @@ func Init() {
 func Register(name string) {
 	registry.Logs[name] = &log{
 		Name:        name,
-		CurrentStep: -1,
+		CurrentStep: registry.index(),
 	}
+	registry.increaseIndex()
 }
 
 func (r *Registry) NumLogs() int {
@@ -101,10 +104,6 @@ func updateLog(name string, message string) (*log, error) {
 	l := registry.Logs[name]
 	if l == nil {
 		return nil, fmt.Errorf("no log called %s exists in registry", name)
-	}
-	if l.CurrentStep == -1 {
-		l.CurrentStep = registry.index()
-		registry.increaseIndex()
 	}
 	l.Message = message
 	l.TotalSteps = registry.NumLogs()
