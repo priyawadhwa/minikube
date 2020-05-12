@@ -129,7 +129,7 @@ func Preload(k8sVersion, containerRuntime string) error {
 		return nil
 	}
 
-	out.T(out.FileDownload, "Downloading Kubernetes {{.version}} preload ...", out.V{"version": k8sVersion})
+	out.TJSON(out.DownloadArtifacts, out.FileDownload, "Downloading Kubernetes {{.version}} preload ...", out.V{"version": k8sVersion})
 	url := remoteTarballURL(k8sVersion, containerRuntime)
 
 	if err := download(url, targetPath); err != nil {

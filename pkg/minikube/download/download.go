@@ -39,13 +39,17 @@ func EnableMock(b bool) {
 
 // download is a well-configured atomic download function
 func download(src string, dst string) error {
+	return downloadJSON(src, dst)
+}
+
+func downloadJSON(src, dst string) error {
 	tmpDst := dst + ".download"
 	client := &getter.Client{
 		Src:     src,
 		Dst:     tmpDst,
 		Dir:     false,
 		Mode:    getter.ClientModeFile,
-		Options: []getter.ClientOption{getter.WithProgress(DefaultProgressBar)},
+		Options: []getter.ClientOption{getter.WithProgress(JSONOutput)},
 		Getters: map[string]getter.Getter{
 			"file":  &getter.FileGetter{Copy: false},
 			"http":  &getter.HttpGetter{Netrc: false},
