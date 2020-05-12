@@ -17,10 +17,22 @@ limitations under the License.
 // Package out provides a mechanism for sending localized, stylized output to the console.
 package out
 
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/spf13/viper"
+)
+
 const (
+	MinikubeVersion      = "Minikube Version"
 	SelectDriver         = "Selecting Driver"
 	StartingControlPlane = "Starting Control Plane"
-	PreparingKubernetes  = "preparing_kubernetes"
+	CreatingNode         = "Creating Node"
+	PreparingKubernetes  = "Preparing Kubernetes"
+	VerifyingKubernetes  = "Verifying Kubernetes"
+	EnablingAddons       = "Enabling Addons"
+	Done                 = "Done"
 )
 
 type LogType string
@@ -33,15 +45,15 @@ const (
 )
 
 type log struct {
-	LogType
-	StyleEnum
-	Message string
-	Name    string
+	Name        string
+	Message     string
+	TotalSteps  int
+	CurrentStep int
 }
 
 // Registry holds all user-facing logs
 type Registry struct {
-	Logs  map[string]log
+	Logs  map[string]*log
 	Index int
 }
 
@@ -50,26 +62,60 @@ var registry Registry
 // Init initializes the logs registry
 func Init() {
 	registry = Registry{
-		Logs: map[string]log{},
+		Logs:  map[string]*log{},
+		Index: 1,
 	}
+	Register(MinikubeVersion)
+	Register(SelectDriver)
+	Register(StartingControlPlane)
+	Register(CreatingNode)
+	Register(PreparingKubernetes)
+	Register(VerifyingKubernetes)
+	if viper.GetBool("install-addons") {
+		Register(EnablingAddons)
+	}
+	Register(Done)
 }
 
 // Register registers a log
-func Register(name string, style StyleEnum, message string, logType LogType) {
-	registry.Logs[name] = log{
-		StyleEnum: style,
-		Message:   message,
-		LogType:   logType,
-		Name:      name,
+func Register(name string) {
+	registry.Logs[name] = &log{
+		Name:        name,
+		CurrentStep: -1,
 	}
 }
 
 func (r *Registry) NumLogs() int {
-	numLogs := 0
-	for _, l := range registry.Logs {
-		if l.LogType == Log {
-			numLogs++
-		}
+	return len(r.Logs)
+}
+
+func (r *Registry) increaseIndex() {
+	r.Index++
+}
+
+func (r *Registry) index() int {
+	return r.Index
+}
+
+func updateLog(name string, message string) (*log, error) {
+	l := registry.Logs[name]
+	if l == nil {
+		return nil, fmt.Errorf("no log called %s exists in registry", name)
 	}
-	return numLogs
+	if l.CurrentStep == -1 {
+		l.CurrentStep = registry.index()
+		registry.increaseIndex()
+	}
+	l.Message = message
+	l.TotalSteps = registry.NumLogs()
+	return l, nil
+}
+
+func JsonEncoding(name string, message string) (string, error) {
+	log, err := updateLog(name, message)
+	if err != nil {
+		return "", err
+	}
+	encoding, err := json.Marshal(log)
+	return string(encoding), err
 }

@@ -56,6 +56,22 @@ If minikube fails, and an actionable error message exists, the following JSON wi
 }
 ```
 
+### Stdout
+If `--output json` is specified, the output of `minikube start` to stdout will look as follows:
+
+```
+$ minikube start
+{"Name":"Minikube Version","Message":"😄  minikube v1.10.0-beta.2 on Darwin 10.14.6\n","TotalSteps":8,"CurrentStep":1}
+{"Name":"Selecting Driver","Message":"✨  Using the hyperkit driver based on user configuration\n","TotalSteps":8,"CurrentStep":2}
+{"Name":"Starting Control Plane","Message":"👍  Starting node minikube in cluster minikube\n","TotalSteps":8,"CurrentStep":3}
+{"Name":"Creating Node","Message":"🔥  Creating hyperkit VM (CPUs=2, Memory=6000MB, Disk=20000MB) ...\n","TotalSteps":8,"CurrentStep":4}
+{"Name":"Preparing Kubernetes","Message":"🐳  Preparing Kubernetes v1.18.1 on Docker 19.03.8 ...\n","TotalSteps":8,"CurrentStep":5}
+{"Name":"Verifying Kubernetes","Message":"🔎  Verifying Kubernetes components...\n","TotalSteps":8,"CurrentStep":6}
+{"Name":"Enabling Addons","Message":"🌟  Enabled addons: default-storageclass, storage-provisioner\n","TotalSteps":8,"CurrentStep":7}
+{"Name":"Done","Message":"🏄  Done! kubectl is now configured to use \"minikube\"\n","TotalSteps":8,"CurrentStep":8}
+```
+
+
 
 ## Implementation Details
 Users can specify JSON output on minikube start via a flag:

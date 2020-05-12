@@ -18,7 +18,6 @@ limitations under the License.
 package out
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -72,12 +71,13 @@ func T(style StyleEnum, format string, a ...V) {
 }
 
 // TJSON writes a stylized and templated message to stdout
-func TJSON(name string, v ...V) {
-	l := registry.Logs[name]
-	templatedMessage := ApplyTemplateFormatting(l.StyleEnum, useColor, l.Message, v...)
-	l.Message = templatedMessage
-	encoding, _ := json.Marshal(l)
-	fmt.Println(string(encoding))
+func TJSON(name string, style StyleEnum, format string, a ...V) {
+	outStyled := ApplyTemplateFormatting(style, useColor, format, a...)
+	encoding, err := JsonEncoding(name, outStyled)
+	if err != nil {
+		glog.Warningf("error getting json encoding for log %s: %v", name, err)
+	}
+	String(encoding + "\n")
 }
 
 // String writes a basic formatted string to stdout

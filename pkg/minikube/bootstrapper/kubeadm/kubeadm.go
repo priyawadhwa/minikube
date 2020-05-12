@@ -342,13 +342,12 @@ func (k *Bootstrapper) client(ip string, port int) (*kubernetes.Clientset, error
 // WaitForNode blocks until the node appears to be healthy
 func (k *Bootstrapper) WaitForNode(cfg config.ClusterConfig, n config.Node, timeout time.Duration) (waitErr error) {
 	start := time.Now()
+	out.TJSON(out.VerifyingKubernetes, out.HealthCheck, "Verifying Kubernetes components...")
 
 	if !n.ControlPlane {
 		glog.Infof("%s is not a control plane, nothing to wait for", n.Name)
 		return nil
 	}
-
-	out.T(out.HealthCheck, "Verifying Kubernetes components...")
 
 	// TODO: #7706: for better performance we could use k.client inside minikube to avoid asking for external IP:PORT
 	hostname, _, port, err := driver.ControlPaneEndpoint(&cfg, &n, cfg.Driver)

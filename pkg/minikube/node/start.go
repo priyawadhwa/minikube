@@ -188,7 +188,7 @@ func Start(starter Starter, apiServer bool) (*kubeconfig.Settings, error) {
 // Provision provisions the machine/container for the node
 func Provision(cc *config.ClusterConfig, n *config.Node, apiServer bool) (command.Runner, bool, libmachine.API, *host.Host, error) {
 	name := driver.MachineName(*cc, *n)
-	out.TJSON(out.StartingControlPlane, out.V{"name": name, "cluster": cc.Name})
+	out.TJSON(out.StartingControlPlane, out.ThumbsUp, "Starting node {{.name}} in cluster {{.cluster}}", out.V{"name": name, "cluster": cc.Name})
 
 	if driver.IsKIC(cc.Driver) {
 		beginDownloadKicArtifacts(&kicGroup, cc.Driver, cc.KubernetesConfig.ContainerRuntime)

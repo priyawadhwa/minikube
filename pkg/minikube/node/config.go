@@ -37,7 +37,7 @@ import (
 
 func showVersionInfo(k8sVersion string, cr cruntime.Manager) {
 	version, _ := cr.Version()
-	out.T(cr.Style(), "Preparing Kubernetes {{.k8sVersion}} on {{.runtime}} {{.runtimeVersion}} ...", out.V{"k8sVersion": k8sVersion, "runtime": cr.Name(), "runtimeVersion": version})
+	out.TJSON(out.PreparingKubernetes, cr.Style(), "Preparing Kubernetes {{.k8sVersion}} on {{.runtime}} {{.runtimeVersion}} ...", out.V{"k8sVersion": k8sVersion, "runtime": cr.Name(), "runtimeVersion": version})
 	for _, v := range config.DockerOpt {
 		out.T(out.Option, "opt {{.docker_option}}", out.V{"docker_option": v})
 	}

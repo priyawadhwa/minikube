@@ -328,7 +328,7 @@ func displayVersion(version string) {
 		prefix = fmt.Sprintf("[%s] ", ClusterFlagValue())
 	}
 
-	out.T(out.Happy, "{{.prefix}}minikube {{.version}} on {{.platform}}", out.V{"prefix": prefix, "version": version, "platform": platform()})
+	out.TJSON(out.MinikubeVersion, out.Happy, "{{.prefix}}minikube {{.version}} on {{.platform}}", out.V{"prefix": prefix, "version": version, "platform": platform()})
 }
 
 // displayEnviron makes the user aware of environment variables that will affect how minikube operates
@@ -347,7 +347,7 @@ func showKubectlInfo(kcs *kubeconfig.Settings, k8sVersion string, machineName st
 	if kcs.KeepContext {
 		out.T(out.Kubectl, "To connect to this cluster, use: kubectl --context={{.name}}", out.V{"name": kcs.ClusterName})
 	} else {
-		out.T(out.Ready, `Done! kubectl is now configured to use "{{.name}}"`, out.V{"name": machineName})
+		out.TJSON(out.Done, out.Ready, `Done! kubectl is now configured to use "{{.name}}"`, out.V{"name": machineName})
 	}
 
 	path, err := exec.LookPath("kubectl")
@@ -459,7 +459,7 @@ func selectDriver(existing *config.ClusterConfig) (registry.DriverState, []regis
 	if existing != nil {
 		old := hostDriver(existing)
 		ds := driver.Status(old)
-		out.TJSON(out.SelectDriver, out.V{"driver": ds.String()})
+		out.TJSON(out.SelectDriver, out.Sparkle, `Using the {{.driver}} driver based on existing profile`, out.V{"driver": ds.String()})
 		return ds, nil, true
 	}
 
@@ -479,7 +479,7 @@ func selectDriver(existing *config.ClusterConfig) (registry.DriverState, []regis
 		if ds.Name == "" {
 			exit.WithCodeT(exit.Unavailable, "The driver '{{.driver}}' is not supported on {{.os}}", out.V{"driver": d, "os": runtime.GOOS})
 		}
-		out.T(out.Sparkle, `Using the {{.driver}} driver based on user configuration`, out.V{"driver": ds.String()})
+		out.TJSON(out.SelectDriver, out.Sparkle, `Using the {{.driver}} driver based on user configuration`, out.V{"driver": ds.String()})
 		return ds, nil, true
 	}
 
@@ -489,7 +489,7 @@ func selectDriver(existing *config.ClusterConfig) (registry.DriverState, []regis
 		if ds.Name == "" {
 			exit.WithCodeT(exit.Unavailable, "The driver '{{.driver}}' is not supported on {{.os}}", out.V{"driver": d, "os": runtime.GOOS})
 		}
-		out.T(out.Sparkle, `Using the {{.driver}} driver based on user configuration`, out.V{"driver": ds.String()})
+		out.TJSON(out.SelectDriver, out.Sparkle, `Using the {{.driver}} driver based on user configuration`, out.V{"driver": ds.String()})
 		return ds, nil, true
 	}
 
@@ -509,9 +509,9 @@ func selectDriver(existing *config.ClusterConfig) (registry.DriverState, []regis
 		for _, a := range alts {
 			altNames = append(altNames, a.String())
 		}
-		out.T(out.Sparkle, `Automatically selected the {{.driver}} driver. Other choices: {{.alternates}}`, out.V{"driver": pick.Name, "alternates": strings.Join(altNames, ", ")})
+		out.TJSON(out.SelectDriver, out.Sparkle, `Automatically selected the {{.driver}} driver. Other choices: {{.alternates}}`, out.V{"driver": pick.Name, "alternates": strings.Join(altNames, ", ")})
 	} else {
-		out.T(out.Sparkle, `Automatically selected the {{.driver}} driver`, out.V{"driver": pick.String()})
+		out.TJSON(out.SelectDriver, out.Sparkle, `Automatically selected the {{.driver}} driver`, out.V{"driver": pick.String()})
 	}
 	return pick, alts, false
 }
@@ -1015,7 +1015,4 @@ func getKubernetesVersion(old *config.ClusterConfig) string {
 
 func initializeLogs() {
 	out.Init()
-	out.Register(out.SelectDriver, out.Sparkle, `Using the {{.driver}} driver based on existing profile`, out.Log)
-	out.Register(out.StartingControlPlane, out.ThumbsUp, "Starting node {{.name}} in cluster {{.cluster}}", out.Log)
-
 }
