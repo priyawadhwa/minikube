@@ -135,7 +135,7 @@ The fifth step is a sample actionable error message (Type: Error).
 
 ## Implementation Details
 
-### Log Steps
+### Type: Log Steps
 Since we need to approximate the total number of steps before minikube starts, we need to know the general steps we expect to execute before starting.
 
 I propose creating a registry of logs, which is prefilled with the following steps:
@@ -177,7 +177,7 @@ out.Step(out.CreateDriver, out.Sparkle, `Using the {{.driver}} driver based on e
 
 `out.Step` will be responsible for applying the passed in template, and printing out a JSON encoded version of the step.
 
-### Stdout - Download Steps
+### Type: Download Steps
 
 To communicate progress on artifacts as they're being downloaded, we want JSON output that looks something like this during download:
 
