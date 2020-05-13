@@ -50,6 +50,7 @@ type log struct {
 	Message     string
 	TotalSteps  int
 	CurrentStep int
+	LogType
 }
 
 // Registry holds all user-facing logs
@@ -84,6 +85,7 @@ func Register(name string) {
 	registry.Logs[name] = &log{
 		Name:        name,
 		CurrentStep: registry.index(),
+		LogType:     Log,
 	}
 	registry.increaseIndex()
 }

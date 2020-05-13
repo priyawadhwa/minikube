@@ -18,6 +18,7 @@ limitations under the License.
 package out
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -103,7 +104,14 @@ func Ln(format string, a ...interface{}) {
 // ErrT writes a stylized and templated error message to stderr
 func ErrT(style StyleEnum, format string, a ...V) {
 	errStyled := ApplyTemplateFormatting(style, useColor, format, a...)
-	Err(errStyled)
+
+	l := &log{
+		LogType: Error,
+		Message: errStyled,
+	}
+	encoding, _ := json.Marshal(l)
+	Ln(string(encoding))
+	// Err(errStyled)
 }
 
 // Err writes a basic formatted string to stderr
@@ -112,6 +120,7 @@ func Err(format string, a ...interface{}) {
 		glog.Errorf("[unset errFile]: %s", fmt.Sprintf(format, a...))
 		return
 	}
+
 	_, err := fmt.Fprintf(errFile, format, a...)
 	if err != nil {
 		glog.Errorf("Fprint failed: %v", err)
@@ -135,7 +144,13 @@ func FatalT(format string, a ...V) {
 
 // WarningT is a shortcut for writing a templated warning message to stderr
 func WarningT(format string, a ...V) {
-	ErrT(Warning, format, a...)
+	l := &log{
+		LogType: WarningType,
+		Message: format,
+	}
+	encoding, _ := json.Marshal(l)
+	Ln(string(encoding))
+	return
 }
 
 // FailureT is a shortcut for writing a templated failure message to stderr

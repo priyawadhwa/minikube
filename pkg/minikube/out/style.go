@@ -169,7 +169,6 @@ func ApplyTemplateFormatting(style StyleEnum, useColor bool, format string, a ..
 	if a == nil {
 		a = []V{{}}
 	}
-	format = applyStyle(style, useColor, format)
 
 	var buf bytes.Buffer
 	t, err := template.New(format).Parse(format)

@@ -18,6 +18,7 @@ limitations under the License.
 package problem
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
 
@@ -41,6 +42,7 @@ type Problem struct {
 	Issues []int
 	// Hide the new issue link: it isn't our problem, and we won't be able to suggest additional assistance.
 	ShowIssueLink bool
+	Type          string
 }
 
 // match maps a regular expression to problem metadata.
@@ -57,6 +59,9 @@ type match struct {
 
 // Display problem metadata to the console
 func (p *Problem) Display() {
+	encoding, _ := json.Marshal(p)
+	fmt.Println(string(encoding))
+	return
 	out.ErrT(out.Tip, "Suggestion: {{.advice}}", out.V{"advice": translate.T(p.Advice)})
 	if p.URL != "" {
 		out.ErrT(out.Documentation, "Documentation: {{.url}}", out.V{"url": p.URL})
@@ -119,6 +124,7 @@ func FromError(err error, goos string) *Problem {
 				ID:            id,
 				Issues:        match.Issues,
 				ShowIssueLink: match.ShowIssueLink,
+				Type:          "Error",
 			}
 
 			if len(match.GOOS) > 0 {

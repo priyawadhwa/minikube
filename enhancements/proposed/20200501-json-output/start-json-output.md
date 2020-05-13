@@ -85,7 +85,12 @@ The JSON structs for each type will look like this:
 ```
 
 **Type: Warning**
-
+```json
+{
+  "Message": "Something seems to be wrong....",
+  "Type": "Warning"
+}
+```
 
 **Type: Error**
 ```json
@@ -102,32 +107,30 @@ The JSON structs for each type will look like this:
 }
 ```
 
+In the case of an unactionable error message, output would look like this:
+
+```json
+{
+  "Message": "error provisioning host: Failed to start host: there was an unexpected & unactionable error",
+  "Type": "Error"
+}
+```
+
 
 `minikube start` output would look something like this:
 
 ```
 $ minikube start
-{"Name":"Minikube Version","Message":"minikube v1.10.0-beta.2 on Darwin 10.14.6","TotalSteps":9,"CurrentStep":1, "Type":"Log"}
-{"Name":"Selecting Driver","Message":"Using the hyperkit driver,"TotalSteps":9,"CurrentStep":2,"Type":"Log"}
+{"Name":"Minikube Version","Message":"minikube v1.10.0-beta.2 on Darwin 10.14.6","TotalSteps":9,"CurrentStep":1,"Type":"Log"}
+{"Name":"Selecting Driver","Message":"Using the hyperkit driver based on existing profile","TotalSteps":9,"CurrentStep":2,"Type":"Log"}
 {"Name":"Starting Control Plane","Message":"Starting node minikube in cluster minikube","TotalSteps":9,"CurrentStep":3,"Type":"Log"}
-{"Name":"Download Necessary Artifacts","Message":"Downloading Kubernetes v1.18.1 preload","TotalSteps":9,"CurrentStep":4,"Type":"Log"}
-  {"Type":"Download", "Artifact":"preload.tar.gz", "Progress": "10%"}
-  {"Type":"Download", "Artifact":"preload.tar.gz", "Progress": "61%"}
-  {"Type":"Download", "Artifact":"preload.tar.gz", "Progress": "73%"}
-  {"Type":"Download", "Artifact":"preload.tar.gz", "Progress": "87%"}
-  {"Type":"Download", "Artifact":"preload.tar.gz", "Progress": "100%"}
-{"Name":"Creating Node","Message":"Creating hyperkit VM","TotalSteps":9,"CurrentStep":5,"Type":"Log"}
-{"Name":"Preparing Kubernetes","Message":"Preparing Kubernetes v1.18.1 on Docker 19.03.8","TotalSteps":9,"CurrentStep":6,"Type":"Log"}
-{"Name":"Verifying Kubernetes","Message":"Verifying Kubernetes components","TotalSteps":9,"CurrentStep":7,"Type":"Log"}
-{"Name":"Enabling Addons","Message":"Enabled addons: default-storageclass, storage-provisioner","TotalSteps":9,"CurrentStep":7,"Type":"Log"}
-{"Name":"Done","Message":"Done! kubectl is now configured to use \"minikube\"","TotalSteps":9,"CurrentStep":9,"Type":"Log"}
+{"Name":"","Message":"Something seems to be wrong....","TotalSteps":0,"CurrentStep":0,"Type":"Warning"}
+{"ID":"NON_C_DRIVE","Err":{},"Advice":"Run minikube from the C: drive.","URL":"","Issues":[1574],"ShowIssueLink":false,"Type":"Error"}
 ```
 
-This way, clients can parse the output as it is logged and know the following:
-1. What the type of step is (Log vs Download)
-1. What step we are currently on
-1. The total number of steps
-1. The specific message related to that step
+In this sample, the first three steps are successful steps (Type: Log).
+The fourth step is a warning that something seems to be wrong (Type: Warning).
+The fifth step is a sample actionable error message (Type: Error).
 
 
 ## Implementation Details

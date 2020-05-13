@@ -39,6 +39,7 @@ import (
 	"k8s.io/minikube/pkg/minikube/driver"
 	"k8s.io/minikube/pkg/minikube/localpath"
 	"k8s.io/minikube/pkg/minikube/out"
+	"k8s.io/minikube/pkg/minikube/problem"
 	"k8s.io/minikube/pkg/minikube/registry"
 	"k8s.io/minikube/pkg/minikube/vmpath"
 	"k8s.io/minikube/pkg/util/lock"
@@ -112,6 +113,13 @@ func createHost(api libmachine.API, cfg config.ClusterConfig, n config.Node) (*h
 			Please consider switching to the new vmware unified driver, which is intended to replace the vmwarefusion driver.
 			See https://minikube.sigs.k8s.io/docs/reference/drivers/vmware/ for more information.
 			To disable this message, run [minikube config set ShowDriverDeprecationNotification false]`)
+	}
+	out.WarningT("Something seems to be wrong....")
+	err := errors.New(".iso: The system cannot find the path specified.")
+	p := problem.FromError(err, "windows")
+	p.Display()
+	if true {
+		return nil, errors.New("there was an unexpected & unactionable error")
 	}
 	showHostInfo(cfg)
 	def := registry.Driver(cfg.Driver)
@@ -231,6 +239,7 @@ func acquireMachinesLock(name string) (mutex.Releaser, error) {
 
 // showHostInfo shows host information
 func showHostInfo(cfg config.ClusterConfig) {
+
 	machineType := driver.MachineType(cfg.Driver)
 	if driver.BareMetal(cfg.Driver) {
 		info, err := getHostInfo()
