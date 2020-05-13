@@ -135,20 +135,7 @@ The fifth step is a sample actionable error message (Type: Error).
 
 ## Implementation Details
 
-### Stderr
-glog logs can be sent to stderr as usual.
-In addition, we will output error code from [err_map.go](https://github.com/kubernetes/minikube/blob/master/pkg/minikube/problem/err_map.go) as a parsable JSON message to stderr.
-
-This will be done by adding the following function to the `out` package:
-
-```go
-func DisplayErrorJSON(out io.Writer, p *problem.Problem)
-```
-
-which will print the JSON encoding of `p` to `out` (in this case, stderr).
-
-
-### Stdout - Log Steps
+### Log Steps
 Since we need to approximate the total number of steps before minikube starts, we need to know the general steps we expect to execute before starting.
 
 I propose creating a registry of logs, which is prefilled with the following steps:
@@ -167,7 +154,7 @@ When a log is called in the code, it will be associated with one of the above st
 
 This will allow us to determine which number step we are currently on, and include that information in the output.
 
-_Note: We may skip steps depending on the user's existing setup. For example, we may not need to "Verify Kubernetes" on a soft start. The current step/total step numbers will only be approximations_
+_Note: We may skip steps depending on the user's existing setup. For example, we may not need to "Verify Kubernetes" on a soft start. Though current step may jump from Step 5 to Step 8, the total number of expected steps will not change._
 
 
 This log would be printed at the correct time later in the code by calling a new function, similar to `out.T`:
@@ -188,17 +175,7 @@ would now be:
 out.Step(out.CreateDriver, out.Sparkle, `Using the {{.driver}} driver based on existing profile`, out.V{"driver": ds.String()})
 ```
 
-`out.Step` will be responsible for applying the passed in template, and printing out a JSON encoded version of the step if `--output json` is specified:
-
-```json
-{
-  "Name": "Selecting Driver",
-  "Message": "✨  Using the hyperkit driver based on user configuration\n",
-  "TotalSteps": 9,
-  "CurrentStep": 2,
-  "Type": "Log"
-}
-```
+`out.Step` will be responsible for applying the passed in template, and printing out a JSON encoded version of the step.
 
 ### Stdout - Download Steps
 
