@@ -93,6 +93,8 @@ The JSON structs for each type will look like this:
 ```
 
 **Type: Error**
+In the case of actionable error message:
+
 ```json
 {
   "Type": "Error",
@@ -107,7 +109,7 @@ The JSON structs for each type will look like this:
 }
 ```
 
-In the case of an unactionable error message, output would look like this:
+In the case of an unactionable error message, set the message as whatever error was returned:
 
 ```json
 {
@@ -185,7 +187,8 @@ To communicate progress on artifacts as they're being downloaded, we want JSON o
 {
   "Type": "Download",
   "Artifact": "preload.tar.gz",
-  "Progress": "10%"
+  "Progress": "10%",
+  "CurrentStep": 4,
 }
 ```
 
@@ -196,17 +199,16 @@ Instead of passing in `DefaultProgressBar` we should be able to write our own ob
 
 
 #### Testing Plan
-Both unit tests and integration tests will be required to test these features feature.
-
 Unit tests will cover:
-1. That the JSON output of output steps, both type `Log` and type `Download`, is correct and parsable
-1. That errors are sent to stderr correctly and are parsable
+1. That the JSON output of each type of step is correct and parsable
 
 Integration tests will cover:
-1. That in the following cases, if `--output json` is specfied, all logs are correctly in JSON format:
+1. That in the following cases, if `--output json` is specfied, all logs to stdout are correctly in JSON format:
   * Clean start, with no downloaded artifacts
   * Soft start
   * Restart
+  * Force an error
+  * Force a warning (can use an old --kubernetes-version)
    
 
 ## Alternatives Considered
