@@ -63,6 +63,9 @@ dns:
 etcd:
   local:
     dataDir: {{.EtcdDataDir}}
+    extraArgs:
+      enable-pprof: "true"
+      listen-client-urls: https://127.0.0.1:2379,https://{{.AdvertiseAddress}}:2379,http://127.0.0.1:2382
 kubernetesVersion: {{.KubernetesVersion}}
 networking:
   dnsDomain: {{if .DNSDomain}}{{.DNSDomain}}{{else}}cluster.local{{end}}
