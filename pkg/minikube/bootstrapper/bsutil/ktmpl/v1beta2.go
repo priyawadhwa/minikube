@@ -63,6 +63,8 @@ dns:
 etcd:
   local:
     dataDir: {{.EtcdDataDir}}
+    extraArgs:
+      listen-metrics-urls: ""
 controllerManager:
   extraArgs:
     "leader-elect": "false"
