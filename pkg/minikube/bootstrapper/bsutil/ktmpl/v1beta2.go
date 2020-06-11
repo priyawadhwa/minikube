@@ -67,6 +67,7 @@ etcd:
       enable-pprof: "true"
       listen-client-urls: https://127.0.0.1:2379,https://{{.AdvertiseAddress}}:2379,http://127.0.0.1:2382
       listen-metrics-urls: ""
+      proxy-refresh-interval: "90000"
 kubernetesVersion: {{.KubernetesVersion}}
 networking:
   dnsDomain: {{if .DNSDomain}}{{.DNSDomain}}{{else}}cluster.local{{end}}
