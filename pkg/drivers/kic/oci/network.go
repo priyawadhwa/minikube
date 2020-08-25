@@ -66,6 +66,10 @@ func dockerGatewayIP(profile string) (net.IP, error) {
 		ip := net.ParseIP(DefaultGateway)
 		return ip, nil
 	}
+	if true {
+		glog.Infof("SKIPPING NETOWRK CREATION")
+		return nil, fmt.Errorf("skipping")
+	}
 	rr, err := runCmd(exec.Command(Docker, "network", "ls", "--filter", "name=bridge", "--format", "{{.ID}}"))
 	if err != nil {
 		return nil, errors.Wrapf(err, "get network bridge")
