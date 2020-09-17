@@ -20,9 +20,27 @@ package schedule
 
 import (
 	"fmt"
+	"os/exec"
 	"time"
+
+	"github.com/VividCortex/godaemon"
+	"github.com/pkg/errors"
 )
 
 func daemonize(profiles []string, duration time.Duration) error {
-	return fmt.Errorf("--schedule has not yet been implemented on windows, see https://github.com/kubernetes/minikube/issues/9271")
+	ep, err := godaemon.GetExecutablePath()
+	if err != nil {
+		return errors.Wrap(err, "getting executable path")
+	}
+	mkArgs := []string{"stop", "--wait", duration.String()}
+	for _, p := range profiles {
+		mkArgs = append(mkArgs, "-p", p)
+	}
+	args := append([]string{"/C", "start", fmt.Sprintf("c:%s", ep)}, mkArgs...)
+	cmd := exec.Command("cmd.exe", args...)
+	if err := cmd.Run(); err != nil {
+		return errors.Wrap(err, "starting daemon command")
+	}
+	fmt.Println("Need to store process: ", cmd.Process.Pid)
+	return savePIDs(cmd.Process.Pid, profiles)
 }

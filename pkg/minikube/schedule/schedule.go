@@ -49,20 +49,7 @@ func Daemonize(profiles []string, duration time.Duration) error {
 		}
 	}
 
-	if err := daemonize(profiles, duration); err != nil {
-		return errors.Wrap(err, "making daemon")
-	}
-
-	// now that this process has daemonized, it has a new PID
-	pid := os.Getpid()
-	// store this PID in MINIKUBE_HOME/profiles/<profile>/pid
-	for _, p := range profiles {
-		file := localpath.PID(p)
-		if err := ioutil.WriteFile(file, []byte(fmt.Sprintf("%v", pid)), 0644); err != nil {
-			return err
-		}
-	}
-	return nil
+	return daemonize(profiles, duration)
 }
 
 func killExistingScheduledStops(profile string) error {
@@ -86,6 +73,16 @@ func killExistingScheduledStops(profile string) error {
 	glog.Infof("killing process %v as it is an old scheduled stop", pid)
 	if err := p.Kill(); err != nil {
 		return errors.Wrapf(err, "killing %v", pid)
+	}
+	return nil
+}
+
+func savePIDs(pid int, profiles []string) error {
+	for _, p := range profiles {
+		file := localpath.PID(p)
+		if err := ioutil.WriteFile(file, []byte(fmt.Sprintf("%v", pid)), 0644); err != nil {
+			return err
+		}
 	}
 	return nil
 }

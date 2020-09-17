@@ -19,6 +19,7 @@ limitations under the License.
 package schedule
 
 import (
+	"os"
 	"time"
 
 	"github.com/VividCortex/godaemon"
@@ -26,5 +27,10 @@ import (
 
 func daemonize(profiles []string, duration time.Duration) error {
 	_, _, err := godaemon.MakeDaemon(&godaemon.DaemonAttr{})
-	return err
+	if err != nil {
+		return err
+	}
+	// now that this process has daemonized, it has a new PID
+	pid := os.Getpid()
+	return savePIDs(pid, profiles)
 }
