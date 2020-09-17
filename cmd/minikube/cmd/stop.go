@@ -93,7 +93,7 @@ func runStop(cmd *cobra.Command, args []string) {
 			exit.Message(reason.Usage, "provided value {{.schedule}} to --schedule is not a valid Golang time.Duration", out.V{"schedule": scheduledStop})
 		}
 		if err := schedule.Daemonize(profilesToStop, duration); err != nil {
-			exit.Message(reason.DaemonizeError, "unable to daemonize: {{.err}}", out.V{"err": err.Error})
+			exit.Message(reason.DaemonizeError, "unable to daemonize: {{.err}}", out.V{"err": err.Error()})
 		}
 		glog.Infof("sleeping %s before completing stop...", duration.String())
 		time.Sleep(duration)
