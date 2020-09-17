@@ -23,7 +23,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/VividCortex/godaemon"
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
 	"k8s.io/minikube/pkg/minikube/config"
@@ -50,8 +49,7 @@ func Daemonize(profiles []string, duration time.Duration) error {
 		}
 	}
 
-	_, _, err := godaemon.MakeDaemon(&godaemon.DaemonAttr{})
-	if err != nil {
+	if err := daemonize(profiles, duration); err != nil {
 		return errors.Wrap(err, "making daemon")
 	}
 

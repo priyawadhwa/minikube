@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"syscall"
 	"testing"
@@ -35,6 +36,9 @@ import (
 )
 
 func TestScheduledStop(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("feature not yet implemented for windows")
+	}
 	profile := UniqueProfileName("scheduled-stop")
 	ctx, cancel := context.WithTimeout(context.Background(), Minutes(5))
 	defer CleanupWithLogs(t, profile, cancel)
