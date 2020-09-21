@@ -19,7 +19,6 @@ limitations under the License.
 package schedule
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -29,22 +28,13 @@ import (
 )
 
 func daemonize(profiles []string, duration time.Duration) error {
-	currentBinary, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	currentBinary, err := filepath.Abs(os.Args[0])
 	if err != nil {
 		return errors.Wrap(err, "getting current binary")
 	}
-	fmt.Println("Current binary is:", currentBinary)
-
-	mkArgs := []string{"stop", "--wait", duration.String()}
-	for _, p := range profiles {
-		mkArgs = append(mkArgs, "-p", p)
+	cmd := exec.Command(currentBinary, "stop", "--wait", duration.String())
+	if err := cmd.Start(); err != nil {
+		return errors.Wrap(err, "startig command")
 	}
-	args := append([]string{"/C", "start", fmt.Sprintf("%s", currentBinary)}, mkArgs...)
-	fmt.Println("Running :", args)
-	cmd := exec.Command("cmd.exe", args...)
-	if err := cmd.Run(); err != nil {
-		return errors.Wrap(err, "starting daemon command")
-	}
-	fmt.Println("Need to store process: ", cmd.Process.Pid)
 	return savePIDs(cmd.Process.Pid, profiles)
 }

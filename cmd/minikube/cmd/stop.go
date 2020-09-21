@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"runtime"
 	"time"
 
 	"github.com/docker/machine/libmachine"
@@ -104,6 +105,9 @@ func runStop(cmd *cobra.Command, args []string) {
 		}
 		if err := schedule.Daemonize(profilesToStop, duration); err != nil {
 			exit.Message(reason.DaemonizeError, "unable to daemonize: {{.err}}", out.V{"err": err.Error()})
+		}
+		if runtime.GOOS == "windows" {
+			return
 		}
 		glog.Infof("sleeping %s before completing stop...", duration.String())
 		time.Sleep(duration)

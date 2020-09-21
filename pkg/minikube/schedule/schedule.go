@@ -19,6 +19,7 @@ package schedule
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strconv"
 	"time"
@@ -40,7 +41,7 @@ func Daemonize(profiles []string, duration time.Duration) error {
 	for _, p := range profiles {
 		// first check if we have a scheduled stop already running that needs to be cancelled
 		if err := killExistingScheduledStops(p); err != nil {
-			return errors.Wrap(err, "killing existing scheduled stops")
+			log.Printf("error killing existing scheduled stops: %v", err)
 		}
 		_, cc := mustload.Partial(p)
 		cc.ScheduledStop = scheduledStop
