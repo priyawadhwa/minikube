@@ -21,8 +21,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
+	"github.com/blang/semver"
 	"github.com/pkg/errors"
 	"k8s.io/minikube/pkg/drivers/kic"
 	"k8s.io/minikube/pkg/drivers/kic/oci"
@@ -65,10 +67,11 @@ func generateTarball(kubernetesVersion, containerRuntime, tarballFilename string
 	}
 
 	// Now, get images to pull
-	imgs, err := images.Kubeadm("", kubernetesVersion)
+	v, err := semver.Make(strings.TrimPrefix(kubernetesVersion, "v"))
 	if err != nil {
-		return errors.Wrap(err, "kubeadm images")
+		return errors.Wrap(err, "semver")
 	}
+	imgs := images.Essential("", v)
 
 	if containerRuntime != "docker" { // kic overlay image is only needed by containerd and cri-o https://github.com/kubernetes/minikube/issues/7428
 		imgs = append(imgs, images.KindNet(""))

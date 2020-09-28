@@ -37,8 +37,8 @@ func Pause(v semver.Version, mirror string) string {
 	return path.Join(kubernetesRepo(mirror), "pause"+archTag(false)+pv)
 }
 
-// essentials returns images needed too bootstrap a kubenretes
-func essentials(mirror string, v semver.Version) []string {
+// Essential returns images needed too bootstrap a kubenretes
+func Essential(mirror string, v semver.Version) []string {
 	imgs := []string{
 		componentImage("kube-proxy", v, mirror),
 		componentImage("kube-scheduler", v, mirror),
@@ -127,8 +127,8 @@ func archTag(hasTag bool) string {
 	return "-" + runtime.GOARCH + ":"
 }
 
-// auxiliary returns images that are helpful for running minikube
-func auxiliary(mirror string) []string {
+// Auxiliary returns images that are helpful for running minikube
+func Auxiliary(mirror string) []string {
 	return []string{
 		storageProvisioner(mirror),
 		dashboardFrontend(mirror),

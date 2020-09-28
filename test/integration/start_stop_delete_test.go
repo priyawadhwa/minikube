@@ -303,7 +303,7 @@ func testPulledImages(ctx context.Context, t *testing.T, profile string, version
 			}
 		}
 	}
-	want, err := images.Kubeadm("", version)
+	want, err := images.All("", version)
 	if err != nil {
 		t.Errorf("failed to get kubeadm images for %s : %v", version, err)
 	}

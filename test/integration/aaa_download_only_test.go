@@ -81,7 +81,7 @@ func TestDownloadOnly(t *testing.T) {
 							return
 						}
 					}
-					imgs, err := images.Kubeadm("", v)
+					imgs, err := images.All("", v)
 					if err != nil {
 						t.Errorf("failed to get kubeadm images for %v: %+v", v, err)
 					}

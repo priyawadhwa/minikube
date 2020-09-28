@@ -314,7 +314,7 @@ func (r *Containerd) Preload(cfg config.KubernetesConfig) error {
 	cRuntime := cfg.ContainerRuntime
 
 	// If images already exist, return
-	images, err := images.Kubeadm(cfg.ImageRepository, k8sVersion)
+	images, err := images.All(cfg.ImageRepository, k8sVersion)
 	if err != nil {
 		return errors.Wrap(err, "getting images")
 	}

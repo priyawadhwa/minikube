@@ -23,13 +23,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Kubeadm returns a list of images necessary to bootstrap kubeadm
-func Kubeadm(mirror string, version string) ([]string, error) {
+// All returns a list essential and auxilary images for bootstrapping kubeadm
+func All(mirror string, version string) ([]string, error) {
 	v, err := semver.Make(strings.TrimPrefix(version, "v"))
 	if err != nil {
 		return nil, errors.Wrap(err, "semver")
 	}
-	imgs := essentials(mirror, v)
-	imgs = append(imgs, auxiliary(mirror)...)
+	imgs := Essential(mirror, v)
+	imgs = append(imgs, Auxiliary(mirror)...)
 	return imgs, nil
 }
