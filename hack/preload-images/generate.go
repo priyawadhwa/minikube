@@ -21,15 +21,12 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 
-	"github.com/blang/semver"
 	"github.com/pkg/errors"
 	"k8s.io/minikube/pkg/drivers/kic"
 	"k8s.io/minikube/pkg/drivers/kic/oci"
 	"k8s.io/minikube/pkg/minikube/bootstrapper/bsutil"
-	"k8s.io/minikube/pkg/minikube/bootstrapper/images"
 	"k8s.io/minikube/pkg/minikube/command"
 	"k8s.io/minikube/pkg/minikube/config"
 	"k8s.io/minikube/pkg/minikube/cruntime"
@@ -39,7 +36,7 @@ import (
 	"k8s.io/minikube/pkg/util/retry"
 )
 
-func generateTarball(kubernetesVersion, containerRuntime, tarballFilename string) error {
+func generateTarball(imgs []string, kubernetesVersion, containerRuntime, tarballFilename string) error {
 	driver := kic.NewDriver(kic.Config{
 		KubernetesVersion: kubernetesVersion,
 		ContainerRuntime:  containerRuntime,
@@ -64,17 +61,6 @@ func generateTarball(kubernetesVersion, containerRuntime, tarballFilename string
 
 	if err := verifyStorage(containerRuntime); err != nil {
 		return errors.Wrap(err, "verifying storage")
-	}
-
-	// Now, get images to pull
-	v, err := semver.Make(strings.TrimPrefix(kubernetesVersion, "v"))
-	if err != nil {
-		return errors.Wrap(err, "semver")
-	}
-	imgs := images.Essential("", v)
-
-	if containerRuntime != "docker" { // kic overlay image is only needed by containerd and cri-o https://github.com/kubernetes/minikube/issues/7428
-		imgs = append(imgs, images.KindNet(""))
 	}
 
 	runner := command.NewKICRunner(profile, driver.OCIBinary)

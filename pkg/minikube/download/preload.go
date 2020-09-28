@@ -39,7 +39,7 @@ import (
 
 const (
 	// PreloadVersion is the current version of the preloaded tarball
-	PreloadVersion = "v7"
+	PreloadVersion = "v6"
 	// AuxVersion is all of the auxilary images required for minikube
 	// NOTE: You need to bump this version up when upgrading auxiliary docker images
 	AuxVersion = "v1"

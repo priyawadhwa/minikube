@@ -26,7 +26,10 @@ import (
 	"runtime/debug"
 	"strings"
 
+	"github.com/blang/semver"
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
+	"k8s.io/minikube/pkg/minikube/bootstrapper/images"
 	"k8s.io/minikube/pkg/minikube/constants"
 	"k8s.io/minikube/pkg/minikube/download"
 )
@@ -74,15 +77,19 @@ func main() {
 
 	k8sVersions = append(k8sVersions, constants.DefaultKubernetesVersion, constants.NewestKubernetesVersion, constants.OldestKubernetesVersion)
 
-	for _, kv := range k8sVersions {
-		for _, cr := range containerRuntimes {
+	for _, cr := range containerRuntimes {
+		for _, kv := range k8sVersions {
 			tf := download.PreloadName(kv, cr)
-			if download.TarballExists(kv, cr) {
+			if download.TarballExists(tf) {
 				fmt.Printf("A preloaded tarball for k8s version %s - runtime %q already exists, skipping generation.\n", kv, cr)
 				continue
 			}
 			fmt.Printf("A preloaded tarball for k8s version %s - runtime %q doesn't exist, generating now...\n", kv, cr)
-			if err := generateTarball(kv, cr, tf); err != nil {
+			imgs, err := k8sImages(kv, cr)
+			if err != nil {
+				exit("gettig images", err)
+			}
+			if err := generateTarball(imgs, kv, cr, tf); err != nil {
 				exit(fmt.Sprintf("generating tarball for k8s version %s with %s", kv, cr), err)
 			}
 			if err := uploadTarball(tf); err != nil {
@@ -92,9 +99,24 @@ func main() {
 			if err := deleteMinikube(); err != nil {
 				fmt.Printf("error cleaning up minikube before finishing up: %v\n", err)
 			}
+		}
 
+		if err := auxiliary(cr); err != nil {
+			exit(fmt.Sprintf("generating auxiliary image"), err)
 		}
 	}
+}
+
+func k8sImages(kubernetesVersion, cr string) ([]string, error) {
+	v, err := semver.Make(strings.TrimPrefix(kubernetesVersion, "v"))
+	if err != nil {
+		return nil, errors.Wrap(err, "semver")
+	}
+	imgs := images.Essential("", v)
+	if cr != "docker" { // kic overlay image is only needed by containerd and cri-o https://github.com/kubernetes/minikube/issues/7428
+		imgs = append(imgs, images.KindNet(""))
+	}
+	return imgs, nil
 }
 
 func createTarball(name string) error {
