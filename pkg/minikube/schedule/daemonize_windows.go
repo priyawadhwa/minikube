@@ -19,22 +19,41 @@ limitations under the License.
 package schedule
 
 import (
+	"fmt"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"time"
 
 	"github.com/pkg/errors"
+	"golang.org/x/sys/windows/svc/mgr"
 )
 
 func daemonize(profiles []string, duration time.Duration) error {
-	currentBinary, err := filepath.Abs(os.Args[0])
+	currentBinary, err := os.Executable()
 	if err != nil {
-		return errors.Wrap(err, "getting current binary")
+		return errors.Wrap(err, "getting executable")
 	}
-	cmd := exec.Command(currentBinary, "stop", "--wait", duration.String())
-	if err := cmd.Start(); err != nil {
-		return errors.Wrap(err, "startig command")
+	fmt.Println(currentBinary)
+	// cmd := exec.Command(currentBinary, "stop", "--wait", duration.String())
+	// if err := cmd.Start(); err != nil {
+	// 	fmt.Println(err)
+	// }
+	// return savePIDs(cmd.Process.Pid, profiles)
+
+	m, err := mgr.Connect()
+	if err != nil {
+		return errors.Wrap(err, "getting manager")
 	}
-	return savePIDs(cmd.Process.Pid, profiles)
+
+	svcName := "minikubeScheduleStop"
+	svc, err := m.CreateService(svcName, currentBinary, mgr.Config{}, []string{"--wait", fmt.Sprintf("%v", duration.Seconds())}...)
+
+	if err != nil {
+		return errors.Wrap(err, "creating service")
+	}
+	if err := svc.Start(); err != nil {
+		return errors.Wrap(err, "starting service")
+	}
+	// TODO: get PID of the service
+	// save it via return savePIDs(<pid>, profiles)
+	return nil
 }
