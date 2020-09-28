@@ -308,7 +308,7 @@ func (r *Containerd) SystemLogCmd(len int) string {
 func (r *Containerd) Preload(cfg config.KubernetesConfig) error {
 	k8sVersion := cfg.KubernetesVersion
 	cRuntime := cfg.ContainerRuntime
-	tn := download.TarballName(k8sVersion, cRuntime)
+	tn := download.PreloadName(k8sVersion, cRuntime)
 	if !download.TarballExists(tn) {
 		return nil
 	}

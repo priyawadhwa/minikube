@@ -306,7 +306,7 @@ func (r *Docker) forceSystemd() error {
 func (r *Docker) Preload(cfg config.KubernetesConfig) error {
 	k8sVersion := cfg.KubernetesVersion
 	cRuntime := cfg.ContainerRuntime
-	tn := download.TarballName(k8sVersion, cRuntime)
+	tn := download.PreloadName(k8sVersion, cRuntime)
 	if !download.TarballExists(tn) {
 		return nil
 	}

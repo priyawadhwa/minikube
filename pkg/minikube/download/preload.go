@@ -47,8 +47,8 @@ const (
 	PreloadBucket = "minikube-preloaded-volume-tarballs"
 )
 
-// TarballName returns name of the tarball
-func TarballName(k8sVersion, containerRuntime string) string {
+// PreloadName returns name of the preload tarball
+func PreloadName(k8sVersion, containerRuntime string) string {
 	if containerRuntime == "crio" {
 		containerRuntime = "cri-o"
 	}
