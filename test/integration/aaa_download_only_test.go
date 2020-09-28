@@ -73,7 +73,7 @@ func TestDownloadOnly(t *testing.T) {
 
 					// skip for none, as none driver does not have preload feature.
 					if !NoneDriver() {
-						if download.PreloadExists(v, r, true) {
+						if download.TarballExists(v, r, true) {
 							// Just make sure the tarball path exists
 							if _, err := os.Stat(download.TarballPath(v, r)); err != nil {
 								t.Errorf("failed to verify preloaded tarball file exists: %v", err)

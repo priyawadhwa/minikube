@@ -304,11 +304,12 @@ func (r *Docker) forceSystemd() error {
 // 2. Extract the preloaded tarball to the correct directory
 // 3. Remove the tarball within the VM
 func (r *Docker) Preload(cfg config.KubernetesConfig) error {
-	if !download.PreloadExists(cfg.KubernetesVersion, cfg.ContainerRuntime) {
-		return nil
-	}
 	k8sVersion := cfg.KubernetesVersion
 	cRuntime := cfg.ContainerRuntime
+	tn := download.TarballName(k8sVersion, cRuntime)
+	if !download.TarballExists(tn) {
+		return nil
+	}
 
 	// If images already exist, return
 	images, err := images.All(cfg.ImageRepository, k8sVersion)
@@ -325,7 +326,7 @@ func (r *Docker) Preload(cfg config.KubernetesConfig) error {
 		glog.Infof("error saving reference store: %v", err)
 	}
 
-	tarballPath := download.TarballPath(k8sVersion, cRuntime)
+	tarballPath := download.TarballPath(tn)
 	targetDir := "/"
 	targetName := "preloaded.tar.lz4"
 	dest := path.Join(targetDir, targetName)

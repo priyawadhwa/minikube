@@ -39,9 +39,10 @@ import (
 
 const (
 	// PreloadVersion is the current version of the preloaded tarball
-	//
-	// NOTE: You may need to bump this version up when upgrading auxiliary docker images
 	PreloadVersion = "v7"
+	// AuxVersion is all of the auxilary images required for minikube
+	// NOTE: You need to bump this version up when upgrading auxiliary docker images
+	AuxVersion = "v1"
 	// PreloadBucket is the name of the GCS bucket where preloaded volume tarballs exist
 	PreloadBucket = "minikube-preloaded-volume-tarballs"
 )
@@ -61,8 +62,8 @@ func TarballName(k8sVersion, containerRuntime string) string {
 }
 
 // returns the name of the checksum file
-func checksumName(k8sVersion, containerRuntime string) string {
-	return fmt.Sprintf("%s.checksum", TarballName(k8sVersion, containerRuntime))
+func checksumName(tarballName string) string {
+	return fmt.Sprintf("%s.checksum", tarballName)
 }
 
 // returns target dir for all cached items related to preloading
@@ -70,23 +71,23 @@ func targetDir() string {
 	return localpath.MakeMiniPath("cache", "preloaded-tarball")
 }
 
-// PreloadChecksumPath returns the local path to the cached checksum file
-func PreloadChecksumPath(k8sVersion, containerRuntime string) string {
-	return filepath.Join(targetDir(), checksumName(k8sVersion, containerRuntime))
+// ChecksumPath returns the local path to the cached checksum file
+func ChecksumPath(tarballName string) string {
+	return filepath.Join(targetDir(), tarballName)
 }
 
-// TarballPath returns the local path to the cached preload tarball
-func TarballPath(k8sVersion, containerRuntime string) string {
-	return filepath.Join(targetDir(), TarballName(k8sVersion, containerRuntime))
+// TarballPath returns the local path to the cached tarball
+func TarballPath(tarballName string) string {
+	return filepath.Join(targetDir(), tarballName)
 }
 
 // remoteTarballURL returns the URL for the remote tarball in GCS
-func remoteTarballURL(k8sVersion, containerRuntime string) string {
-	return fmt.Sprintf("https://storage.googleapis.com/%s/%s", PreloadBucket, TarballName(k8sVersion, containerRuntime))
+func remoteTarballURL(tarballName string) string {
+	return fmt.Sprintf("https://storage.googleapis.com/%s/%s", PreloadBucket, tarballName)
 }
 
-// PreloadExists returns true if there is a preloaded tarball that can be used
-func PreloadExists(k8sVersion, containerRuntime string, forcePreload ...bool) bool {
+// TarballExists returns true if there is a tarball at the specified path that can be used
+func TarballExists(tarballName string, forcePreload ...bool) bool {
 	// TODO (#8166): Get rid of the need for this and viper at all
 	force := false
 	if len(forcePreload) > 0 {
@@ -94,19 +95,19 @@ func PreloadExists(k8sVersion, containerRuntime string, forcePreload ...bool) bo
 	}
 
 	// TODO: debug why this func is being called two times
-	glog.Infof("Checking if preload exists for k8s version %s and runtime %s", k8sVersion, containerRuntime)
+	glog.Info("Checking if preload exists...")
 	if !viper.GetBool("preload") && !force {
 		return false
 	}
 
+	targetPath := TarballPath(tarballName)
 	// Omit remote check if tarball exists locally
-	targetPath := TarballPath(k8sVersion, containerRuntime)
 	if _, err := os.Stat(targetPath); err == nil {
 		glog.Infof("Found local preload: %s", targetPath)
 		return true
 	}
 
-	url := remoteTarballURL(k8sVersion, containerRuntime)
+	url := remoteTarballURL(tarballName)
 	resp, err := http.Head(url)
 	if err != nil {
 		glog.Warningf("%s fetch error: %v", url, err)
@@ -124,8 +125,8 @@ func PreloadExists(k8sVersion, containerRuntime string, forcePreload ...bool) bo
 }
 
 // Preload caches the preloaded images tarball on the host machine
-func Preload(k8sVersion, containerRuntime string) error {
-	targetPath := TarballPath(k8sVersion, containerRuntime)
+func Preload(tarballName, k8sVersion string) error {
+	targetPath := TarballPath(tarballName)
 
 	if _, err := os.Stat(targetPath); err == nil {
 		glog.Infof("Found %s in cache, skipping download", targetPath)
@@ -133,47 +134,47 @@ func Preload(k8sVersion, containerRuntime string) error {
 	}
 
 	// Make sure we support this k8s version
-	if !PreloadExists(k8sVersion, containerRuntime) {
+	if !TarballExists(tarballName) {
 		glog.Infof("Preloaded tarball for k8s version %s does not exist", k8sVersion)
 		return nil
 	}
 
 	out.T(style.FileDownload, "Downloading Kubernetes {{.version}} preload ...", out.V{"version": k8sVersion})
-	url := remoteTarballURL(k8sVersion, containerRuntime)
+	url := remoteTarballURL(tarballName)
 
 	if err := download(url, targetPath); err != nil {
 		return errors.Wrapf(err, "download failed: %s", url)
 	}
 
-	if err := saveChecksumFile(k8sVersion, containerRuntime); err != nil {
+	if err := saveChecksumFile(tarballName); err != nil {
 		return errors.Wrap(err, "saving checksum file")
 	}
 
-	if err := verifyChecksum(k8sVersion, containerRuntime, targetPath); err != nil {
+	if err := verifyChecksum(tarballName, targetPath); err != nil {
 		return errors.Wrap(err, "verify")
 	}
 
 	return nil
 }
 
-func saveChecksumFile(k8sVersion, containerRuntime string) error {
-	glog.Infof("saving checksum for %s ...", TarballName(k8sVersion, containerRuntime))
+func saveChecksumFile(tarballName string) error {
+	glog.Infof("saving checksum for %s ...", tarballName)
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx, option.WithoutAuthentication())
 	if err != nil {
 		return errors.Wrap(err, "getting storage client")
 	}
-	attrs, err := client.Bucket(PreloadBucket).Object(TarballName(k8sVersion, containerRuntime)).Attrs(ctx)
+	attrs, err := client.Bucket(PreloadBucket).Object(tarballName).Attrs(ctx)
 	if err != nil {
 		return errors.Wrap(err, "getting storage object")
 	}
 	checksum := attrs.MD5
-	return ioutil.WriteFile(PreloadChecksumPath(k8sVersion, containerRuntime), checksum, 0o644)
+	return ioutil.WriteFile(ChecksumPath(tarballName), checksum, 0o644)
 }
 
 // verifyChecksum returns true if the checksum of the local binary matches
 // the checksum of the remote binary
-func verifyChecksum(k8sVersion, containerRuntime, path string) error {
+func verifyChecksum(tarballName, path string) error {
 	glog.Infof("verifying checksumm of %s ...", path)
 	// get md5 checksum of tarball path
 	contents, err := ioutil.ReadFile(path)
@@ -182,7 +183,7 @@ func verifyChecksum(k8sVersion, containerRuntime, path string) error {
 	}
 	checksum := md5.Sum(contents)
 
-	remoteChecksum, err := ioutil.ReadFile(PreloadChecksumPath(k8sVersion, containerRuntime))
+	remoteChecksum, err := ioutil.ReadFile(ChecksumPath(tarballName))
 	if err != nil {
 		return errors.Wrap(err, "reading checksum file")
 	}

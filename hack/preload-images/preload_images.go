@@ -77,7 +77,7 @@ func main() {
 	for _, kv := range k8sVersions {
 		for _, cr := range containerRuntimes {
 			tf := download.TarballName(kv, cr)
-			if download.PreloadExists(kv, cr) {
+			if download.TarballExists(kv, cr) {
 				fmt.Printf("A preloaded tarball for k8s version %s - runtime %q already exists, skipping generation.\n", kv, cr)
 				continue
 			}

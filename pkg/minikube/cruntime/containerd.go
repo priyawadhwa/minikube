@@ -306,12 +306,12 @@ func (r *Containerd) SystemLogCmd(len int) string {
 
 // Preload preloads the container runtime with k8s images
 func (r *Containerd) Preload(cfg config.KubernetesConfig) error {
-	if !download.PreloadExists(cfg.KubernetesVersion, cfg.ContainerRuntime) {
-		return nil
-	}
-
 	k8sVersion := cfg.KubernetesVersion
 	cRuntime := cfg.ContainerRuntime
+	tn := download.TarballName(k8sVersion, cRuntime)
+	if !download.TarballExists(tn) {
+		return nil
+	}
 
 	// If images already exist, return
 	images, err := images.All(cfg.ImageRepository, k8sVersion)
@@ -322,8 +322,7 @@ func (r *Containerd) Preload(cfg config.KubernetesConfig) error {
 		glog.Info("Images already preloaded, skipping extraction")
 		return nil
 	}
-
-	tarballPath := download.TarballPath(k8sVersion, cRuntime)
+	tarballPath := download.TarballPath(tn)
 	targetDir := "/"
 	targetName := "preloaded.tar.lz4"
 	dest := path.Join(targetDir, targetName)
