@@ -17,17 +17,11 @@ limitations under the License.
 package schedule
 
 import (
-	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
-	"strconv"
 	"time"
 
-	"github.com/golang/glog"
 	"github.com/pkg/errors"
 	"k8s.io/minikube/pkg/minikube/config"
-	"k8s.io/minikube/pkg/minikube/localpath"
 	"k8s.io/minikube/pkg/minikube/mustload"
 )
 
@@ -38,11 +32,10 @@ func Daemonize(profiles []string, duration time.Duration) error {
 		InitiationTime: time.Now().Unix(),
 		Duration:       duration,
 	}
+	if err := killExistingScheduledStops(profiles); err != nil {
+		log.Printf("error killing existing scheduled stops: %v", err)
+	}
 	for _, p := range profiles {
-		// first check if we have a scheduled stop already running that needs to be cancelled
-		if err := killExistingScheduledStops(p); err != nil {
-			log.Printf("error killing existing scheduled stops: %v", err)
-		}
 		_, cc := mustload.Partial(p)
 		cc.ScheduledStop = scheduledStop
 		if err := config.SaveProfile(p, cc); err != nil {
@@ -51,39 +44,4 @@ func Daemonize(profiles []string, duration time.Duration) error {
 	}
 
 	return daemonize(profiles, duration)
-}
-
-func killExistingScheduledStops(profile string) error {
-	file := localpath.PID(profile)
-	f, err := ioutil.ReadFile(file)
-	if os.IsNotExist(err) {
-		return nil
-	}
-	defer os.Remove(file)
-	if err != nil {
-		return errors.Wrapf(err, "reading %s", file)
-	}
-	pid, err := strconv.Atoi(string(f))
-	if err != nil {
-		return errors.Wrapf(err, "converting %v to int", string(f))
-	}
-	p, err := os.FindProcess(pid)
-	if err != nil {
-		return errors.Wrap(err, "finding process")
-	}
-	glog.Infof("killing process %v as it is an old scheduled stop", pid)
-	if err := p.Kill(); err != nil {
-		return errors.Wrapf(err, "killing %v", pid)
-	}
-	return nil
-}
-
-func savePIDs(pid int, profiles []string) error {
-	for _, p := range profiles {
-		file := localpath.PID(p)
-		if err := ioutil.WriteFile(file, []byte(fmt.Sprintf("%v", pid)), 0644); err != nil {
-			return err
-		}
-	}
-	return nil
 }

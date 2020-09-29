@@ -33,6 +33,24 @@ const (
 
 // schtasks /create /sc once /tn minikubeStop /TR "C:\Users\jenkins\minikube\out\minikube.exe stop" /ST 16:20:30 /f
 
+func killExistingScheduledStops(profiles []string) error {
+	// delete task name
+	currentBinary, err := os.Executable()
+	if err != nil {
+		return errors.Wrap(err, "getting executable")
+	}
+	args := []string{"/DELETE", "/TN", taskName}
+	cmd := exec.Command("schtasks.exe", args...)
+	fmt.Println(cmd.Args)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	fmt.Println(string(output))
+	return nil
+}
+
 func daemonize(profiles []string, duration time.Duration) error {
 	currentBinary, err := os.Executable()
 	if err != nil {
