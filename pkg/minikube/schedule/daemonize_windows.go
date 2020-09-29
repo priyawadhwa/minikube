@@ -21,39 +21,40 @@ package schedule
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"time"
 
 	"github.com/pkg/errors"
-	"golang.org/x/sys/windows/svc/mgr"
 )
+
+const (
+	taskName = "minikubeScheduledStop"
+)
+
+// schtasks /create /sc once /tn minikubeStop /TR "C:\Users\jenkins\minikube\out\minikube.exe stop" /ST 16:20:30 /f
 
 func daemonize(profiles []string, duration time.Duration) error {
 	currentBinary, err := os.Executable()
 	if err != nil {
 		return errors.Wrap(err, "getting executable")
 	}
-	fmt.Println(currentBinary)
-	// cmd := exec.Command(currentBinary, "stop", "--wait", duration.String())
-	// if err := cmd.Start(); err != nil {
-	// 	fmt.Println(err)
-	// }
-	// return savePIDs(cmd.Process.Pid, profiles)
+	var stopCommand string
+	for _, p := range profiles {
+		stopCommand = stopCommand + fmt.Sprintf("%s stop -p %s", currentBinary, p)
+	}
 
-	m, err := mgr.Connect()
+	// the schtasks.exe command requires the stop time in HH:MM format
+	stopTime := time.Now().Add(duration).Format("15:04")
+
+	args := []string{"/CREATE", "/SC", "ONCE", "/TN", taskName, "/TR", fmt.Sprintf("\"%s\"", stopCommand), "/ST", stopTime, "/F"}
+	cmd := exec.Command("schtasks.exe", args...)
+	fmt.Println(cmd.Args)
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return errors.Wrap(err, "getting manager")
+		fmt.Println(err)
+		return err
 	}
+	fmt.Println(string(output))
 
-	svcName := "minikubeScheduleStop"
-	svc, err := m.CreateService(svcName, currentBinary, mgr.Config{}, []string{"--wait", fmt.Sprintf("%v", duration.Seconds())}...)
-
-	if err != nil {
-		return errors.Wrap(err, "creating service")
-	}
-	if err := svc.Start(); err != nil {
-		return errors.Wrap(err, "starting service")
-	}
-	// TODO: get PID of the service
-	// save it via return savePIDs(<pid>, profiles)
 	return nil
 }
