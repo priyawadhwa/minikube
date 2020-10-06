@@ -62,11 +62,11 @@ func collectResults(ctx context.Context, binaries []*Binary, driver string) (*re
 				return nil, errors.Wrapf(err, "timing run %d with %s", run, binary.Name())
 			}
 			rm.addResult(binary, r)
-			r, err = timeEnableIngress(ctx, binary)
-			if err != nil {
-				return nil, errors.Wrapf(err, "timing run %d with %s", run, binary.Name())
-			}
-			rm.addResult(binary, r)
+			// r, err = timeEnableIngress(ctx, binary)
+			// if err != nil {
+			// 	return nil, errors.Wrapf(err, "timing run %d with %s", run, binary.Name())
+			// }
+			// rm.addResult(binary, r)
 		}
 	}
 	return rm, nil
