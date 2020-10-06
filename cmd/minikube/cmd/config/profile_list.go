@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"strings"
 
+	"k8s.io/klog/v2"
 	"k8s.io/minikube/pkg/minikube/bootstrapper/bsutil/kverify"
 	"k8s.io/minikube/pkg/minikube/config"
 	"k8s.io/minikube/pkg/minikube/driver"
@@ -75,7 +76,7 @@ func printProfilesTable() {
 func updateProfilesStatus(profiles []*config.Profile) {
 	api, err := machine.NewAPIClient()
 	if err != nil {
-		glog.Errorf("failed to get machine api client %v", err)
+		klog.Errorf("failed to get machine api client %v", err)
 	}
 	defer api.Close()
 
@@ -104,13 +105,13 @@ func profileStatus(p *config.Profile, api libmachine.API) string {
 
 	hostname, _, port, err := driver.ControlPlaneEndpoint(p.Config, &cp, host.DriverName)
 	if err != nil {
-		glog.Warningf("error loading profiles: %v", err)
+		klog.Warningf("error loading profiles: %v", err)
 		return "Unknown"
 	}
 
 	status, err := kverify.APIServerStatus(cr, hostname, port)
 	if err != nil {
-		glog.Warningf("error getting apiserver status for %s: %v", p.Name, err)
+		klog.Warningf("error getting apiserver status for %s: %v", p.Name, err)
 		return "Unknown"
 	}
 	return status.String()

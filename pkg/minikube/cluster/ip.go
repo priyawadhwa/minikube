@@ -28,6 +28,7 @@ import (
 	"github.com/docker/machine/libmachine/host"
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
+	"k8s.io/klog/v2"
 	"k8s.io/minikube/pkg/drivers/kic/oci"
 	"k8s.io/minikube/pkg/minikube/driver"
 	"k8s.io/minikube/pkg/minikube/machine"
@@ -175,7 +176,7 @@ func getIPForInterface(name string) (net.IP, error) {
 		return nil, errors.Errorf("Could not find interface %s inside %+v", name, ints)
 	}
 
-	glog.Infof("Found interface: %+v\n", i)
+	klog.Infof("Found interface: %+v\n", i)
 	addrs, _ := i.Addrs()
 	for _, a := range addrs {
 		glog.Infof("interface addr: %+v", a)

@@ -28,6 +28,7 @@ import (
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
+	"k8s.io/klog/v2"
 	"k8s.io/minikube/pkg/drivers/kic"
 	"k8s.io/minikube/pkg/drivers/kic/oci"
 	"k8s.io/minikube/pkg/minikube/config"
@@ -95,7 +96,7 @@ func status() registry.State {
 			err = errors.Wrapf(err, "deadline exceeded running %q", strings.Join(cmd.Args, " "))
 		}
 
-		glog.Warningf("docker version returned error: %v", err)
+		klog.Warningf("docker version returned error: %v", err)
 
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			stderr := strings.TrimSpace(string(exitErr.Stderr))
@@ -137,18 +138,17 @@ func checkNeedsImprovement() registry.State {
 // checkOverlayMod checks if
 func checkOverlayMod() registry.State {
 	if _, err := os.Stat("/sys/module/overlay"); err == nil {
-		glog.Info("overlay module found")
-
+		klog.Info("overlay module found")
 		return registry.State{Installed: true, Healthy: true}
 	}
 
 	if _, err := os.Stat("/sys/module/overlay2"); err == nil {
-		glog.Info("overlay2 module found")
+		klog.Info("overlay2 module found")
 
 		return registry.State{Installed: true, Healthy: true}
 	}
 
-	glog.Warningf("overlay modules were not found")
+	klog.Warningf("overlay modules were not found")
 
 	return registry.State{NeedsImprovement: true, Installed: true, Healthy: true, Fix: "enable the overlay Linux kernel module using 'modprobe overlay'"}
 }
