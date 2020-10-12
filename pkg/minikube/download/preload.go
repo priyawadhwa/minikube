@@ -125,33 +125,51 @@ func TarballExists(tarballName string, forcePreload ...bool) bool {
 }
 
 // Preload caches the preloaded images tarball on the host machine
-func Preload(tarballName, k8sVersion string) error {
-	targetPath := TarballPath(tarballName)
+func Preload(k8sVersion, containerRuntime string) error {
+	essentialName := PreloadName(k8sVersion, containerRuntime)
+	auxName := auxName(containerRuntime)
+	tarballNames := []string{essentialName, auxName}
 
-	if _, err := os.Stat(targetPath); err == nil {
-		glog.Infof("Found %s in cache, skipping download", targetPath)
-		return nil
+	var needToDownload []string
+	for _, name := range tarballNames {
+		tp := TarballPath(name)
+		if _, err := os.Stat(tp); err != nil {
+			glog.Infof("Didn't find %s in cache, will have to download\n", tp)
+			needToDownload = append(needToDownload, name)
+		}
 	}
-
-	// Make sure we support this k8s version
-	if !TarballExists(tarballName) {
-		glog.Infof("Preloaded tarball for k8s version %s does not exist", k8sVersion)
+	if needToDownload == nil {
+		glog.Infof("All preload tarballs are cached, skipping download")
 		return nil
 	}
 
 	out.T(style.FileDownload, "Downloading Kubernetes {{.version}} preload ...", out.V{"version": k8sVersion})
-	url := remoteTarballURL(tarballName)
+	for _, tarballName := range needToDownload {
+		tarballName := tarballName
+		tp := TarballPath(tarballName)
+		if _, err := os.Stat(tp); err == nil {
+			glog.Infof("Found %s in cache, skipping download", tp)
+			continue
+		}
+		// Make sure we support this k8s version
+		if !TarballExists(tarballName) {
+			glog.Infof("Preloaded tarball for k8s version %s does not exist", k8sVersion)
+			continue
+		}
 
-	if err := download(url, targetPath); err != nil {
-		return errors.Wrapf(err, "download failed: %s", url)
-	}
+		url := remoteTarballURL(tarballName)
 
-	if err := saveChecksumFile(tarballName); err != nil {
-		return errors.Wrap(err, "saving checksum file")
-	}
+		if err := download(url, tp); err != nil {
+			return errors.Wrapf(err, "download failed: %s", url)
+		}
 
-	if err := verifyChecksum(tarballName, targetPath); err != nil {
-		return errors.Wrap(err, "verify")
+		if err := saveChecksumFile(tarballName); err != nil {
+			return errors.Wrap(err, "saving checksum file")
+		}
+
+		if err := verifyChecksum(tarballName, tp); err != nil {
+			return errors.Wrap(err, "verify")
+		}
 	}
 
 	return nil

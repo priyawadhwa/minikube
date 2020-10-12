@@ -119,10 +119,6 @@ func k8sImages(kubernetesVersion, cr string) ([]string, error) {
 	return imgs, nil
 }
 
-func createTarball(name string) error {
-	return nil
-}
-
 func verifyDockerStorage() error {
 	cmd := exec.Command("docker", "exec", profile, "docker", "info", "-f", "{{.Info.Driver}}")
 	var stderr bytes.Buffer

@@ -94,7 +94,7 @@ func Start(starter Starter, apiServer bool) (*kubeconfig.Settings, error) {
 	showVersionInfo(starter.Node.KubernetesVersion, cr)
 
 	// Add "host.minikube.internal" DNS alias (intentionally non-fatal)
-	hostIP, err := cluster.HostIP(starter.Host)
+	hostIP, err := cluster.HostIP(starter.Host, starter.Cfg.Name)
 	if err != nil {
 		glog.Errorf("Unable to get host IP: %v", err)
 	} else if err := machine.AddHostAlias(starter.Runner, constants.HostAlias, hostIP); err != nil {
@@ -383,7 +383,7 @@ func startHost(api libmachine.API, cc *config.ClusterConfig, n *config.Node, del
 		}
 	}
 
-	if _, ff := err.(*oci.FailFastError); ff {
+	if err, ff := errors.Cause(err).(*oci.FailFastError); ff {
 		glog.Infof("will skip retrying to create machine because error is not retriable: %v", err)
 		return host, exists, err
 	}

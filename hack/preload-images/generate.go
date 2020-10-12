@@ -38,6 +38,7 @@ import (
 
 func generateTarball(imgs []string, kubernetesVersion, containerRuntime, tarballFilename string) error {
 	driver := kic.NewDriver(kic.Config{
+		ClusterName:       profile,
 		KubernetesVersion: kubernetesVersion,
 		ContainerRuntime:  containerRuntime,
 		OCIBinary:         oci.Docker,

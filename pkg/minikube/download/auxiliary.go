@@ -26,8 +26,8 @@ import (
 	"k8s.io/minikube/pkg/minikube/style"
 )
 
-// AuxName returns name of the auxiliary tarball
-func AuxName(containerRuntime string) string {
+// auxName returns name of the auxiliary tarball
+func auxName(containerRuntime string) string {
 	if containerRuntime == "crio" {
 		containerRuntime = "cri-o"
 	}
@@ -40,9 +40,9 @@ func AuxName(containerRuntime string) string {
 	return fmt.Sprintf("preloaded-images-aux-%s-%s-%s-%s.tar.lz4", AuxVersion, containerRuntime, storageDriver, runtime.GOARCH)
 }
 
-// Auxiliary downloads the auxiliary images tarball to the host
-func Auxiliary(containerRuntime string) error {
-	name := AuxName(containerRuntime)
+// auxiliary downloads the auxiliary images tarball to the host
+func auxiliary(containerRuntime string) error {
+	name := auxName(containerRuntime)
 	if TarballExists(name) {
 		glog.Infof("Found %s in cache, skipping download", name)
 		return nil

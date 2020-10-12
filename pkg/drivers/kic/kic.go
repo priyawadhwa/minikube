@@ -37,6 +37,8 @@ import (
 	"k8s.io/minikube/pkg/minikube/constants"
 	"k8s.io/minikube/pkg/minikube/cruntime"
 	"k8s.io/minikube/pkg/minikube/download"
+	"k8s.io/minikube/pkg/minikube/driver"
+	"k8s.io/minikube/pkg/minikube/out"
 	"k8s.io/minikube/pkg/minikube/sysinit"
 	"k8s.io/minikube/pkg/util/retry"
 )
@@ -76,9 +78,20 @@ func (d *Driver) Create() error {
 		CPUs:          strconv.Itoa(d.NodeConfig.CPU),
 		Memory:        strconv.Itoa(d.NodeConfig.Memory) + "mb",
 		Envs:          d.NodeConfig.Envs,
-		ExtraArgs:     []string{"--expose", fmt.Sprintf("%d", d.NodeConfig.APIServerPort)},
+		ExtraArgs:     append([]string{"--expose", fmt.Sprintf("%d", d.NodeConfig.APIServerPort)}, d.NodeConfig.ExtraArgs...),
 		OCIBinary:     d.NodeConfig.OCIBinary,
 		APIServerPort: d.NodeConfig.APIServerPort,
+	}
+
+	if gateway, err := oci.CreateNetwork(d.OCIBinary, d.NodeConfig.ClusterName); err != nil {
+		out.WarningT("Unable to create dedicated network, this might result in cluster IP change after restart: {{.error}}", out.V{"error": err})
+	} else {
+		params.Network = d.NodeConfig.ClusterName
+		ip := gateway.To4()
+		// calculate the container IP based on guessing the machine index
+		ip[3] += byte(driver.IndexFromMachineName(d.NodeConfig.MachineName))
+		glog.Infof("calculated static IP %q for the %q container", ip.String(), d.NodeConfig.MachineName)
+		params.IP = ip.String()
 	}
 
 	// control plane specific options
@@ -124,6 +137,7 @@ func (d *Driver) Create() error {
 
 	var waitForPreload sync.WaitGroup
 	waitForPreload.Add(1)
+	var pErr error
 	go func() {
 		defer waitForPreload.Done()
 		tarballName := download.PreloadName(d.NodeConfig.KubernetesVersion, d.NodeConfig.ContainerRuntime)
@@ -134,12 +148,19 @@ func (d *Driver) Create() error {
 		t := time.Now()
 		glog.Infof("Starting extracting preloaded images to volume ...")
 		// Extract preloaded images to container
-		if err := oci.ExtractTarballToVolume(d.NodeConfig.OCIBinary, download.TarballPath(tarballName), params.Name, d.NodeConfig.ImageDigest); err != nil {
+		if err := oci.ExtractTarballToVolume(d.NodeConfig.OCIBinary, download.TarballPath(download.PreloadName(d.NodeConfig.KubernetesVersion, d.NodeConfig.ContainerRuntime)), params.Name, d.NodeConfig.ImageDigest); err != nil {
+			if strings.Contains(err.Error(), "No space left on device") {
+				pErr = oci.ErrInsufficientDockerStorage
+				return
+			}
 			glog.Infof("Unable to extract preloaded tarball to volume: %v", err)
 		} else {
 			glog.Infof("duration metric: took %f seconds to extract preloaded images to volume", time.Since(t).Seconds())
 		}
 	}()
+	if pErr == oci.ErrInsufficientDockerStorage {
+		return pErr
+	}
 
 	if err := oci.CreateContainerNode(params); err != nil {
 		return errors.Wrap(err, "create kic node")
@@ -290,6 +311,10 @@ func (d *Driver) Remove() error {
 	if id, err := oci.ContainerID(d.OCIBinary, d.MachineName); err == nil && id != "" {
 		return fmt.Errorf("expected no container ID be found for %q after delete. but got %q", d.MachineName, id)
 	}
+
+	if err := oci.RemoveNetwork(d.NodeConfig.ClusterName); err != nil {
+		glog.Warningf("failed to remove network (which might be okay) %s: %v", d.NodeConfig.ClusterName, err)
+	}
 	return nil
 }
 
@@ -404,7 +429,7 @@ func killAPIServerProc(runner command.Runner) error {
 		pid, err := strconv.Atoi(rr.Stdout.String())
 		if err == nil { // this means we have a valid pid
 			glog.Warningf("Found a kube-apiserver running with pid %d, will try to kill the proc", pid)
-			if _, err = runner.RunCmd(exec.Command("pkill", "-9", string(pid))); err != nil {
+			if _, err = runner.RunCmd(exec.Command("pkill", "-9", fmt.Sprint(pid))); err != nil {
 				return errors.Wrap(err, "kill")
 			}
 		}

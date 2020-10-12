@@ -406,6 +406,7 @@ func dockerBoundToContainerd(runner command.Runner) bool {
 	return false
 }
 
+// ImagesPreloaded returns true if all images have been preloaded
 func (r *Docker) ImagesPreloaded(images []string) bool {
 	return dockerImagesPreloaded(r.Runner, images)
 }
