@@ -19,15 +19,10 @@ package download
 import (
 	"fmt"
 	"runtime"
-
-	"github.com/golang/glog"
-	"github.com/pkg/errors"
-	"k8s.io/minikube/pkg/minikube/out"
-	"k8s.io/minikube/pkg/minikube/style"
 )
 
-// auxName returns name of the auxiliary tarball
-func auxName(containerRuntime string) string {
+// AuxName returns name of the auxiliary tarball
+func AuxName(containerRuntime string) string {
 	if containerRuntime == "crio" {
 		containerRuntime = "cri-o"
 	}
@@ -38,30 +33,4 @@ func auxName(containerRuntime string) string {
 		storageDriver = "overlay2"
 	}
 	return fmt.Sprintf("preloaded-images-aux-%s-%s-%s-%s.tar.lz4", AuxVersion, containerRuntime, storageDriver, runtime.GOARCH)
-}
-
-// auxiliary downloads the auxiliary images tarball to the host
-func auxiliary(containerRuntime string) error {
-	name := auxName(containerRuntime)
-	if TarballExists(name) {
-		glog.Infof("Found %s in cache, skipping download", name)
-		return nil
-	}
-
-	out.T(style.FileDownload, "Downloading auxiliary preload ...")
-	url := remoteTarballURL(name)
-
-	targetPath := TarballPath(name)
-	if err := download(url, targetPath); err != nil {
-		return errors.Wrapf(err, "download failed: %s", url)
-	}
-
-	if err := saveChecksumFile(name); err != nil {
-		return errors.Wrap(err, "saving checksum file")
-	}
-
-	if err := verifyChecksum(name, targetPath); err != nil {
-		return errors.Wrap(err, "verify")
-	}
-	return nil
 }

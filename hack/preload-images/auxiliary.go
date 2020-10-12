@@ -28,7 +28,7 @@ import (
 func auxiliary(cr string) error {
 	aux := download.AuxName(cr)
 	if download.TarballExists(aux) {
-		fmt.Printf("Auxiliary tarball for version %v and runtime %s already exists, skipping generation", download.AuxVersion, cr)
+		fmt.Printf("Auxiliary tarball for version %v and runtime %s already exists, skipping generation\n", download.AuxVersion, cr)
 		return nil
 	}
 	imgs := images.Auxiliary("")

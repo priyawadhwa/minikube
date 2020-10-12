@@ -127,7 +127,7 @@ func TarballExists(tarballName string, forcePreload ...bool) bool {
 // Preload caches the preloaded images tarball on the host machine
 func Preload(k8sVersion, containerRuntime string) error {
 	essentialName := PreloadName(k8sVersion, containerRuntime)
-	auxName := auxName(containerRuntime)
+	auxName := AuxName(containerRuntime)
 	tarballNames := []string{essentialName, auxName}
 
 	var needToDownload []string
@@ -144,34 +144,44 @@ func Preload(k8sVersion, containerRuntime string) error {
 	}
 
 	out.T(style.FileDownload, "Downloading Kubernetes {{.version}} preload ...", out.V{"version": k8sVersion})
+	var errors []error
 	for _, tarballName := range needToDownload {
-		tarballName := tarballName
-		tp := TarballPath(tarballName)
-		if _, err := os.Stat(tp); err == nil {
-			glog.Infof("Found %s in cache, skipping download", tp)
-			continue
-		}
-		// Make sure we support this k8s version
-		if !TarballExists(tarballName) {
-			glog.Infof("Preloaded tarball for k8s version %s does not exist", k8sVersion)
-			continue
-		}
-
-		url := remoteTarballURL(tarballName)
-
-		if err := download(url, tp); err != nil {
-			return errors.Wrapf(err, "download failed: %s", url)
-		}
-
-		if err := saveChecksumFile(tarballName); err != nil {
-			return errors.Wrap(err, "saving checksum file")
-		}
-
-		if err := verifyChecksum(tarballName, tp); err != nil {
-			return errors.Wrap(err, "verify")
+		if err := tryDownload(tarballName); err != nil {
+			errors = append(errors, err)
 		}
 	}
 
+	if errors != nil {
+		return fmt.Errorf("errors downloading preloaded tarballs: %v", errors)
+	}
+
+	return nil
+}
+
+func tryDownload(tarballName string) error {
+	tp := TarballPath(tarballName)
+	if _, err := os.Stat(tp); err == nil {
+		glog.Infof("Found %s in cache, skipping download", tp)
+		return nil
+	}
+	if !TarballExists(tarballName) {
+		glog.Infof("Preloaded tarball %s does not exist", tarballName)
+		return nil
+	}
+
+	url := remoteTarballURL(tarballName)
+
+	if err := download(url, tp); err != nil {
+		return errors.Wrapf(err, "downloading %v", url)
+	}
+
+	if err := saveChecksumFile(tarballName); err != nil {
+		return errors.Wrapf(err, "saving checksum file")
+	}
+
+	if err := verifyChecksum(tarballName); err != nil {
+		return errors.Wrapf(err, "verifying checksum")
+	}
 	return nil
 }
 
@@ -192,7 +202,8 @@ func saveChecksumFile(tarballName string) error {
 
 // verifyChecksum returns true if the checksum of the local binary matches
 // the checksum of the remote binary
-func verifyChecksum(tarballName, path string) error {
+func verifyChecksum(tarballName string) error {
+	path := TarballPath(tarballName)
 	glog.Infof("verifying checksumm of %s ...", path)
 	// get md5 checksum of tarball path
 	contents, err := ioutil.ReadFile(path)
