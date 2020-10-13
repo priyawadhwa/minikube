@@ -27,10 +27,10 @@ import (
 // create auxiliary tarball if needed
 func auxiliary(cr string) error {
 	aux := download.AuxName(cr)
-	if download.TarballExists(aux) {
-		fmt.Printf("Auxiliary tarball for version %v and runtime %s already exists, skipping generation\n", download.AuxVersion, cr)
-		return nil
-	}
+	// if download.TarballExists(aux) {
+	// 	fmt.Printf("Auxiliary tarball for version %v and runtime %s already exists, skipping generation\n", download.AuxVersion, cr)
+	// 	return nil
+	// }
 	imgs := images.Auxiliary("")
 	if err := generateTarball(imgs, constants.DefaultKubernetesVersion, cr, aux); err != nil {
 		exit(fmt.Sprintf("generating tarball"), err)
