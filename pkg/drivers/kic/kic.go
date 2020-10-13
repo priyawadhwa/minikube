@@ -143,19 +143,20 @@ func (d *Driver) Create() error {
 		tarballName := download.PreloadName(d.NodeConfig.KubernetesVersion, d.NodeConfig.ContainerRuntime)
 		// If preload doesn't exist, don't bother extracting tarball to volume
 		if !download.TarballExists(tarballName) {
+			fmt.Println("tarball doesn't exist")
 			return
 		}
 		t := time.Now()
-		glog.Infof("Starting extracting preloaded images to volume ...")
+		fmt.Printf("Starting extracting preloaded images to volume ...")
 		// Extract preloaded images to container
 		if err := oci.ExtractTarballToVolume(d.NodeConfig.OCIBinary, params.Name, d.NodeConfig.ImageDigest, download.TarballPaths(d.NodeConfig.KubernetesVersion, d.NodeConfig.ContainerRuntime)); err != nil {
 			if strings.Contains(err.Error(), "No space left on device") {
 				pErr = oci.ErrInsufficientDockerStorage
 				return
 			}
-			glog.Infof("Unable to extract preloaded tarball to volume: %v", err)
+			fmt.Printf("Unable to extract preloaded tarball to volume: %v", err)
 		} else {
-			glog.Infof("duration metric: took %f seconds to extract preloaded images to volume", time.Since(t).Seconds())
+			fmt.Printf("duration metric: took %f seconds to extract preloaded images to volume", time.Since(t).Seconds())
 		}
 	}()
 	if pErr == oci.ErrInsufficientDockerStorage {
