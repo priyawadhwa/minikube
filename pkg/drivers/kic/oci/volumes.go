@@ -80,7 +80,7 @@ func allVolumesByLabel(ociBin string, label string) ([]string, error) {
 
 // ExtractTarballToVolume runs a docker image imageName which extracts the tarball at tarballPath
 // to the volume named volumeName
-func ExtractTarballToVolume(ociBin string, tarballPath, volumeName, imageName string) error {
+func ExtractTarballToVolume(ociBin string, volumeName, imageName string, tarballPaths []string) error {
 	cmdArgs := []string{"run", "--rm", "--entrypoint", "/usr/bin/tar"}
 	// Podman:
 	// when selinux setenforce is enforced, normal mount will lead to file permissions error (-?????????)
@@ -89,10 +89,12 @@ func ExtractTarballToVolume(ociBin string, tarballPath, volumeName, imageName st
 	if ociBin == Podman && runtime.GOOS == "linux" {
 		cmdArgs = append(cmdArgs, "--security-opt", "label=disable")
 	}
-	cmdArgs = append(cmdArgs, "-v", fmt.Sprintf("%s:/preloaded.tar:ro", tarballPath), "-v", fmt.Sprintf("%s:/extractDir", volumeName), imageName, "-I", "lz4", "-xvf", "/preloaded.tar", "-C", "/extractDir")
-	cmd := exec.Command(ociBin, cmdArgs...)
-	if _, err := runCmd(cmd); err != nil {
-		return err
+	for _, tarballPath := range tarballPaths {
+		args := append(cmdArgs, "-v", fmt.Sprintf("%s:/preloaded.tar:ro", tarballPath), "-v", fmt.Sprintf("%s:/extractDir", volumeName), imageName, "-I", "lz4", "-xvf", "/preloaded.tar", "-C", "/extractDir")
+		cmd := exec.Command(ociBin, args...)
+		if _, err := runCmd(cmd); err != nil {
+			return err
+		}
 	}
 	return nil
 }

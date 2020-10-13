@@ -148,7 +148,7 @@ func (d *Driver) Create() error {
 		t := time.Now()
 		glog.Infof("Starting extracting preloaded images to volume ...")
 		// Extract preloaded images to container
-		if err := oci.ExtractTarballToVolume(d.NodeConfig.OCIBinary, download.TarballPath(download.PreloadName(d.NodeConfig.KubernetesVersion, d.NodeConfig.ContainerRuntime)), params.Name, d.NodeConfig.ImageDigest); err != nil {
+		if err := oci.ExtractTarballToVolume(d.NodeConfig.OCIBinary, params.Name, d.NodeConfig.ImageDigest, download.TarballPaths(d.NodeConfig.KubernetesVersion, d.NodeConfig.ContainerRuntime)); err != nil {
 			if strings.Contains(err.Error(), "No space left on device") {
 				pErr = oci.ErrInsufficientDockerStorage
 				return

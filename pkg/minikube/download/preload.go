@@ -47,6 +47,13 @@ const (
 	PreloadBucket = "minikube-preloaded-volume-tarballs"
 )
 
+// TarballPaths returns the paths to all preload tarballs
+func TarballPaths(k8sVersion, containerRuntime string) []string {
+	preload := PreloadName(k8sVersion, containerRuntime)
+	aux := AuxName(containerRuntime)
+	return []string{TarballPath(aux), TarballPath(preload)}
+}
+
 // PreloadName returns name of the preload tarball
 func PreloadName(k8sVersion, containerRuntime string) string {
 	if containerRuntime == "crio" {
