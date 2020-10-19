@@ -15,7 +15,7 @@ require (
 	github.com/cloudfoundry-attic/jibber_jabber v0.0.0-20151120183258-bcc4c8345a21
 	github.com/cloudfoundry/jibber_jabber v0.0.0-20151120183258-bcc4c8345a21 // indirect
 	github.com/docker/cli v0.0.0-20200303162255-7d407207c304 // indirect
-	github.com/docker/docker v17.12.0-ce-rc1.0.20200706150819-a40b877fbb9e+incompatible
+	github.com/docker/docker v17.12.0-ce-rc1.0.20201009160326-9c15e82f19b0+incompatible
 	github.com/docker/go-units v0.4.0
 	github.com/docker/machine v0.7.1-0.20190902101342-b170508bf44c // v0.16.2^
 	github.com/elazarl/goproxy v0.0.0-20190421051319-9d40249d3c2f
@@ -49,6 +49,7 @@ require (
 	github.com/mattn/go-isatty v0.0.12
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/moby/hyperkit v0.0.0-20171020124204-a12cd7250bcd
+	github.com/moby/term v0.0.0-20200915141129-7f0af18e79f2 // indirect
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/otiai10/copy v1.0.2
@@ -61,7 +62,7 @@ require (
 	github.com/priyawadhwa/tracer-minikube v0.0.0-20200930213812-ffb103f020c2
 	github.com/russross/blackfriday v1.5.3-0.20200218234912-41c5fccfd6f6 // indirect
 	github.com/samalba/dockerclient v0.0.0-20160414174713-91d7393ff859 // indirect
-	github.com/shirou/gopsutil v2.20.6+incompatible
+	github.com/shirou/gopsutil v2.20.10-0.20201018091616-3202231bcdbd+incompatible
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
@@ -75,7 +76,7 @@ require (
 	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
-	golang.org/x/sys v0.0.0-20200923182605-d9f96fdee20d
+	golang.org/x/sys v0.0.0-20201018230417-eeed37f84f13
 	golang.org/x/text v0.3.3
 	google.golang.org/api v0.32.0
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
@@ -93,10 +94,10 @@ require (
 
 replace (
 	git.apache.org/thrift.git => github.com/apache/thrift v0.0.0-20180902110319-2566ecd5d999
-	github.com/docker/docker => github.com/docker/docker v1.4.2-0.20190924003213-a8608b5b67c7
 	github.com/docker/machine => github.com/machine-drivers/machine v0.7.1-0.20200810185219-7d42fed1b770
 	github.com/google/go-containerregistry => github.com/afbjorklund/go-containerregistry v0.0.0-20200902152226-fbad78ec2813
 	github.com/hashicorp/go-getter => github.com/afbjorklund/go-getter v1.4.1-0.20190910175809-eb9f6c26742c
+	github.com/moby/hyperkit => github.com/priyawadhwa/hyperkit v0.0.0-20201019204641-ffc67d334bd8
 	github.com/samalba/dockerclient => github.com/sayboras/dockerclient v1.0.0
 	k8s.io/api => k8s.io/api v0.17.3
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.17.3
