@@ -129,6 +129,11 @@ func runStart(cmd *cobra.Command, args []string) {
 	register.SetEventLogPath(localpath.EventLog(ClusterFlagValue()))
 
 	out.SetJSON(viper.GetString(startOutput) == "json")
+	if err := register.InitializeTracer(viper.GetString(trace)); err != nil {
+		exit.Message(reason.Usage, "error initializing tracing: {{.Error}}", out.V{"Error": err.Error()})
+	}
+	defer register.Cleanup()
+
 	displayVersion(version.GetVersion())
 
 	// No need to do the update check if no one is going to see it

@@ -31,6 +31,7 @@ import (
 	_ "k8s.io/minikube/pkg/initflag"
 
 	// Register drivers
+
 	_ "k8s.io/minikube/pkg/minikube/registry/drvs"
 
 	// Force exp dependency
@@ -70,6 +71,7 @@ func main() {
 	if os.Getenv(constants.IsMinikubeChildProcess) == "" {
 		machine.StartDriver()
 	}
+
 	out.SetOutFile(os.Stdout)
 	out.SetErrFile(os.Stderr)
 	cmd.Execute()

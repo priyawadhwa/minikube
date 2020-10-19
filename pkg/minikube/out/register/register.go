@@ -115,6 +115,7 @@ func (r *Register) currentStep() string {
 
 // SetStep sets the current step
 func (r *Register) SetStep(s RegStep) {
+	defer startSpan(string(s))
 	if r.first == RegStep("") {
 		_, ok := r.steps[s]
 		if ok {
@@ -122,8 +123,9 @@ func (r *Register) SetStep(s RegStep) {
 		} else {
 			klog.Errorf("unexpected first step: %q", r.first)
 		}
+	} else {
+		endSpan(string(r.current))
 	}
-
 	r.current = s
 }
 

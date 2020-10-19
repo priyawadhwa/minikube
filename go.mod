@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	cloud.google.com/go/storage v1.10.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v0.11.0
 	github.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5 // indirect
 	github.com/Parallels/docker-machine-parallels v1.3.0
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
@@ -71,6 +72,7 @@ require (
 	github.com/xeipuuv/gojsonschema v0.0.0-20180618132009-1d523034197f
 	github.com/zchee/go-vmnet v0.0.0-20161021174912-97ebf9174097
 	go.opentelemetry.io/otel v0.11.0
+	go.opentelemetry.io/otel/sdk v0.11.0
 	golang.org/x/build v0.0.0-20190927031335-2835ba2e683f
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6
