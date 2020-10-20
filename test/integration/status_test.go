@@ -52,7 +52,7 @@ func TestInsufficientStorage(t *testing.T) {
 	}
 
 	// make sure 'minikube status' has correct output
-	stdout := runStatusCmd(ctx, t, profile)
+	stdout := runStatusCmd(ctx, t, profile, true)
 	verifyClusterState(t, stdout)
 
 	// try deleting events.json and make sure this still works
@@ -60,16 +60,18 @@ func TestInsufficientStorage(t *testing.T) {
 	if err := os.Remove(eventsFile); err != nil {
 		t.Fatalf("removing %s", eventsFile)
 	}
-	stdout = runStatusCmd(ctx, t, profile)
+	stdout = runStatusCmd(ctx, t, profile, true)
 	verifyClusterState(t, stdout)
 }
 
 // runStatusCmd runs the status command and returns stdout
-func runStatusCmd(ctx context.Context, t *testing.T, profile string) []byte {
+func runStatusCmd(ctx context.Context, t *testing.T, profile string, increaseEnv bool) []byte {
 	// make sure minikube status shows insufficient storage
 	c := exec.CommandContext(ctx, Target(), "status", "-p", profile, "--output=json", "--layout=cluster")
 	// artificially set /var to 100% capacity
-	c.Env = append(os.Environ(), fmt.Sprintf("%s=100", constants.TestDiskUsedEnv))
+	if increaseEnv {
+		c.Env = append(os.Environ(), fmt.Sprintf("%s=100", constants.TestDiskUsedEnv))
+	}
 	rr, err := Run(t, c)
 	// status exits non-0 if status isn't Running
 	if err == nil {

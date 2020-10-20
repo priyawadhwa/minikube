@@ -1,5 +1,98 @@
 # Release Notes
 
+## Version 1.14.0 - 2020-10-08
+
+## Features
+
+* Delete context when stopped [#9414](https://github.com/kubernetes/minikube/pull/9414)
+* New flag "--ports" to expose ports for docker & podman drivers [#9404](https://github.com/kubernetes/minikube/pull/9404)
+
+## Bug Fixes and minor improvements
+
+* Ingress addon: fix the controller name [#9413](https://github.com/kubernetes/minikube/pull/9413)
+* docker/podman drivers: no panic when updating mount-string with no configuration  [#9412](https://github.com/kubernetes/minikube/pull/9412)
+* Improve solution message when there is no space left on device [#9316](https://github.com/kubernetes/minikube/pull/9316)
+
+* To see more changes checkout the last beta release notes [1.14.0-beta.0](https://github.com/kubernetes/minikube/releases/tag/v1.14.0-beta.0).
+
+Thank you to our contributors for this release.
+
+- Anders F Björklund
+- Asare Worae
+- Medya Ghazizadeh
+- Prajilesh N
+- Predrag Rogic
+- Priya Wadhwa
+- Thomas Strömberg
+- ToonvanStrijp
+
+## Version 1.14.0-beta.0 - 2020-10-06
+
+## Features
+
+* add dedicated network for docker driver [#9294](https://github.com/kubernetes/minikube/pull/9294)
+* Make sure gcp-auth addon can be enabled on startup [#9318](https://github.com/kubernetes/minikube/pull/9318)
+
+## Bug Fixes
+
+* Fix minikube status bug when cluster is paused [#9383](https://github.com/kubernetes/minikube/pull/9383)
+* don't allow profile name to be less than 2 characters [#9367](https://github.com/kubernetes/minikube/pull/9367)
+* fix: "profile list" shows paused clusters as "Running" [#8978](https://github.com/kubernetes/minikube/pull/8978)
+* Fix error in unittest, as pointed out by warning [#9345](https://github.com/kubernetes/minikube/pull/9345)
+
+## Updates
+
+* update kicbase image to ubuntu-based [#9353](https://github.com/kubernetes/minikube/pull/9353)
+
+Thank you to our contributors for this release! 
+
+- Anders F Björklund
+- Bob Killen
+- Daniel Weibel
+- Dominik Braun
+- Ilya Zuyev
+- JJ Asghar
+- Jituri, Pranav
+- Medya Ghazizadeh
+- Michael Ryan Dempsey
+- Predrag Rogic
+- Priya Wadhwa
+- Sharif Elgamal
+- Tacio Costa
+- Thomas Strömberg
+- Till Hoffmann
+- loftkun
+- programistka
+- zhanwang
+
+
+
+## Version 1.13.1 - 2020-09-18
+* Update Default Kubernetes Version to v1.19.2 [#9265](https://github.com/kubernetes/minikube/pull/9265)
+* fix mounting for docker driver in windows [#9263](https://github.com/kubernetes/minikube/pull/9263)
+* CSI Hostpath Driver & VolumeSnapshots addons [#8461](https://github.com/kubernetes/minikube/pull/8461)
+* docker/podman drivers: Make sure CFS_BANDWIDTH is available for --cpus [#9255](https://github.com/kubernetes/minikube/pull/9255)
+* Fix ForwardedPort for podman version 2.0.1 and up [#9237](https://github.com/kubernetes/minikube/pull/9237)
+* Avoid setting time for memory assets [#9256](https://github.com/kubernetes/minikube/pull/9256)
+* point to newest gcp-auth-webhook version [#9199](https://github.com/kubernetes/minikube/pull/9199)
+* Set preload=false if not using overlay2 as docker storage driver [#8831](https://github.com/kubernetes/minikube/pull/8831)
+* Upgrade crio to 1.17.3 [#8922](https://github.com/kubernetes/minikube/pull/8922)
+* Add Docker Desktop instructions if memory is greater than minimum but less than recommended [#9181](https://github.com/kubernetes/minikube/pull/9181)
+* Update minimum memory constants to use MiB instead of MB [#9180](https://github.com/kubernetes/minikube/pull/9180)
+
+Thank you to our contributors for this release! 
+- Anders F Björklund
+- Dean Coakley
+- Julien Breux
+- Li Zhijian
+- Medya Ghazizadeh
+- Priya Wadhwa
+- Sharif Elgamal
+- Thomas Strömberg
+- Zadjad Rezai
+- jjanik
+
+
 ## Version 1.13.0 - 2020-09-03
 
 ## Features

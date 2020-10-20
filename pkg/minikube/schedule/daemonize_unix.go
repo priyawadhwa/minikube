@@ -50,9 +50,6 @@ func killExistingScheduledStops(profiles []string) error {
 		if err != nil {
 			return errors.Wrap(err, "finding process")
 		}
-		if p.Exited() {
-			return nil
-		}
 		glog.Infof("killing process %v as it is an old scheduled stop", pid)
 		if err := p.Kill(); err != nil {
 			return errors.Wrapf(err, "killing %v", pid)
