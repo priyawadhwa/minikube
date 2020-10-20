@@ -40,7 +40,6 @@ func Cleanup() {
 	if t.finalSpan == nil {
 		return
 	}
-	fmt.Println("ending final span")
 	t.finalSpan.End()
 	time.Sleep(2 * time.Second)
 }
@@ -75,7 +74,6 @@ func startSpan(name string) {
 	if t.Tracer == nil {
 		return
 	}
-	fmt.Println("Starting", name)
 	_, span := t.Start(t.ctx, name)
 	t.spans[name] = span
 }
@@ -88,6 +86,5 @@ func endSpan(name string) {
 	if !ok {
 		return
 	}
-	fmt.Println("ending", name)
 	span.End()
 }
