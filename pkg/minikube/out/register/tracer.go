@@ -16,9 +16,9 @@ import (
 
 type mktracer struct {
 	trace.Tracer
-	ctx       context.Context
-	finalSpan trace.Span
-	spans     map[string]trace.Span
+	ctx     context.Context
+	spans   map[string]trace.Span
+	cleanup func()
 }
 
 var (
@@ -36,12 +36,12 @@ func InitializeTracer(t string) error {
 	return fmt.Errorf("%s is not a valid tracer", t)
 }
 
+// Cleanup ends the span and flushes all data
 func Cleanup() {
-	if t.finalSpan == nil {
+	if t.cleanup == nil {
 		return
 	}
-	t.finalSpan.End()
-	time.Sleep(2 * time.Second)
+	t.cleanup()
 }
 
 func initGCPTracer() error {
@@ -49,8 +49,13 @@ func initGCPTracer() error {
 	if projectID == "" {
 		return fmt.Errorf("gcp tracer requires a valid GCP project id set via the MINIKUBE_TRACER_GCP_PROJECT_ID env variable")
 	}
-	exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
+	// header := "X-Cloud-Trace-Context:105445aa7843bc8bf206b12000100000/1;o=1"
+	// tr := &http.Transport{
+	// 	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	// }
+	// client := &http.Client{Transport: tr}
 
+	exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
 	if err != nil {
 		return errors.Wrap(err, "getting exporter")
 	}
@@ -64,9 +69,22 @@ func initGCPTracer() error {
 		Tracer: global.TraceProvider().Tracer("container-tools"),
 		spans:  map[string]trace.Span{},
 	}
-	ctx, span := t.Tracer.Start(context.Background(), "minikube_start")
+	id, err := trace.IDFromHex("105445aa7843bc8bf206b12000100000")
+	if err != nil {
+		return errors.Wrap(err, "getting id from hex")
+	}
+	link := trace.Link{
+		SpanContext: trace.SpanContext{
+			TraceID: id,
+		},
+	}
+	ctx, span := t.Tracer.Start(context.Background(), "minikube_start", trace.LinkedTo(link.SpanContext))
 	t.ctx = ctx
-	t.finalSpan = span
+	t.cleanup = func() {
+		span.End()
+		exporter.Flush()
+		time.Sleep(2 * time.Second)
+	}
 	return nil
 }
 
