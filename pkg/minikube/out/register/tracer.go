@@ -69,7 +69,7 @@ func initGCPTracer() error {
 		Tracer: global.TraceProvider().Tracer("container-tools"),
 		spans:  map[string]trace.Span{},
 	}
-	id, err := trace.IDFromHex("105445aa7843bc8bf206b12000100000")
+	id, err := trace.IDFromHex("8fbb2742dffa3530a94ac1f32e76dca5")
 	if err != nil {
 		return errors.Wrap(err, "getting id from hex")
 	}
