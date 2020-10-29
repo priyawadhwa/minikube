@@ -69,14 +69,6 @@ func main() {
 	if err := flag.Set("alsologtostderr", "false"); err != nil {
 		klog.Warningf("Unable to set default flag value for alsologtostderr: %v", err)
 	}
-	// if err := flag.Set("stderrthreshold", "FATAL"); err != nil {
-	// 	klog.Warningf("Unable to set default flag value for stderrthreshold: %v", err)
-	// }
-
-	// if err := flag.Set("log_file", "myfile.log"); err != nil {
-	// 	klog.Warningf("Unable to set default flag value for log_file: %v", err)
-	// }
-
 	flag.Parse()
 	pflag.CommandLine.AddGoFlagSet(ks)
 	defer klog.Flush()
