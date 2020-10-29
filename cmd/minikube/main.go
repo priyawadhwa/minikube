@@ -18,6 +18,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -28,7 +29,6 @@ import (
 	// Fix for https://github.com/kubernetes/minikube/issues/4866
 
 	"k8s.io/klog/v2"
-	_ "k8s.io/minikube/pkg/initflag"
 
 	// Register drivers
 	_ "k8s.io/minikube/pkg/minikube/registry/drvs"
@@ -37,6 +37,7 @@ import (
 	_ "golang.org/x/exp/ebnf"
 
 	mlog "github.com/docker/machine/libmachine/log"
+	"github.com/spf13/pflag"
 
 	"github.com/google/slowjam/pkg/stacklog"
 	"github.com/pkg/profile"
@@ -58,7 +59,26 @@ var (
 )
 
 func main() {
-	bridgeLogMessages()
+	// bridgeLogMessages()
+	ks := flag.NewFlagSet("klog", flag.ExitOnError)
+	klog.InitFlags(ks)
+	fmt.Println(ks.Lookup("log_file"))
+	if err := flag.Set("logtostderr", "false"); err != nil {
+		klog.Warningf("Unable to set default flag value for logtostderr: %v", err)
+	}
+	if err := flag.Set("alsologtostderr", "false"); err != nil {
+		klog.Warningf("Unable to set default flag value for alsologtostderr: %v", err)
+	}
+	// if err := flag.Set("stderrthreshold", "FATAL"); err != nil {
+	// 	klog.Warningf("Unable to set default flag value for stderrthreshold: %v", err)
+	// }
+
+	// if err := flag.Set("log_file", "myfile.log"); err != nil {
+	// 	klog.Warningf("Unable to set default flag value for log_file: %v", err)
+	// }
+
+	flag.Parse()
+	pflag.CommandLine.AddGoFlagSet(ks)
 	defer klog.Flush()
 
 	s := stacklog.MustStartFromEnv("STACKLOG_PATH")

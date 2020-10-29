@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	goflag "flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -223,15 +222,6 @@ func init() {
 	RootCmd.AddCommand(completionCmd)
 	templates.ActsAsRootCommand(RootCmd, []string{"options"}, groups...)
 
-	klog.InitFlags(nil)
-	if err := goflag.Set("logtostderr", "false"); err != nil {
-		klog.Warningf("Unable to set default flag value for logtostderr: %v", err)
-	}
-	if err := goflag.Set("alsologtostderr", "false"); err != nil {
-		klog.Warningf("Unable to set default flag value for alsologtostderr: %v", err)
-	}
-
-	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	if err := viper.BindPFlags(RootCmd.PersistentFlags()); err != nil {
 		exit.Error(reason.InternalBindFlags, "Unable to bind flags", err)
 	}
