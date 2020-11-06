@@ -1,0 +1,10 @@
+[Unit]
+Description=minikube scheduled stop
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/var/lib/minikube/scheduled-stop/stop.sh
+EnvironmentFile=/var/lib/minikube/scheduled-stop/environment
