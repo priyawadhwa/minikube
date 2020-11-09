@@ -21,6 +21,10 @@ package schedule
 import (
 	"fmt"
 	"time"
+
+	"github.com/pkg/errors"
+	"k8s.io/minikube/pkg/minikube/command"
+	"k8s.io/minikube/pkg/minikube/mustload"
 )
 
 func killExistingScheduledStops(profiles []string) error {
@@ -28,5 +32,22 @@ func killExistingScheduledStops(profiles []string) error {
 }
 
 func daemonize(profiles []string, duration time.Duration) error {
+	for _, profile := range profiles {
+		if err := startSystemdService(profile, duration); err != nil {
+			return errors.Wrapf(err, "implementing scheduled stop for %s", profile)
+		}
+	}
 	return fmt.Errorf("not yet implemented for windows")
+}
+
+func startSystemdService(profile string, duration time.Duration) error {
+	// get ssh runner
+	co := mustload.Running(profile)
+	command.NewSSHRunner(co.)
+
+	// update environment file to include duration
+
+	// restart scheduled stop service in container
+
+	return nil
 }

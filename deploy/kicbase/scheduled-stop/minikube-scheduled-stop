@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -x
+
+echo "scheduled stop ...";
+
+mkdir -p /var/lib/minikube/scheduled-stop
