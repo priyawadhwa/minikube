@@ -88,11 +88,11 @@ func runStop(cmd *cobra.Command, args []string) {
 	}
 
 	if scheduledStopDuration != 0 {
-		if runtime.GOOS == "windows" {
-			exit.Message(reason.Usage, "the --schedule flag is currently not supported on windows")
-		}
 		if err := schedule.Daemonize(profilesToStop, scheduledStopDuration); err != nil {
 			exit.Message(reason.DaemonizeError, "unable to daemonize: {{.err}}", out.V{"err": err.Error()})
+		}
+		if runtime.GOOS == "windows" {
+			return
 		}
 		klog.Infof("sleeping %s before completing stop...", scheduledStopDuration.String())
 		time.Sleep(scheduledStopDuration)
