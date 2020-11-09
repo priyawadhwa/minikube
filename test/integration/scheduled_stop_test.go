@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"syscall"
 	"testing"
@@ -34,7 +35,10 @@ import (
 	"k8s.io/minikube/pkg/util/retry"
 )
 
-func TestScheduledStop(t *testing.T) {
+func TestUnixScheduledStop(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("test only runs on unix machines")
+	}
 	profile := UniqueProfileName("scheduled-stop")
 	ctx, cancel := context.WithTimeout(context.Background(), Minutes(5))
 	defer CleanupWithLogs(t, profile, cancel)

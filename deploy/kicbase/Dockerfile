@@ -133,10 +133,11 @@ RUN ln -fs /usr/lib/systemd/system/minikube-automount.service \
     /etc/systemd/system/multi-user.target.wants/minikube-automount.service
 
 # scheduled stop service
-COPY scheduled-stop/minikube-scheduled-stop /usr/sbin/minikube-scheduled-stop
+COPY scheduled-stop/stop.sh /var/lib/minikube/scheduled-stop/stop.sh
 COPY scheduled-stop/minikube-scheduled-stop.service /usr/lib/systemd/system/minikube-scheduled-stop.service
 RUN ln -fs /usr/lib/systemd/system/minikube-scheduled-stop.service \
-    /etc/systemd/system/multi-user.target.wants/minikube-scheduled-stop.service
+    /etc/systemd/system/multi-user.target.wants/minikube-scheduled-stop.service && \
+    mkdir -p /var/lib/minikube/scheduled-stop/
 
 # disable non-docker runtimes by default
 RUN systemctl disable containerd && systemctl disable crio && rm /etc/crictl.yaml
