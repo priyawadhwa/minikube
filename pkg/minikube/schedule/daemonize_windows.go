@@ -23,12 +23,34 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"k8s.io/minikube/pkg/minikube/command"
-	"k8s.io/minikube/pkg/minikube/mustload"
+	"k8s.io/minikube/pkg/minikube/assets"
+	"k8s.io/minikube/pkg/minikube/constants"
+	"k8s.io/minikube/pkg/minikube/machine"
+	"k8s.io/minikube/pkg/minikube/sysinit"
 )
 
 func killExistingScheduledStops(profiles []string) error {
-	return fmt.Errorf("not yet implemented for windows")
+	for _, profile := range profiles {
+		klog.Infof("trying to kill existing schedule stop for profile %s..."0, profile)
+		h, err := api.Load(profile)
+		if err != nil {
+			return errors.Wrap(err, "Error loading existing host. Please try running [minikube delete], then run [minikube start] again.")
+		}
+		runner, err := machine.CommandRunner(h)
+		if err != nil {
+			return errors.Wrap(err, "getting command runner")
+		}
+		// update environment file to include duration
+		if err := runner.Copy(environmentFile(duration)); err != nil {
+			return errors.Wrap(err, "copying scheduled stop env file")
+		}
+		// restart scheduled stop service in container
+		sysManger := sysinit.New(runner)
+		if err := sysManger.Stop(constants.ScheduledStopSystemdService); err != nil {
+			return errors.Wrapf(err, "stopping schedule-stop service for profile %s", profile)
+		}
+	}
+	return nil
 }
 
 func daemonize(profiles []string, duration time.Duration) error {
@@ -42,12 +64,24 @@ func daemonize(profiles []string, duration time.Duration) error {
 
 func startSystemdService(profile string, duration time.Duration) error {
 	// get ssh runner
-	co := mustload.Running(profile)
-	command.NewSSHRunner(co.)
-
+	h, err := api.Load(profile)
+	if err != nil {
+		return errors.Wrap(err, "Error loading existing host. Please try running [minikube delete], then run [minikube start] again.")
+	}
+	runner, err := machine.CommandRunner(h)
+	if err != nil {
+		return errors.Wrap(err, "getting command runner")
+	}
 	// update environment file to include duration
-
+	if err := runner.Copy(environmentFile(duration)); err != nil {
+		return errors.Wrap(err, "copying scheduled stop env file")
+	}
 	// restart scheduled stop service in container
+	sysManger := sysinit.New(runner)
+	return sysManger.Restart(constants.ScheduledStopSystemdService)
+}
 
-	return nil
+func environmentFile(duration time.Duration) assets.CopyableFile {
+	contents := []byte(fmt.Sprintf("SLEEP=%s", duration.Seconds()))
+	return assets.NewMemoryAssetTarget(contents, constants.ScheduledStopEnvFile, "0644")
 }
