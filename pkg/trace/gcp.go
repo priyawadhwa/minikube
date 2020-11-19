@@ -20,34 +20,51 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"runtime"
+	"time"
 
+	"contrib.go.opencensus.io/exporter/stackdriver"
+	"go.opencensus.io/stats"
+	"go.opencensus.io/stats/view"
+	"go.opencensus.io/tag"
 	"go.opentelemetry.io/otel/api/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"k8s.io/klog"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel/api/global"
 )
 
 const (
-	projectEnvVar  = "MINIKUBE_GCP_PROJECT_ID"
-	parentSpanName = "minikube start"
+	projectEnvVar    = "MINIKUBE_GCP_PROJECT_ID"
+	parentSpanName   = "minikube start"
+	customMetricName = "custom.googleapis.com/minikube/start_time"
 )
 
 type gcpTracer struct {
 	projectID string
-	parentCtx context.Context
+	traceExporter
+	metricExporter
+}
+
+type traceExporter struct {
 	trace.Tracer
-	spans   map[string]trace.Span
+	parentCtx context.Context
+	spans     map[string]trace.Span
+	cleanup   func()
+}
+
+type metricExporter struct {
 	cleanup func()
 }
 
-func (t *gcpTracer) StartSpan(name string) {
+func (t *traceExporter) StartSpan(name string) {
 	_, span := t.Tracer.Start(t.parentCtx, name)
 	t.spans[name] = span
 }
-func (t *gcpTracer) EndSpan(name string) {
+func (t *traceExporter) EndSpan(name string) {
 	span, ok := t.spans[name]
 	if !ok {
 		klog.Warningf("cannot end span %s as it was never started", name)
@@ -57,11 +74,8 @@ func (t *gcpTracer) EndSpan(name string) {
 }
 
 func (t *gcpTracer) Cleanup() {
-	span, ok := t.spans[parentSpanName]
-	if ok {
-		span.End()
-	}
-	t.cleanup()
+	t.traceExporter.cleanup()
+	t.metricExporter.cleanup()
 }
 
 func initGCPTracer() (*gcpTracer, error) {
@@ -70,6 +84,25 @@ func initGCPTracer() (*gcpTracer, error) {
 		return nil, fmt.Errorf("GCP tracer requires a valid GCP project id set via the %s env variable", projectEnvVar)
 	}
 
+	tex, err := getTraceExporter(projectID)
+	if err != nil {
+		return nil, errors.Wrap(err, "getting trace exporter")
+	}
+
+	mex, err := getMetricExporter(projectID)
+	if err != nil {
+		return nil, errors.Wrap(err, "getting metrics exporter")
+	}
+
+	return &gcpTracer{
+		traceExporter:  tex,
+		metricExporter: mex,
+	}, nil
+}
+
+// getTraceExporter is responsible for collecting traces
+// and sending them to Cloud Trace via the Stackdriver exporter
+func getTraceExporter(projectID string) (traceExporter, error) {
 	_, flush, err := texporter.InstallNewPipeline(
 		[]texporter.Option{
 			texporter.WithProjectID(projectID),
@@ -79,19 +112,74 @@ func initGCPTracer() (*gcpTracer, error) {
 		}),
 	)
 	if err != nil {
-		return nil, errors.Wrap(err, "installing pipeline")
+		return traceExporter{}, errors.Wrap(err, "installing pipeline")
 	}
 
 	t := global.Tracer(parentSpanName)
-
+	// start the intial parent span, which will end in the cleanup func
 	ctx, span := t.Start(context.Background(), parentSpanName)
-	return &gcpTracer{
-		projectID: projectID,
+	cleanup := func() {
+		span.End()
+		flush()
+	}
+	return traceExporter{
 		parentCtx: ctx,
-		cleanup:   flush,
+		cleanup:   cleanup,
 		Tracer:    t,
 		spans: map[string]trace.Span{
 			parentSpanName: span,
 		},
+	}, nil
+}
+
+// getMetricExporter is responsible for collecting one metric (start time)
+// and sending it to Cloud Monitoring via the Stackdriver exporter
+func getMetricExporter(projectID string) (metricExporter, error) {
+	osMethod, err := tag.NewKey("os")
+	if err != nil {
+		return metricExporter{}, errors.Wrap(err, "new tag key")
+	}
+
+	ctx, err := tag.New(context.Background(), tag.Insert(osMethod, runtime.GOOS))
+	if err != nil {
+		return metricExporter{}, errors.Wrap(err, "new tag")
+	}
+	latencyS := stats.Float64("repl/start_time", "start time in seconds", "s")
+	// Register the view. It is imperative that this step exists,
+	// otherwise recorded metrics will be dropped and never exported.
+	v := &view.View{
+		Name:        customMetricName,
+		Measure:     latencyS,
+		Aggregation: view.LastValue(),
+	}
+	if err := view.Register(v); err != nil {
+		return metricExporter{}, errors.Wrap(err, "registering view")
+	}
+
+	sd, err := stackdriver.NewExporter(stackdriver.Options{
+		ProjectID: projectID,
+		// ReportingInterval sets the frequency of reporting metrics
+		// to stackdriver backend.
+		ReportingInterval: 1 * time.Second,
+	})
+	if err != nil {
+		return metricExporter{}, errors.Wrap(err, "new exporter")
+	}
+	if err := sd.StartMetricsExporter(); err != nil {
+		return metricExporter{}, errors.Wrap(err, "starting metrics exporter")
+	}
+	now := time.Now()
+
+	cleanup := func() {
+		// record the total time this command took
+		fmt.Println(time.Since(now).Seconds())
+		stats.Record(ctx, latencyS.M(time.Since(now).Seconds()))
+		sd.Flush()
+		time.Sleep(5 * time.Second)
+		sd.StopMetricsExporter()
+	}
+
+	return metricExporter{
+		cleanup: cleanup,
 	}, nil
 }
