@@ -73,8 +73,8 @@ func (t *gcpTracer) EndSpan(name string) {
 }
 
 func (t *gcpTracer) Cleanup() {
-	t.traceExporter.cleanup()
 	t.metricExporter.cleanup()
+	t.traceExporter.cleanup()
 }
 
 func initGCPTracer() (*gcpTracer, error) {
@@ -88,9 +88,15 @@ func initGCPTracer() (*gcpTracer, error) {
 		return nil, errors.Wrap(err, "getting trace exporter")
 	}
 
+	mex, err := getMetricExporter(projectID)
+	if err != nil {
+		return nil, errors.Wrap(err, "getting metric exporter")
+	}
+
 	return &gcpTracer{
-		projectID:     projectID,
-		traceExporter: tex,
+		projectID:      projectID,
+		traceExporter:  tex,
+		metricExporter: mex,
 	}, nil
 }
 
@@ -167,7 +173,7 @@ func getMetricExporter(projectID string) (metricExporter, error) {
 		fmt.Println(time.Since(now).Seconds())
 		stats.Record(ctx, latencyS.M(time.Since(now).Seconds()))
 		sd.Flush()
-		time.Sleep(5 * time.Second)
+		time.Sleep(2 * time.Second)
 		sd.StopMetricsExporter()
 	}
 
