@@ -20,7 +20,13 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"runtime"
+	"time"
 
+	"contrib.go.opencensus.io/exporter/stackdriver"
+	"go.opencensus.io/stats"
+	"go.opencensus.io/stats/view"
+	"go.opencensus.io/tag"
 	"go.opentelemetry.io/otel/api/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"k8s.io/klog"
@@ -115,5 +121,57 @@ func getTraceExporter(projectID string) (traceExporter, error) {
 		spans: map[string]trace.Span{
 			parentSpanName: span,
 		},
+	}, nil
+}
+
+// getMetricExporter is responsible for collecting one metric (start time)
+// and sending it to Cloud Monitoring via the Stackdriver exporter
+func getMetricExporter(projectID string) (metricExporter, error) {
+	osMethod, err := tag.NewKey("os")
+	if err != nil {
+		return metricExporter{}, errors.Wrap(err, "new tag key")
+	}
+
+	ctx, err := tag.New(context.Background(), tag.Insert(osMethod, runtime.GOOS))
+	if err != nil {
+		return metricExporter{}, errors.Wrap(err, "new tag")
+	}
+	latencyS := stats.Float64("repl/start_time", "start time in seconds", "s")
+	// Register the view. It is imperative that this step exists,
+	// otherwise recorded metrics will be dropped and never exported.
+	v := &view.View{
+		Name:        customMetricName,
+		Measure:     latencyS,
+		Aggregation: view.LastValue(),
+	}
+	if err := view.Register(v); err != nil {
+		return metricExporter{}, errors.Wrap(err, "registering view")
+	}
+
+	sd, err := stackdriver.NewExporter(stackdriver.Options{
+		ProjectID: projectID,
+		// ReportingInterval sets the frequency of reporting metrics
+		// to stackdriver backend.
+		ReportingInterval: 1 * time.Second,
+	})
+	if err != nil {
+		return metricExporter{}, errors.Wrap(err, "new exporter")
+	}
+	if err := sd.StartMetricsExporter(); err != nil {
+		return metricExporter{}, errors.Wrap(err, "starting metrics exporter")
+	}
+	now := time.Now()
+
+	cleanup := func() {
+		// record the total time this command took
+		fmt.Println(time.Since(now).Seconds())
+		stats.Record(ctx, latencyS.M(time.Since(now).Seconds()))
+		sd.Flush()
+		time.Sleep(5 * time.Second)
+		sd.StopMetricsExporter()
+	}
+
+	return metricExporter{
+		cleanup: cleanup,
 	}, nil
 }
