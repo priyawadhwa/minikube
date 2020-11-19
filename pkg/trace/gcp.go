@@ -31,15 +31,25 @@ import (
 )
 
 const (
-	projectEnvVar  = "MINIKUBE_GCP_PROJECT_ID"
-	parentSpanName = "minikube start"
+	projectEnvVar    = "MINIKUBE_GCP_PROJECT_ID"
+	parentSpanName   = "minikube start"
+	customMetricName = "custom.googleapis.com/minikube/start_time"
 )
 
 type gcpTracer struct {
 	projectID string
-	parentCtx context.Context
+	traceExporter
+	metricExporter
+}
+
+type traceExporter struct {
 	trace.Tracer
-	spans   map[string]trace.Span
+	parentCtx context.Context
+	spans     map[string]trace.Span
+	cleanup   func()
+}
+
+type metricExporter struct {
 	cleanup func()
 }
 
@@ -57,11 +67,8 @@ func (t *gcpTracer) EndSpan(name string) {
 }
 
 func (t *gcpTracer) Cleanup() {
-	span, ok := t.spans[parentSpanName]
-	if ok {
-		span.End()
-	}
-	t.cleanup()
+	t.traceExporter.cleanup()
+	t.metricExporter.cleanup()
 }
 
 func initGCPTracer() (*gcpTracer, error) {
@@ -70,6 +77,20 @@ func initGCPTracer() (*gcpTracer, error) {
 		return nil, fmt.Errorf("GCP tracer requires a valid GCP project id set via the %s env variable", projectEnvVar)
 	}
 
+	tex, err := getTraceExporter(projectID)
+	if err != nil {
+		return nil, errors.Wrap(err, "getting trace exporter")
+	}
+
+	return &gcpTracer{
+		projectID:     projectID,
+		traceExporter: tex,
+	}, nil
+}
+
+// getTraceExporter is responsible for collecting traces
+// and sending them to Cloud Trace via the Stackdriver exporter
+func getTraceExporter(projectID string) (traceExporter, error) {
 	_, flush, err := texporter.InstallNewPipeline(
 		[]texporter.Option{
 			texporter.WithProjectID(projectID),
@@ -79,16 +100,17 @@ func initGCPTracer() (*gcpTracer, error) {
 		}),
 	)
 	if err != nil {
-		return nil, errors.Wrap(err, "installing pipeline")
+		return traceExporter{}, errors.Wrap(err, "installing pipeline")
 	}
-
 	t := global.Tracer(parentSpanName)
-
 	ctx, span := t.Start(context.Background(), parentSpanName)
-	return &gcpTracer{
-		projectID: projectID,
+	cleanup := func() {
+		span.End()
+		flush()
+	}
+	return traceExporter{
 		parentCtx: ctx,
-		cleanup:   flush,
+		cleanup:   cleanup,
 		Tracer:    t,
 		spans: map[string]trace.Span{
 			parentSpanName: span,
