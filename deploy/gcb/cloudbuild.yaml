@@ -2,11 +2,11 @@
 # saves them to a `latest` GCS bucket on all PR merges
 
 steps:
-- name: 'ubuntu'
+- name: 'ubuntu@sha256:1d7b639619bdca2d008eca2d5293e3c43ff84cbee597ff76de3b7a7de3e84956'
   args: ['apt-get', 'update']
-- name: 'ubuntu'
-  args: ['apt-get', 'install', 'make']
-- name: 'ubuntu'
+- name: 'ubuntu@sha256:1d7b639619bdca2d008eca2d5293e3c43ff84cbee597ff76de3b7a7de3e84956'
+  args: ['apt-get', 'install', '-y', 'make']
+- name: 'ubuntu@sha256:1d7b639619bdca2d008eca2d5293e3c43ff84cbee597ff76de3b7a7de3e84956'
   args: ['make', 'cross']
 - name: 'gcr.io/cloud-builders/gsutil'
   args: ['cp', 'out/minikube*', 'gs://priya-test-bucket/latest']
