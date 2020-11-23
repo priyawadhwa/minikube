@@ -6,6 +6,6 @@ steps:
   args: ['cross']
   entrypoint: 'make'
 - name: 'gcr.io/cloud-builders/gsutil'
-  args: ['cp', 'out/minikube*', 'gs://priya-test-bucket/latest']
+  args: ['cp', 'out/minikube*', 'gs://minikube/latest']
 - name: 'gcr.io/cloud-builders/gsutil'
-  args: ['acl', 'ch', '-u', 'AllUsers:R', 'gs://priya-test-bucket/latest/minikube*']
+  args: ['acl', 'ch', '-u', 'AllUsers:R', 'gs://minikube/latest/minikube*']
