@@ -1,0 +1,10 @@
+# This trigger builds minikube binaries and
+# saves them to a `latest` GCS bucket on all PR merges
+
+steps:
+- name: 'ubuntu'
+  args: ['apt-get', 'update', '&&', 'apt-get', 'install', 'make']
+- name: 'ubuntu'
+  args: ['make', 'cross']
+- name: 'gcr.io/cloud-builders/gsutil'
+  args: ['cp', 'out/minikube*', 'gs://priya-test-bucket/latest']
