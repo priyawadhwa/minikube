@@ -3,7 +3,9 @@
 
 steps:
 - name: 'ubuntu'
-  args: ['apt-get', 'update', '&&', 'apt-get', 'install', 'make']
+  args: ['apt-get', 'update']
+- name: 'ubuntu'
+  args: ['apt-get', 'install', 'make']
 - name: 'ubuntu'
   args: ['make', 'cross']
 - name: 'gcr.io/cloud-builders/gsutil'
