@@ -763,9 +763,6 @@ site: site/themes/docsy/assets/vendor/bootstrap/package.js out/hugo/hugo ## Serv
 out/mkcmp:
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o $@ cmd/performance/mkcmp/main.go
 
-.PHONY: out/performance-bot
-out/performance-bot:
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o $@ cmd/performance/pr-bot/bot.go
 
 .PHONY: compare
 compare: out/mkcmp out/minikube
